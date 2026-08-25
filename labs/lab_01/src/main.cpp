@@ -12,7 +12,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
 	if(argc < 4) {
-		cout << "Usage: Lab01 <out_image_name>.png width height" << endl;
+		cout << "Usage: Lab01 <out_image_name>.png width height vax vay vbx vby vcx vcy" << endl;
 		return 0;
 	}
 	// Output filename
@@ -21,6 +21,19 @@ int main(int argc, char **argv)
 	int width = atoi(argv[2]);
 	// Height of image
 	int height = atoi(argv[3]);
+
+	// Vertex a xy coordinates
+	int v_a_x = atoi(argv[4]);
+	int v_a_y = atoi(argv[5]);
+
+	// Vertex b xy coordinates
+	int v_b_x = atoi(argv[6]);
+	int v_b_y = atoi(argv[7]);
+
+	// Vertex c xy coordinates
+	int v_c_x = atoi(argv[6]);
+	int v_c_y = atoi(argv[7]);
+
 	// Create the image. We're using a `shared_ptr`, a C++11 feature.
 	auto image = make_shared<Image>(width, height);
 	// Draw a rectangle
