@@ -3,11 +3,14 @@
 #include <vector>
 #include <memory>
 #include "Image.h"
+#include "BoundingBox.h"
 
 // This allows you to skip the `std::` in front of C++ standard library
 // functions. You can also say `using std::cout` to be more selective.
 // You should never do this in a header file.
 using namespace std;
+
+int validate_inputs(int argc, char** argv);
 
 int main(int argc, char **argv)
 {
@@ -17,6 +20,7 @@ int main(int argc, char **argv)
 	}
 	// Output filename
 	string filename(argv[1]);
+
 	// Width of image
 	int width = atoi(argv[2]);
 	// Height of image
@@ -31,21 +35,34 @@ int main(int argc, char **argv)
 	int v_b_y = atoi(argv[7]);
 
 	// Vertex c xy coordinates
-	int v_c_x = atoi(argv[6]);
-	int v_c_y = atoi(argv[7]);
+	int v_c_x = atoi(argv[8]);
+	int v_c_y = atoi(argv[9]);
+
+	if (validate_inputs(argc, argv) != 0) {
+		cout << "inputs are not valid" << endl;
+		return -1;
+	}
 
 	// Create the image. We're using a `shared_ptr`, a C++11 feature.
 	auto image = make_shared<Image>(width, height);
-	// Draw a rectangle
-	for(int y = 10; y < 20; ++y) {
-		for(int x = 20; x < 40; ++x) {
-			unsigned char r = 255;
-			unsigned char g = 0;
-			unsigned char b = 0;
-			image->setPixel(x, y, r, g, b);
-		}
-	}
+
+	BoundingBox bounding_triangle = BoundingBox(v_a_x, v_a_y, v_b_x, v_b_y, v_c_x, v_c_y);
+	bounding_triangle.draw(image.get());
+
+	// Draw a traingle from the verticies
+	// Sanity check to draw the three values
+	image->setPixel(v_a_x, v_a_y, 0, 255, 0);
+	image->setPixel(v_b_x, v_b_y, 0, 255, 0);
+	image->setPixel(v_c_x, v_c_y, 0, 255, 0);
+
 	// Write image to file
 	image->writeToFile(filename);
 	return 0;
 }
+
+int validate_inputs(int argc, char** argv) {
+	// TODO: check that the verticies are within the bounds
+	return 0;
+}
+
+
