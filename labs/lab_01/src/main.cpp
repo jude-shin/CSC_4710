@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
-#include <vector>
 #include <memory>
 #include "Image.h"
-#include "BoundingBox.h"
+#include "Triangle.h"
 
 // This allows you to skip the `std::` in front of C++ standard library
 // functions. You can also say `using std::cout` to be more selective.
@@ -46,8 +45,8 @@ int main(int argc, char **argv)
 	// Create the image. We're using a `shared_ptr`, a C++11 feature.
 	auto image = make_shared<Image>(width, height);
 
-	BoundingBox bounding_triangle = BoundingBox(v_a_x, v_a_y, v_b_x, v_b_y, v_c_x, v_c_y);
-	bounding_triangle.draw(image.get());
+	Triangle tri = Triangle(v_a_x, v_a_y, v_b_x, v_b_y, v_c_x, v_c_y);
+	tri.draw_bounding_box(image.get());
 
 	// Draw a traingle from the verticies
 	// Sanity check to draw the three values
@@ -61,7 +60,7 @@ int main(int argc, char **argv)
 }
 
 int validate_inputs(int argc, char** argv) {
-	// TODO: check that the verticies are within the bounds
+	// TODO: check that the verticies are within the bounds?
 	return 0;
 }
 
