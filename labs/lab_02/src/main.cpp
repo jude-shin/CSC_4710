@@ -47,35 +47,15 @@ int main(int argc, char **argv)
 	// Create the image. We're using a `shared_ptr`, a C++11 feature.
 	auto image = make_shared<Image>(width, height);
 
-	// =================
-	cout << "Point A: (" 
-		<< pa.get_x() << ", " 
-		<< pa.get_y() << ") [" 
-		<< pa.get_r() << ", " 
-		<< pa.get_g() << ", " 
-		<< pa.get_b() << "]" << endl;
-
-	cout << "Point B: (" 
-		<< pb.get_x() << ", " 
-		<< pb.get_y() << ") [" 
-		<< pb.get_r() << ", " 
-		<< pb.get_g() << ", " 
-		<< pb.get_b() << "]" << endl;
-
-	cout << "Point C: (" 
-		<< pc.get_x() << ", " 
-		<< pc.get_y() << ") [" 
-		<< pc.get_r() << ", " 
-		<< pc.get_g() << ", " 
-		<< pc.get_b() << "]" << endl;
-
-	// =================
-
+	// Create the Triangle
 	Triangle tri = Triangle(&pa, &pb, &pc);
-	tri.draw_bounding_box(image.get());
+	// tri.draw_bounding_box(image.get());
 
-	// Draw a traingle from the verticies
-	tri.draw_points(image.get());
+	// Draw a traingle's verticies
+	// tri.draw_points(image.get());
+
+	// Draw the triangle
+	tri.draw_triangle(image.get());
 
 	// Write image to file
 	image->writeToFile(filename);
@@ -152,26 +132,22 @@ int parse_inputs(
 	}
 
 	// Defaults for Colors
-	int a_color_r = 200;
+	int a_color_r = 255;
 	int a_color_g = 0;
 	int a_color_b = 0;
 
 	int b_color_r = 0;
-	int b_color_g = 200;
+	int b_color_g = 255;
 	int b_color_b = 0;
 
 	int c_color_r = 0;
 	int c_color_g = 0;
-	int c_color_b = 200;
+	int c_color_b = 255;
 
 	// Create those points
-	// *pa = Point(vax, vay, a_color_r, a_color_g, a_color_b);
-	// *pb = Point(vbx, vby, b_color_r, b_color_g, b_color_b);
-	// *pc = Point(vcx, vcy, c_color_r, c_color_g, c_color_b);
-
-	*pa = Point(vax, vay, 255, 255, 255);
-	*pb = Point(vbx, vby, 255, 255, 255);
-	*pc = Point(vcx, vcy, 255, 255, 255);
+	*pa = Point(vax, vay, a_color_r, a_color_g, a_color_b);
+	*pb = Point(vbx, vby, b_color_r, b_color_g, b_color_b);
+	*pc = Point(vcx, vcy, c_color_r, c_color_g, c_color_b);
 
 	return 0;
 }
