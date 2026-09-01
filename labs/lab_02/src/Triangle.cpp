@@ -83,14 +83,13 @@ void Triangle::draw_triangle(Image* image) {
 	
 			// IFF this is true, then the point is not within the triangle.
 			// Just break early and start computing the next point.
-			if ((alpha <= 0) || (alpha >= 1) ||
-					(beta <= 0) || (beta >= 1)||
-					(gamma <= 0) || (gamma >= 1)) {
+			if ((alpha < 0) || (alpha > 1) ||
+					(beta < 0) || (beta > 1)||
+					(gamma < 0) || (gamma > 1)) {
 				continue;
 			}
 
 			// Blend the colors based on the points and the alpha, beta, gamma vals
-			// TODO: change this from a solid color to something else
 			int blend_r = static_cast<int>(alpha*ar + beta*br + gamma*cr);
 			int blend_g = static_cast<int>(alpha*ag + beta*bg + gamma*cg);
 			int blend_b = static_cast<int>(alpha*ab + beta*bb + gamma*cb);
