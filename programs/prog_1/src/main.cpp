@@ -50,7 +50,8 @@ int main(int argc, char **argv) {
 			&width, 
 			&height, 
 			&color_mode) < 0) {
-		cout << "Usage: meshfile imagefile width height color_mode" << endl;
+		cout << "USAGE: ./raster meshfile imagefile width height color_mode" << endl;
+		cout << "EXAMPLE: ./raster ../resources/bunny.obj out.png 512 512 1" << endl;
 		return 0;
 	}
 
@@ -105,12 +106,12 @@ int parse_inputs(
 
 	// Check that the number of arguments provided is valid
 	if(argc-1 < EXPECTED_ARGC) {
-		cout << "Too little arguments" << endl;
+		cout << "WARNING: Too little arguments" << endl;
 		return -1;
 	}
 
 	if(argc-1 > EXPECTED_ARGC) {
-		cout << "Too many arguments" << endl;
+		cout << "WARNING: Too many arguments" << endl;
 		return -1;
 	}
 
@@ -128,7 +129,7 @@ int parse_inputs(
 
 	// Validate the parsed inputs
 	if (*color_mode != 1 && *color_mode != 2) {
-		cout << "Color Mode must be 1 or 2" << endl;
+		cout << "WARNING: Color Mode must be 1 or 2" << endl;
 		return -1;
 	}
 
