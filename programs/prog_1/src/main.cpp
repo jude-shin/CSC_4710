@@ -104,12 +104,12 @@ int parse_inputs(
 		int* color_mode) {
 
 	// Check that the number of arguments provided is valid
-	if(argc < EXPECTED_ARGC) {
+	if(argc-1 < EXPECTED_ARGC) {
 		cout << "Too little arguments" << endl;
 		return -1;
 	}
 
-	if(argc > EXPECTED_ARGC) {
+	if(argc-1 > EXPECTED_ARGC) {
 		cout << "Too many arguments" << endl;
 		return -1;
 	}
@@ -127,7 +127,7 @@ int parse_inputs(
 	*color_mode = atoi(argv[5]);
 
 	// Validate the parsed inputs
-	if (*color_mode != 1 || *color_mode != 2) {
+	if (*color_mode != 1 && *color_mode != 2) {
 		cout << "Color Mode must be 1 or 2" << endl;
 		return -1;
 	}
