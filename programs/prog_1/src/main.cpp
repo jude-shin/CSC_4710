@@ -31,6 +31,7 @@ int parse_inputs(
 		int* color_mode);
 
 void resize_obj(std::vector<tinyobj::shape_t> &shapes);
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image);
 
 // =============================================================================
 
@@ -55,16 +56,17 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	//set g_width and g_height appropriately!
+	// Set g_width and g_height appropriately!
 	g_width = g_height = 100;
 
-	//create an image
+	// Create an image
 	auto image = make_shared<Image>(g_width, g_height);
 
-	// triangle buffer
+	// Triangle buffer
 	vector<unsigned int> triBuf;
-	// position buffer
+	// Position buffer
 	vector<float> posBuf;
+
 	// Some obj files contain material information.
 	// We'll ignore them for this assignment.
 	vector<tinyobj::shape_t> shapes; // geometry
@@ -85,9 +87,31 @@ int main(int argc, char **argv) {
 	cout << "Number of triangles: " << triBuf.size()/3 << endl;
 
 	//TODO add code to iterate through each triangle and rasterize it 
+	// shapes -> materials -> positions / (indicies?)
+	// shape_t -> material_t -> float / (unsigned int?)
+
+	// Rasterize all the triangles
+	if (rasterize_all(&shapes, image.get()) < 0) { 
+		cout << "Unknown error rasterizing the traingles."  << endl;
+		return -1;
+	}
+
 
 	//write out the image
 	image->writeToFile(output_filename);
+
+	return 0;
+}
+
+/*
+ * Rasterizes all the traingles.
+ * Args: 
+ *	shapes: All the traingles that we will rasterize, parsed from the obj file
+ *	image: the buffer we are writing our rasterized traingles to (which will 
+ *				be saved to a .png later)
+ * Returns: 0 upon completion, -1 if any error occured.
+ */
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
 
 	return 0;
 }
