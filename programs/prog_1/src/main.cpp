@@ -104,14 +104,31 @@ int main(int argc, char **argv) {
 }
 
 /*
- * Rasterizes all the traingles.
+ * Rasterizes all the traingles for all the shapes.
  * Args: 
- *	shapes: All the traingles that we will rasterize, parsed from the obj file
+ *	shapes: All the shapes (which have triangles) that we will rasterize, 
+ *				parsed from the obj file
  *	image: the buffer we are writing our rasterized traingles to (which will 
  *				be saved to a .png later)
  * Returns: 0 upon completion, -1 if any error occured.
  */
 int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
+	// For each of the shapes, get their meshes
+	for (tinyobj::shape_t shape : *shapes) {
+		// for each traingle in the mesh
+
+		for (int i = 0; i < shape.mesh.positions.size(); i+=3) {
+			// Parse out each x, y, and z for this point
+			float x = shape.mesh.positions[i];
+			float y = shape.mesh.positions[i+1];
+			float z = shape.mesh.positions[i+2];
+
+			// Rasterize that triangle!
+
+			// TODO: do something with that zbuffer later or something
+
+		}
+	}
 
 	return 0;
 }
