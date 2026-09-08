@@ -51,9 +51,6 @@ int main(int argc, char **argv)
 	Triangle tri = Triangle(&pa, &pb, &pc);
 	// tri.draw_bounding_box(image.get());
 
-	// Draw a traingle's verticies
-	// tri.draw_points(image.get());
-
 	// Draw the triangle
 	tri.draw_triangle(image.get());
 

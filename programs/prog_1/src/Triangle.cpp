@@ -68,7 +68,7 @@ void Triangle::draw_triangle(Image* image) {
 			int blend_g = static_cast<int>(alpha*ag + beta*bg + gamma*cg);
 			int blend_b = static_cast<int>(alpha*ab + beta*bb + gamma*cb);
 
-			image->setPixel(x, y, blend_r, blend_g, blend_b);
+			image->setPixel(x, y, a.get_r(), a.get_g(), a.get_b());
 		}
 	}
 }

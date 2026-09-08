@@ -33,7 +33,8 @@ int parse_inputs(
 		int* color_mode);
 
 void resize_obj(std::vector<tinyobj::shape_t> &shapes);
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image);
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height);
+int scale_point(int wh, float xy);
 
 // =============================================================================
 
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
 	}
 
 	// Set g_width and g_height appropriately!
-	g_width = g_height = 100;
+	g_width = width;
+	g_height = height;
 
 	// Create an image
 	auto image = make_shared<Image>(g_width, g_height);
@@ -88,16 +90,11 @@ int main(int argc, char **argv) {
 	cout << "Number of vertices: " << posBuf.size()/3 << endl;
 	cout << "Number of triangles: " << triBuf.size()/3 << endl;
 
-	//TODO add code to iterate through each triangle and rasterize it 
-	// shapes -> materials -> positions / (indicies?)
-	// shape_t -> material_t -> float / (unsigned int?)
-
 	// Rasterize all the triangles
-	if (rasterize_all(&shapes, image.get()) < 0) { 
+	if (rasterize_all(&shapes, image.get(), width, height) < 0) { 
 		cout << "Unknown error rasterizing the traingles."  << endl;
 		return -1;
 	}
-
 
 	//write out the image
 	image->writeToFile(output_filename);
@@ -112,9 +109,11 @@ int main(int argc, char **argv) {
  *				parsed from the obj file
  *	image: the buffer we are writing our rasterized traingles to (which will 
  *				be saved to a .png later)
+ *	width: width of the screen to draw to
+ *	height: height of the screen to draw to
  * Returns: 0 upon completion, -1 if any error occured.
  */
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height) {
 	// For each of the shapes, get their meshes
 	for (tinyobj::shape_t shape : *shapes) {
 		// for each traingle in the mesh
@@ -126,35 +125,22 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
 
 			// Parse out each x, y, and z for this point
 			idx = shape.mesh.indices[i];
-			Point a = Point(
-					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
-					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
-					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
-					);
-			cout << "x: " << a.get_x() << endl;
-			cout << "y: " << a.get_y() << endl;
-			cout << "z: " << a.get_z() << endl;
+			int ax = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int ay = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int az = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+			Point a = Point(ax, ay);
 
 			idx = shape.mesh.indices[i+1];
-			Point b = Point(
-					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
-					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
-					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
-					);
-			cout << "x: " << b.get_x() << endl;
-			cout << "y: " << b.get_y() << endl;
-			cout << "z: " << b.get_z() << endl;
+			int bx = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int by = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int bz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+			Point b = Point(bx, by);
 
 			idx = shape.mesh.indices[i+2];
-			Point c = Point(
-					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
-					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
-					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
-					);
-			cout << "x: " << c.get_x() << endl;
-			cout << "y: " << c.get_y() << endl;
-			cout << "z: " << c.get_z() << endl;
-
+			int cx = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int cy = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int cz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+			Point c = Point(cx, cy);
 
 			// Rasterize that triangle!
 			Triangle tri = Triangle(&a, &b, &c);
@@ -165,6 +151,11 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
 	}
 
 	return 0;
+}
+
+// Scales the -1 to 1 floating point to the desired dimension (width or height)
+int scale_point(int wh, float xy) {
+	return (xy + 1.0) * 0.5 * (wh - 1);
 }
 
 /*

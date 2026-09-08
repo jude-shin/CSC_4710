@@ -8,25 +8,26 @@
 
 class Point {
 public:
-  Point(float x, float y, float z, int r, int g, int b);
+  Point(int x, int y, int r, int g, int b);
   Point(const Point& other);
-  Point(float x, float y, float z);
+  Point(int x, int y);
   Point();
 
-  float get_x() const;
-  float get_y() const;
-  float get_z() const;
-  float get_r() const;
-  float get_g() const;
-  float get_b() const;
+  int get_x() const;
+  int get_y() const;
+  int get_r() const;
+  int get_g() const;
+  int get_b() const;
+
+  void draw_points(Image* image);
+
 
 private:
-  float x;
-  float y;
-  float z;
-  float r;
-  float g;
-  float b;
+  int x;
+  int y;
+  int r;
+  int g;
+  int b;
 };
 
 #endif
