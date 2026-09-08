@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstring>
 #include <assert.h>
 
 #include "tiny_obj_loader.h"
@@ -114,7 +115,13 @@ int main(int argc, char **argv) {
  * Returns: 0 upon completion, -1 if any error occured.
  */
 int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height) {
+	// Which dimension we should scale
 	int min_dimension = min(width, height);
+
+	// ZBuffer (default set to -2, which is outside the scaled range of [-1, 1])
+	float zbuff[width][height];
+	std::memset(zbuff, -2, sizeof(zbuff));
+
 	// For each of the shapes, get their meshes
 	for (tinyobj::shape_t shape : *shapes) {
 		// for each traingle in the mesh
@@ -128,19 +135,34 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int
 			idx = shape.mesh.indices[i];
 			int ax = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
 			int ay = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
-			int az = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+
+			float az = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
+			// If the point in the z buffer (ax, and ay) is greater than az, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
+			if (az < zbuff[ax][ay]) {
+				continue;
+			}
 			Point a = Point(ax, ay);
 
 			idx = shape.mesh.indices[i+1];
 			int bx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
 			int by = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
-			int bz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+
+			float bz = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
+			// If the point in the z buffer (bx, and by) is greater than bz, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
+			if (bz < zbuff[bx][by]) {
+				continue;
+			}
 			Point b = Point(bx, by);
 
 			idx = shape.mesh.indices[i+2];
 			int cx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
 			int cy = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
-			int cz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
+
+			float cz = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
+			// If the point in the z buffer (cx, and cy) is greater than cz, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
+			if (cz < zbuff[cx][cy]) {
+				continue;
+			}
 			Point c = Point(cx, cy);
 
 			// Rasterize that triangle!
