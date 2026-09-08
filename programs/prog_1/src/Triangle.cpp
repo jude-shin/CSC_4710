@@ -9,7 +9,7 @@ using namespace std;
 Triangle::Triangle(Point* a, Point* b, Point* c)
 	: a(*a), b(*b), c(*c) {}
 
-void Triangle::draw_triangle(Image* image) {
+void Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int height) {
 	// I am too lazy to make a rectangle class. Maybe do this a different time.
 	int min_x = std::min({a.get_x(), b.get_x(), c.get_x()});
 	int max_x = std::max({a.get_x(), b.get_x(), c.get_x()});
@@ -62,13 +62,26 @@ void Triangle::draw_triangle(Image* image) {
 			}
 
 			// TODO: blend it differently based on the new criteria
+			float cur_pixel_z = 
+				alpha * a.get_z() + 
+				beta * b.get_z() + 
+				gamma * c.get_z();
 
-			// Blend the colors based on the points and the alpha, beta, gamma vals
-			int blend_r = static_cast<int>(alpha*ar + beta*br + gamma*cr);
-			int blend_g = static_cast<int>(alpha*ag + beta*bg + gamma*cg);
-			int blend_b = static_cast<int>(alpha*ab + beta*bb + gamma*cb);
+			int z_idx = y * width + x;
 
-			image->setPixel(x, y, a.get_r(), a.get_g(), a.get_b());
+			if (cur_pixel_z > (*zbuff)[z_idx]) {
+				(*zbuff)[z_idx] = cur_pixel_z;
+				// image->setPixel(x, y, 0, 255*cur_pixel_z, 0);
+				float depth = (cur_pixel_z+1)*0.5;
+				int shade = depth*255;
+				image->setPixel(x, y, 0, shade, 0);
+			}
+
+			// // Blend the colors based on the points and the alpha, beta, gamma vals
+			// int blend_r = static_cast<int>(alpha*ar + beta*br + gamma*cr);
+			// int blend_g = static_cast<int>(alpha*ag + beta*bg + gamma*cg);
+			// int blend_b = static_cast<int>(alpha*ab + beta*bb + gamma*cb);
+
 		}
 	}
 }

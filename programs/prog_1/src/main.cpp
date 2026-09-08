@@ -34,7 +34,7 @@ int parse_inputs(
 		int* color_mode);
 
 void resize_obj(std::vector<tinyobj::shape_t> &shapes);
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height);
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height, vector<float>* zbuff);
 int scale_point(int wh, float xy);
 
 // =============================================================================
@@ -91,8 +91,12 @@ int main(int argc, char **argv) {
 	cout << "Number of vertices: " << posBuf.size()/3 << endl;
 	cout << "Number of triangles: " << triBuf.size()/3 << endl;
 
+	// Z Buffer
+	// since z is in the image, it is from -1 to 1, so those will always be smaller than 2
+	vector<float> zbuff(width*height, -2);
+
 	// Rasterize all the triangles
-	if (rasterize_all(&shapes, image.get(), width, height) < 0) { 
+	if (rasterize_all(&shapes, image.get(), width, height, &zbuff) < 0) { 
 		cout << "Unknown error rasterizing the traingles."  << endl;
 		return -1;
 	}
@@ -114,13 +118,11 @@ int main(int argc, char **argv) {
  *	height: height of the screen to draw to
  * Returns: 0 upon completion, -1 if any error occured.
  */
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height) {
+int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height, vector<float>* zbuff) {
 	// Which dimension we should scale
 	int min_dimension = min(width, height);
 
 	// ZBuffer (default set to -2, which is outside the scaled range of [-1, 1])
-	float zbuff[width][height];
-	std::memset(zbuff, -2, sizeof(zbuff));
 
 	// For each of the shapes, get their meshes
 	for (tinyobj::shape_t shape : *shapes) {
@@ -137,39 +139,25 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int
 			int ay = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 
 			float az = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
-			// If the point in the z buffer (ax, and ay) is greater than az, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
-			if (az < zbuff[ax][ay]) {
-				continue;
-			}
-			Point a = Point(ax, ay);
+			Point a = Point(ax, ay, az);
 
 			idx = shape.mesh.indices[i+1];
 			int bx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
 			int by = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 
 			float bz = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
-			// If the point in the z buffer (bx, and by) is greater than bz, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
-			if (bz < zbuff[bx][by]) {
-				continue;
-			}
-			Point b = Point(bx, by);
+			Point b = Point(bx, by, bz);
 
 			idx = shape.mesh.indices[i+2];
 			int cx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
 			int cy = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 
 			float cz = shape.mesh.positions[(idx*3)+2];  // get the point from the index, adding 2 to the real index to get the x position
-			// If the point in the z buffer (cx, and cy) is greater than cz, then abort this triangle and don't draw it. OTHERWISE, log it in the zbuffer and then continue
-			if (cz < zbuff[cx][cy]) {
-				continue;
-			}
-			Point c = Point(cx, cy);
+			Point c = Point(cx, cy, cz);
 
 			// Rasterize that triangle!
 			Triangle tri = Triangle(&a, &b, &c);
-			tri.draw_triangle(image);
-
-			// TODO: do something with that zbuffer later or something
+			tri.draw_triangle(image, zbuff, width, height);
 		}
 	}
 
