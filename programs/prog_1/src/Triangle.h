@@ -11,7 +11,6 @@ class Triangle {
 public:
   Triangle(Point* a, Point* b, Point* c);
   void draw_bounding_box(Image* image);
-  void draw_points(Image* image);
   void draw_triangle(Image* image);
 
 private:

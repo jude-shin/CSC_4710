@@ -1,7 +1,5 @@
 #include <cassert>
 #include <algorithm>
-#include <iostream>
-#include <cmath>
 #include "Triangle.h"
 #include "Point.h"
 #include "Image.h"
@@ -9,33 +7,7 @@
 using namespace std;
 
 Triangle::Triangle(Point* a, Point* b, Point* c)
-	: a(*a), b(*b), c(*c)
-{}
-
-void Triangle::draw_bounding_box(Image* image) {
-	int min_x = std::min({a.get_x(), b.get_x(), c.get_x()});
-	int max_x = std::max({a.get_x(), b.get_x(), c.get_x()});
-	int min_y = std::min({a.get_y(), b.get_y(), c.get_y()});
-	int max_y = std::max({a.get_y(), b.get_y(), c.get_y()});
-
-	// Draw the bounding recangle
-	for(int y = min_y; y <= max_y; ++y) {
-		for(int x = min_x; x <= max_x; ++x) {
-			if (x%2 == 0) {
-				image->setPixel(x, y, 0, 0, 255);
-			}
-			else {
-				image->setPixel(x, y, 255, 0, 0);
-			}
-		}
-	}
-}
-
-void Triangle::draw_points(Image* image) {
-	a.draw_points(image);
-	b.draw_points(image);
-	c.draw_points(image);
-}
+	: a(*a), b(*b), c(*c) {}
 
 void Triangle::draw_triangle(Image* image) {
 	// I am too lazy to make a rectangle class. Maybe do this a different time.
@@ -88,6 +60,8 @@ void Triangle::draw_triangle(Image* image) {
 					(gamma < 0) || (gamma > 1)) {
 				continue;
 			}
+
+			// TODO: blend it differently based on the new criteria
 
 			// Blend the colors based on the points and the alpha, beta, gamma vals
 			int blend_r = static_cast<int>(alpha*ar + beta*br + gamma*cr);

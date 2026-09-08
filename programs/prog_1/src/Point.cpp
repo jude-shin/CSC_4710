@@ -1,12 +1,11 @@
 #include <cassert>
 #include <stdexcept>
 #include "Point.h"
-#include "Image.h"
 
 using namespace std;
 
-Point::Point(int x, int y, int r, int g, int b) 
-	: x(x), y(y), r(r), g(g), b(b) {
+Point::Point(float x, float y, float z, int r, int g, int b) 
+	: x(x), y(y), z(z), r(r), g(g), b(b) {
 	// Ensure the point is within a valid 3D workspace boundary
 	if (r < 0 || r > 255) {
 		throw std::invalid_argument("r value not within [0, 255]");
@@ -24,23 +23,21 @@ Point::Point(int x, int y, int r, int g, int b)
 Point::Point(const Point& other) {
 	x = other.x;
 	y = other.y;
+	z = other.z;
 	r = other.r;
 	g = other.g;
 	b = other.b;
 }
 
 Point::Point()
-	: x(0), y(0), r(0), g(0), b(255) {
-}
+	: Point(0, 0, 0) {}
 
+Point::Point(float x, float y, float z)
+	: x(x), y(y), z(z), r(191), g(0), b(255) {}
 
-int Point::get_x() const { return x; }
-int Point::get_y() const { return y; }
-int Point::get_r() const { return r; }
-int Point::get_g() const { return g; }
-int Point::get_b() const { return b; }
-
-
-void Point::draw_points(Image* image) {
-	image->setPixel(x, y, r, g, b);
-}
+float Point::get_x() const { return x; }
+float Point::get_y() const { return y; }
+float Point::get_z() const { return z; }
+float Point::get_r() const { return r; }
+float Point::get_g() const { return g; }
+float Point::get_b() const { return b; }

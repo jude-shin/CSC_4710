@@ -8,6 +8,8 @@
 
 #include "tiny_obj_loader.h"
 #include "Image.h"
+#include "Point.h"
+#include "Triangle.h"
 
 // This allows you to skip the `std::` in front of C++ standard library
 // functions. You can also say `using std::cout` to be more selective.
@@ -116,17 +118,49 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image) {
 	// For each of the shapes, get their meshes
 	for (tinyobj::shape_t shape : *shapes) {
 		// for each traingle in the mesh
+		for (unsigned int i = 0; i < shape.mesh.indices.size(); i+=3) {
+			unsigned int idx = 0;
+			// i: the index of one point in the triangle
+			// i+1: the index of another point in the triangle
+			// i+2: the index of the final point in the triangle
 
-		for (int i = 0; i < shape.mesh.positions.size(); i+=3) {
 			// Parse out each x, y, and z for this point
-			float x = shape.mesh.positions[i];
-			float y = shape.mesh.positions[i+1];
-			float z = shape.mesh.positions[i+2];
+			idx = shape.mesh.indices[i];
+			Point a = Point(
+					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
+					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
+					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
+					);
+			cout << "x: " << a.get_x() << endl;
+			cout << "y: " << a.get_y() << endl;
+			cout << "z: " << a.get_z() << endl;
+
+			idx = shape.mesh.indices[i+1];
+			Point b = Point(
+					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
+					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
+					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
+					);
+			cout << "x: " << b.get_x() << endl;
+			cout << "y: " << b.get_y() << endl;
+			cout << "z: " << b.get_z() << endl;
+
+			idx = shape.mesh.indices[i+2];
+			Point c = Point(
+					shape.mesh.positions[(idx*3)+0],  // get the point from the index, adding 0 to the real index to get the x position
+					shape.mesh.positions[(idx*3)+1],  // get the point from the index, adding 1 to the real index to get the y position
+					shape.mesh.positions[(idx*3)+2]		// get the point from the index, adding 2 to the real index to get the z position
+					);
+			cout << "x: " << c.get_x() << endl;
+			cout << "y: " << c.get_y() << endl;
+			cout << "z: " << c.get_z() << endl;
+
 
 			// Rasterize that triangle!
+			Triangle tri = Triangle(&a, &b, &c);
+			tri.draw_triangle(image);
 
 			// TODO: do something with that zbuffer later or something
-
 		}
 	}
 
