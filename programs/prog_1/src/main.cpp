@@ -114,6 +114,7 @@ int main(int argc, char **argv) {
  * Returns: 0 upon completion, -1 if any error occured.
  */
 int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height) {
+	int min_dimension = min(width, height);
 	// For each of the shapes, get their meshes
 	for (tinyobj::shape_t shape : *shapes) {
 		// for each traingle in the mesh
@@ -125,20 +126,20 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int
 
 			// Parse out each x, y, and z for this point
 			idx = shape.mesh.indices[i];
-			int ax = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
-			int ay = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int ax = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int ay = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 			int az = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
 			Point a = Point(ax, ay);
 
 			idx = shape.mesh.indices[i+1];
-			int bx = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
-			int by = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int bx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int by = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 			int bz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
 			Point b = Point(bx, by);
 
 			idx = shape.mesh.indices[i+2];
-			int cx = scale_point(width, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
-			int cy = scale_point(height, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
+			int cx = scale_point(min_dimension, shape.mesh.positions[(idx*3)+0]);  // get the point from the index, adding 0 to the real index to get the x position
+			int cy = scale_point(min_dimension, shape.mesh.positions[(idx*3)+1]);  // get the point from the index, adding 1 to the real index to get the x position
 			int cz = scale_point(1, shape.mesh.positions[(idx*3)+2]);  // get the point from the index, adding 2 to the real index to get the x position
 			Point c = Point(cx, cy);
 
