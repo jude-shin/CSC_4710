@@ -1,5 +1,6 @@
 #include <cassert>
 #include <algorithm>
+#include <iostream>
 #include "Triangle.h"
 #include "Point.h"
 #include "Image.h"
@@ -9,8 +10,7 @@ using namespace std;
 Triangle::Triangle(Point* a, Point* b, Point* c)
 	: a(*a), b(*b), c(*c) {}
 
-void Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int height) {
-	// I am too lazy to make a rectangle class. Maybe do this a different time.
+int Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int height, Mode mode) {
 	int min_x = std::min({a.get_x(), b.get_x(), c.get_x()});
 	int max_x = std::max({a.get_x(), b.get_x(), c.get_x()});
 	int min_y = std::min({a.get_y(), b.get_y(), c.get_y()});
@@ -61,20 +61,59 @@ void Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int 
 				continue;
 			}
 
-			// TODO: blend it differently based on the new criteria
+
+			// Calculate depth values
 			float cur_pixel_z = 
 				alpha * a.get_z() + 
 				beta * b.get_z() + 
 				gamma * c.get_z();
-
 			int z_idx = y * width + x;
+			float depth = (cur_pixel_z+1)*0.5;
+
+			int red, green, blue = 0;
+			switch(mode) {
+				case Mode::DEPTH: 
+					red = depth*DEPTH_R;
+					green = depth*DEPTH_G;
+					red = depth*DEPTH_B;
+					break;
+
+				case Mode::SPECIAL:
+					// If all barycentric weights are greater than or equal to 0.2: cyan
+					if (alpha > SPECIAL_CYAN_THRESH && 
+							beta > SPECIAL_CYAN_THRESH && 
+							gamma > SPECIAL_CYAN_THRESH) {
+						red = SPECIAL_CYAN_R;
+						green = SPECIAL_CYAN_G;
+						blue = SPECIAL_CYAN_B;
+						break;
+					}
+
+					// Pixels wehre the minimum barycentric weight falls within the range
+					// (0.05, 0.2) will be yellow
+					if (std::min({alpha, beta, gamma}) > SPECIAL_YELLOW_THRESH && 
+							std::min({alpha, beta, gamma}) < SPECIAL_CYAN_THRESH) {
+						red = SPECIAL_YELLOW_R;
+						green = SPECIAL_YELLOW_G;
+						blue = SPECIAL_YELLOW_B;
+						break;
+					}
+
+					// Oherwise, just color it magenta
+					red = SPECIAL_MAGENTA_R;
+					green = SPECIAL_MAGENTA_G;
+					blue = SPECIAL_MAGENTA_B;
+					break;
+
+				default:
+					cout << "Unknown Mode Provided" << endl;
+					return -1;
+			}
+
 
 			if (cur_pixel_z > (*zbuff)[z_idx]) {
 				(*zbuff)[z_idx] = cur_pixel_z;
-				// image->setPixel(x, y, 0, 255*cur_pixel_z, 0);
-				float depth = (cur_pixel_z+1)*0.5;
-				int shade = depth*255;
-				image->setPixel(x, y, 0, shade, 0);
+				image->setPixel(x, y, red, green, blue);
 			}
 
 			// // Blend the colors based on the points and the alpha, beta, gamma vals
@@ -84,4 +123,6 @@ void Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int 
 
 		}
 	}
+
+	return 0;
 }

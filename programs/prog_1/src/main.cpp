@@ -34,7 +34,13 @@ int parse_inputs(
 		int* color_mode);
 
 void resize_obj(std::vector<tinyobj::shape_t> &shapes);
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height, vector<float>* zbuff);
+int rasterize_all(
+		vector<tinyobj::shape_t>* shapes, 
+		Image* image, 
+		int width, 
+		int height, 
+		vector<float>* zbuff,
+		int color_mode);
 int scale_point(int wh, float xy);
 
 // =============================================================================
@@ -96,7 +102,7 @@ int main(int argc, char **argv) {
 	vector<float> zbuff(width*height, -2);
 
 	// Rasterize all the triangles
-	if (rasterize_all(&shapes, image.get(), width, height, &zbuff) < 0) { 
+	if (rasterize_all(&shapes, image.get(), width, height, &zbuff, color_mode) < 0) { 
 		cout << "Unknown error rasterizing the traingles."  << endl;
 		return -1;
 	}
@@ -118,7 +124,13 @@ int main(int argc, char **argv) {
  *	height: height of the screen to draw to
  * Returns: 0 upon completion, -1 if any error occured.
  */
-int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int height, vector<float>* zbuff) {
+int rasterize_all(
+		vector<tinyobj::shape_t>* shapes, 
+		Image* image, 
+		int width, 
+		int height, 
+		vector<float>* zbuff,
+		int color_mode) {
 	// Which dimension we should scale
 	int min_dimension = min(width, height);
 
@@ -157,7 +169,12 @@ int rasterize_all(vector<tinyobj::shape_t>* shapes, Image* image, int width, int
 
 			// Rasterize that triangle!
 			Triangle tri = Triangle(&a, &b, &c);
-			tri.draw_triangle(image, zbuff, width, height);
+			Mode mode = static_cast<Mode>(color_mode);
+
+			if (tri.draw_triangle(image, zbuff, width, height, mode) < 0) {
+				cout << "Error drawing triangle!" << endl;
+				return -1;
+			}
 		}
 	}
 
