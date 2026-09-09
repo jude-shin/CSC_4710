@@ -22,9 +22,7 @@
 #define SPECIAL_MAGENTA_G 0
 #define SPECIAL_MAGENTA_B 255
 
-
 // Depth Render Mode Colors
-// TODO: implement
 #define DEPTH_R 191
 #define DEPTH_G 0 
 #define DEPTH_B 255 
