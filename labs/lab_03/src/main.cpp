@@ -23,15 +23,22 @@ using namespace glm;
 
 /* Global data associated with triangle geometry - this will likely vary
 in later programs - so is left explicit for now  */
-static const GLfloat g_vertex_buffer_data[] = {
+// =============================================================================
+static const GLfloat g_vertex_buffer_data_a[] = {
+		1.0f, -0.75f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		0.25f, 1.0f, 0.0f,
+
 		-1.0f, -1.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f
+		0.0f, 1.0f, 0.0f,
 
-		// -1.0f, -0.75f, 0.0f,
-		// -1.0f, 1.0f, 0.0f,
-		// -0.25f, 1.0f, 0.0f,
+		-1.0f, -0.75f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		-0.25f, 1.0f, 0.0f,
 	};
+
+// =============================================================================
 
 /* A big global wrapper for all our data */
 class Application : public EventCallbacks {
@@ -114,7 +121,7 @@ public:
 		prog->addAttribute("vertPos");
 	}
 
-	void initGeom(const std::string& resourceDirectory, const GLfloat* buffer)
+	void initGeom(const std::string& resourceDirectory)
 	{
 		//generate the VAO
 		glGenVertexArrays(1, &VertexArrayID);
@@ -125,7 +132,7 @@ public:
 		//set the current state to focus on our vertex buffer
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 		//actually memcopy the data - only do this once
-		glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data_a), g_vertex_buffer_data_a, GL_DYNAMIC_DRAW);
 	}
 
 	void render()
@@ -163,8 +170,8 @@ public:
 		//key function to get up how many elements to pull out at a time (3)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
 
-		//actually draw from vertex 0, 3 vertices
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//actually draw from vertex 0, 9 vertices
+		glDrawArrays(GL_TRIANGLES, 0, sizeof(g_vertex_buffer_data_a) / (3*sizeof(GLfloat)));
 		glDisableVertexAttribArray(0);
 
 		prog->unbind();
@@ -196,7 +203,7 @@ int main(int argc, char *argv[])
 	// may need to initialize or set up different data and state
 
 	application->init(resourceDir);
-	application->initGeom(resourceDir, g_vertex_buffer_data);
+	application->initGeom(resourceDir);
 
 	// Loop until the user closes the window.
 	while (! glfwWindowShouldClose(windowManager->getHandle()))
