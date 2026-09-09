@@ -24,19 +24,6 @@ int Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int h
 	float _d = (c.get_y()-a.get_y());
 	float deter = (_a*_d)-(_b*_c);
 
-	// Colors
-	int ar = a.get_r();
-	int ag = a.get_g();
-	int ab = a.get_b();
-
-	int br = b.get_r();
-	int bg = b.get_g();
-	int bb = b.get_b();
-
-	int cr = c.get_r();
-	int cg = c.get_g();
-	int cb = c.get_b();
-
 	// =========================================================
 
 	// For every pixel in the bounding box
@@ -110,17 +97,12 @@ int Triangle::draw_triangle(Image* image, vector<float>* zbuff, int width, int h
 					return -1;
 			}
 
-
+			// Set the colors for that pixel if the pixels depth is closer to the camera
+			// than the other stored pixel
 			if (cur_pixel_z > (*zbuff)[z_idx]) {
 				(*zbuff)[z_idx] = cur_pixel_z;
 				image->setPixel(x, y, red, green, blue);
 			}
-
-			// // Blend the colors based on the points and the alpha, beta, gamma vals
-			// int blend_r = static_cast<int>(alpha*ar + beta*br + gamma*cr);
-			// int blend_g = static_cast<int>(alpha*ag + beta*bg + gamma*cg);
-			// int blend_b = static_cast<int>(alpha*ab + beta*bb + gamma*cb);
-
 		}
 	}
 
