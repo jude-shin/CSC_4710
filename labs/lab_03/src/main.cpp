@@ -24,19 +24,34 @@ using namespace glm;
 /* Global data associated with triangle geometry - this will likely vary
 in later programs - so is left explicit for now  */
 // =============================================================================
-static const GLfloat g_vertex_buffer_data_a[] = {
-		1.0f, -0.75f, 0.0f,
+static const GLfloat g_vertex_buffer_data[] = {
+		1.0f, -0.75f, 0.0f, // Right Triangle
 		1.0f, 1.0f, 0.0f,
 		0.25f, 1.0f, 0.0f,
 
-		-1.0f, -1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f, // Center Triangle
 		1.0f, -1.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
 
-		-1.0f, -0.75f, 0.0f,
+		-1.0f, -0.75f, 0.0f, // Left Triangle
 		-1.0f, 1.0f, 0.0f,
 		-0.25f, 1.0f, 0.0f,
 	};
+
+static const GLfloat g_color_buffer_data[] = {
+    0.583f,  0.771f,  0.014f, // Right Triangle
+    0.609f,  0.115f,  0.436f,
+    0.327f,  0.483f,  0.844f,
+
+    0.583f,  0.771f,  0.014f, // Center Triangle
+    0.327f,  0.483f,  0.844f,
+    0.609f,  0.115f,  0.436f,
+
+    0.609f,  0.115f,  0.436f, // Left Triangle
+    0.327f,  0.483f,  0.844f,
+    0.583f,  0.771f,  0.014f,
+	};
+
 
 // =============================================================================
 
@@ -58,6 +73,9 @@ public:
 
 	// Data necessary to give our triangle to OpenGL
 	GLuint vertexBufferID;
+
+	// Data for coloring the triangles
+	GLuint colorbuffer;
 
 	/* we will work with matrices soon - don't worry - place holder for now */
 	void createIdentityMat(float *M) {
@@ -123,6 +141,8 @@ public:
 
 	void initGeom(const std::string& resourceDirectory)
 	{
+		// --- Set the Points ---
+
 		//generate the VAO
 		glGenVertexArrays(1, &VertexArrayID);
 		glBindVertexArray(VertexArrayID);
@@ -132,7 +152,13 @@ public:
 		//set the current state to focus on our vertex buffer
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 		//actually memcopy the data - only do this once
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data_a), g_vertex_buffer_data_a, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_DYNAMIC_DRAW);
+
+		// --- Set the Colors ---
+
+		glGenBuffers(1, &colorbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 	}
 
 	void render()
@@ -164,6 +190,7 @@ public:
 		//change m
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, M);
 
+		// --- Points ---
 		//we need to set up the vertex array
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
@@ -171,8 +198,13 @@ public:
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
 
 		//actually draw from vertex 0, 9 vertices
-		glDrawArrays(GL_TRIANGLES, 0, sizeof(g_vertex_buffer_data_a) / (3*sizeof(GLfloat)));
+		glDrawArrays(GL_TRIANGLES, 0, sizeof(g_vertex_buffer_data) / (3*sizeof(GLfloat)));
 		glDisableVertexAttribArray(0);
+
+		// --- Colors ---
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 		prog->unbind();
 
