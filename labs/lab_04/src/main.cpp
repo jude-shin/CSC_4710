@@ -68,21 +68,30 @@ public:
 		printf("\n");
 	}
 
-	void createIdentityMat(float *M)
-	{
-	//set all values to zero
+	void createIdentityMat(float *M) {
+		//set all values to zero
 		for(int i = 0; i < 4; ++i) {
 			for(int j = 0; j < 4; ++j) {
 				M[i*4+j] = 0;
 			}
 		}
-	//overwrite diagonal with 1s
+		//overwrite diagonal with 1s
 		M[0] = M[5] = M[10] = M[15] = 1;
 	}
 
-	void createTranslateMat(float *T, float x, float y, float z)
-	{
-   // IMPLEMENT ME
+	void createTranslateMat(float *T, float x, float y, float z) {
+		/*
+			 | 1 0 0 x |
+			 | 0 1 0 y |
+			 | 0 0 1 z |
+			 | 0 0 0 1 |
+		*/
+
+		createIdentityMat(T);
+
+		T[12] = x;
+		T[13] = y; 
+		T[14] = z;
 	}
 
 
