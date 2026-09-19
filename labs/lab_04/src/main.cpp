@@ -171,7 +171,7 @@ public:
 		R[0] = cos(radians);
 		R[1] = sin(radians);
 		R[4] = -sin(radians);
-		R[4] = cos(radians);
+		R[5] = cos(radians);
 		R[10] = 1;
 		R[15] = 1;
 	}
@@ -302,6 +302,11 @@ public:
 		float V[16] = {0};
 		float P[16] = {0};
 
+		float cubeTrans[16] = {0};
+		float cubeScale[16] = {0};
+		float cubeRotate[16] = {0};
+		float temp1[16] = {0};
+
 		// Get current frame buffer size.
 		int width, height;
 		glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -311,17 +316,69 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Use the local matrices for lab 4
-		// -------------------------------------------------------------------------
-		// TODO
 		float aspect = width/(float)height;
 		createPerspectiveMat(P, 70.0f, aspect, 0.1, 100.0f);	
 
-		// Change the model matrix to change the cube
-		createRotateMatY(M, 0.5);
-
 		// Move the camera back a little bit on the z axis
 		createTranslateMat(V, 0, 0, -6);
-		// -------------------------------------------------------------------------
+
+		// =========================================================================
+
+		// LEFT SIDE OF H 
+		createTranslateMat(cubeTrans, -3.5, 0, 0); // *here*
+		createScaleMat(cubeScale, 0.6, 4, 0.6);
+
+		multMat(M, cubeTrans, cubeScale);
+
+		// Draw mesh using GLSL.
+		prog->bind();
+		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, P);
+		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, V);
+		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, M);
+		mesh->draw(prog);
+		prog->unbind();
+
+		// =========================================================================
+
+		// RIGHT SIDE OF H 
+		createTranslateMat(cubeTrans, -2, 0, 0); // *here*
+		createScaleMat(cubeScale, 0.6, 4, 0.6);
+
+		multMat(M, cubeTrans, cubeScale);
+
+		// Draw mesh using GLSL.
+		prog->bind();
+		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, P);
+		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, V);
+		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, M);
+		mesh->draw(prog);
+		prog->unbind();
+
+		// =========================================================================
+
+		// CONNECTION OF H
+		createScaleMat(cubeScale, 0.6, 3, 0.6);
+		createRotateMatZ(cubeRotate, 0.9);
+		createTranslateMat(cubeTrans, -2.5, 0, 0); // *here*
+
+		multMat(temp1, cubeTrans, cubeRotate);
+		multMat(M, temp1, cubeScale);
+
+		// Draw mesh using GLSL.
+		prog->bind();
+		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, P);
+		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, V);
+		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, M);
+		mesh->draw(prog);
+		prog->unbind();
+
+		// =========================================================================
+
+		// // ONLY PART OF I
+		createTranslateMat(cubeTrans, 0, 0, 0); // *here*
+		createScaleMat(cubeScale, 0.75, 4, 0.75);
+
+		multMat(M, cubeTrans, cubeScale);
 
 		// Draw mesh using GLSL.
 		prog->bind();
