@@ -306,6 +306,8 @@ public:
 		float cubeScale[16] = {0};
 		float cubeRotate[16] = {0};
 		float temp1[16] = {0};
+		float sceneRotate[16] = {0};
+		float sceneZoom[16] = {0};
 
 		// Get current frame buffer size.
 		int width, height;
@@ -320,7 +322,10 @@ public:
 		createPerspectiveMat(P, 70.0f, aspect, 0.1, 100.0f);	
 
 		// Move the camera back a little bit on the z axis
-		createTranslateMat(V, 0, 0, -6);
+		createTranslateMat(sceneZoom, 0, 0, -6);
+		// Rotate the camera 
+		createRotateMatY(sceneRotate, -0.3);
+		multMat(V, sceneZoom, sceneRotate);
 
 		// =========================================================================
 
@@ -358,7 +363,7 @@ public:
 
 		// CONNECTION OF H
 		createScaleMat(cubeScale, 0.6, 3, 0.6);
-		createRotateMatZ(cubeRotate, 0.9);
+		createRotateMatZ(cubeRotate, 1.0);
 		createTranslateMat(cubeTrans, -2.5, 0, 0); // *here*
 
 		multMat(temp1, cubeTrans, cubeRotate);
@@ -374,7 +379,7 @@ public:
 
 		// =========================================================================
 
-		// // ONLY PART OF I
+		// ONLY PART OF I
 		createTranslateMat(cubeTrans, 0, 0, 0); // *here*
 		createScaleMat(cubeScale, 0.75, 4, 0.75);
 
@@ -387,6 +392,9 @@ public:
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, M);
 		mesh->draw(prog);
 		prog->unbind();
+
+
+		// =========================================================================
 
 	}
 };
