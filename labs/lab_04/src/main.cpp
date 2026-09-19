@@ -176,8 +176,7 @@ public:
 		R[15] = 1;
 	}
 
-	void multMat(float *C, const float *A, const float *B)
-	{
+	void multMat(float *C, const float *A, const float *B) {
 		float c = 0;
 		for(int k = 0; k < 4; ++k) {
       // Process kth column of C
@@ -188,8 +187,10 @@ public:
 				c = 0;
          //vector dot
 				for(int j = 0; j < 4; ++j) {
-            // IMPLEMENT ME
+					c += A[j * 4 + i] * B[k * 4 + j];
 				}
+
+				C[k*4+i] = c;
 			}
 		}
 	}
