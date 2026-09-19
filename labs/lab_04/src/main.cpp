@@ -68,13 +68,25 @@ public:
 		printf("\n");
 	}
 
-	void createIdentityMat(float *M) {
+	void createEmptySquareMat(float *M, int dim) {
 		//set all values to zero
-		for(int i = 0; i < 4; ++i) {
-			for(int j = 0; j < 4; ++j) {
-				M[i*4+j] = 0;
+		for(int i = 0; i < dim; ++i) {
+			for(int j = 0; j < dim; ++j) {
+				M[i*dim+j] = 0;
 			}
 		}
+	}
+
+	void createIdentityMat(float *M) {
+		/*
+			 | 1 0 0 0 |
+			 | 0 1 0 0 |
+			 | 0 0 1 0 |
+			 | 0 0 0 1 |
+		*/
+
+		createEmptySquareMat(M, 4);
+
 		//overwrite diagonal with 1s
 		M[0] = M[5] = M[10] = M[15] = 1;
 	}
@@ -95,24 +107,67 @@ public:
 	}
 
 
-	void createScaleMat(float *S, float x, float y, float z)
-	{
-   // IMPLEMENT ME
+	void createScaleMat(float *S, float x, float y, float z) {
+		/*
+			 | x 0 0 0 |
+			 | 0 y 0 0 |
+			 | 0 0 z 0 |
+			 | 0 0 0 1 |
+		*/
+
+		createEmptySquareMat(S, 4);
+
+		S[0] = x;
+		S[5] = y; 
+		S[10] = z;
+		S[15] = 1;
 	}
 
-	void createRotateMatX(float *R, float radians)
-	{ 
-   // IMPLEMENT ME
+	void createRotateMatX(float *R, float radians) { 
+		/*
+			 | 1   0   0 |
+			 | 0 cos -sin |
+			 | 0 sin -cos |
+		*/
+		createEmptySquareMat(R, 3);
+
+		R[0] = 1;
+		R[4] = cos(radians);
+		R[5] = sin(radians);
+		R[7] = asin(radians);
+		R[8] = acos(radians);
 	}
 
-	void createRotateMatY(float *R, float radians)
-	{
-   // IMPLEMENT ME
+	void createRotateMatY(float *R, float radians) {
+		/*
+			 | cos 0 sin |
+			 |  0  1  0  |
+			 |-sin 0 cos |
+		*/
+
+		createEmptySquareMat(R, 3);
+
+		R[0] = cos(radians);
+		R[2] = asin(radians);
+		R[4] = 1;
+		R[6] = sin(radians);
+		R[8] = cos(radians);
 	}
 
-	void createRotateMatZ(float *R, float radians)
-	{
-   // IMPLEMENT ME
+	void createRotateMatZ(float *R, float radians) {
+		/*
+			 | cos -sin 0 |
+			 | sin -cos 0 |
+			 |  0   0   1 |
+		*/
+
+		createEmptySquareMat(R, 3);
+
+		R[0] = cos(radians);
+		R[1] = sin(radians);
+		R[3] = asin(radians);
+		R[4] = acos(radians);
+		R[8] = 1;
 	}
 
 	void multMat(float *C, const float *A, const float *B)
