@@ -324,7 +324,7 @@ public:
 		// Move the camera back a little bit on the z axis
 		createTranslateMat(sceneZoom, 0, 0, -6);
 		// Rotate the camera 
-		createRotateMatY(sceneRotate, -0.3);
+		createRotateMatY(sceneRotate, -0.5);
 		multMat(V, sceneZoom, sceneRotate);
 
 		// =========================================================================
