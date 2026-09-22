@@ -10,6 +10,8 @@ cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 # Ext command for glad
 
+**YOU MIGHT NOT NEED TO DO THIS ACTUALLY!!!**
+
 Run this command to link glad into the project.
 
 glad --api gl:core=3.3 --out-path ext/glad
