@@ -46,8 +46,11 @@ public:
 	vec3 gMin;
 
 	//animation data
-	float sTheta = 0;
-	float gTrans = 0;
+	float upper_arm_theta = 0;
+	float forearm_theta = 0;
+	float hand_theta = 0;
+	float gTransY = 0;
+	float gTransX = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -56,10 +59,16 @@ public:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			gTrans -= 0.2;
+			gTransY -= 0.2;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			gTrans += 0.2;
+			gTransY += 0.2;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			gTransX -= 0.2;
+		}
+		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+			gTransX += 0.2;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -169,56 +178,69 @@ public:
 		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 
-		// draw mesh 
+		// TODO: question: since this is all in a loop, the body and the head are 
+		// always being drawn. Is this not inefficent?
+		// - DRAW MESH: begin
 		Model->pushMatrix();
-			Model->loadIdentity();
-			Model->translate(vec3(gTrans, 0, 0));
-			/* draw top cube - aka head */
-			Model->pushMatrix();
-				Model->translate(vec3(0, 1.4, 0));
-				Model->scale(vec3(0.5, 0.5, 0.5));
-				setModel(prog, Model);
-				mesh->draw(prog);
-			Model->popMatrix();
-			//draw the torso with these transforms
-			Model->pushMatrix();
-			  Model->scale(vec3(1.25, 1.35, 1.25));
-			  setModel(prog, Model);
-			  mesh->draw(prog);
-			Model->popMatrix();
-			// draw the upper 'arm' - relative 
-			//note you must change this to include 3 components!
-			Model->pushMatrix();
-			  //place at shoulder
-			  Model->translate(vec3(0.8, 0.8, 0));
-			  //rotate shoulder joint
-			  Model->rotate(sTheta, vec3(0, 0, 1));
-			  //move to shoulder joint
-			  Model->translate(vec3(0.8, 0, 0));
-	
-			    //now draw lower arm - this is INCOMPLETE and you will add a 3rd component
-			  	//right now this is in the SAME place as the upper arm
-			  	Model->pushMatrix();
-			      Model->scale(vec3(0.8, 0.25, 0.25));
-			  	  setModel(prog, Model);
-			  	  mesh->draw(prog);
-			  	Model->popMatrix();
+		// Translate whole figure from origin based on the global vars changed by 
+		// keystrokes
+		Model->loadIdentity();
+		Model->translate(vec3(gTransY, gTransX, 0));
 
-			  //Do final scale ONLY to upper arm then draw
-			  //non-uniform scale
-			  Model->scale(vec3(0.8, 0.25, 0.25));
-			  setModel(prog, Model);
-			  mesh->draw(prog);
-			Model->popMatrix();
+		// -- DRAW HEAD: begin
+		Model->pushMatrix();
+		Model->translate(vec3(0, 1.4, 0));
+		Model->scale(vec3(0.5, 0.5, 0.5));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// -- DRAW HEAD: end
+
+		// -- DRAW TORSO: begin
+		Model->pushMatrix();
+		Model->scale(vec3(1.25, 1.35, 1.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// -- DRAW TORSO: end
+
+		// -- DRAW UPPER ARM: begin
+		Model->pushMatrix();
+		// Place at shoulder
+		Model->translate(vec3(0.8, 0.8, 0));
+		// Rotate shoulder joint
+		Model->rotate(upper_arm_theta, vec3(0, 0, 1));
+		// Move to shoulder joint
+		Model->translate(vec3(0.8, 0, 0));
+
+		// TODO: right now this is in the SAME place as the upper arm
+		// --- DRAW FOREARM: begin
+		Model->pushMatrix();
+		Model->rotate(upper_arm_theta, vec3(0, 0, 1));
+		Model->translate(vec3(1.5, 0, 0));
+		Model->scale(vec3(0.8, 0.25, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// --- DRAW FOREARM: end
+
+		// Do final scale ONLY to upper arm then draw
+		// Non-uniform scale
+		Model->scale(vec3(0.8, 0.25, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// -- DRAW UPPER ARM: end
 		
 		Model->popMatrix();
-
+		// - DRAW MESH: end
 		prog->unbind();
 
-		//animation update example
-		sTheta = sin(glfwGetTime());
+		// Update Animation Timings
+		upper_arm_theta = sin(glfwGetTime());
+		forearm_theta = sin(glfwGetTime())*2.0;
 
-		// Pop matrix stacks.
+		// Pop P and V matrix stacks.
 		Projection->popMatrix();
 		View->popMatrix();
 
