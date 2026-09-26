@@ -42,15 +42,16 @@ public:
 	// Data necessary to give our triangle to OpenGL
 	GLuint VertexBufferID;
 
-	//example data that might be useful when trying to compute bounds on multi-shape
+	// Example data that might be useful when trying to compute bounds on multi-shape
 	vec3 gMin;
 
-	//animation data
+	// Animation data
 	float upper_arm_theta = 0;
 	float forearm_theta = 0;
 	float hand_theta = 0;
 	float gTransY = 0;
 	float gTransX = 0;
+	bool paused = false;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -69,6 +70,9 @@ public:
 		}
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 			gTransX += 0.2;
+		}
+		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+			paused = !paused;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -237,13 +241,14 @@ public:
 		prog->unbind();
 
 		// Update Animation Timings
-		upper_arm_theta = sin(glfwGetTime());
-		forearm_theta = sin(glfwGetTime())*2.0;
+		if (!paused) {
+			upper_arm_theta = sin(glfwGetTime());
+			forearm_theta = sin(glfwGetTime())*2.0;
+		}
 
 		// Pop P and V matrix stacks.
 		Projection->popMatrix();
 		View->popMatrix();
-
 	}
 };
 
