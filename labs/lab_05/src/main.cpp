@@ -71,7 +71,7 @@ public:
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 			gTransX += 0.2;
 		}
-		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		if (key == GLFW_KEY_X && action == GLFW_PRESS) {
 			paused = !paused;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -208,7 +208,9 @@ public:
 		Model->popMatrix();
 		// -- DRAW TORSO: end
 
-		// -- DRAW UPPER ARM: begin
+		// =========================================================================
+
+		// -- DRAW RIGHT UPPER ARM: begin
 		Model->pushMatrix();
 		// Place at shoulder
 		Model->translate(vec3(0.8, 0.8, 0));
@@ -217,16 +219,28 @@ public:
 		// Move to shoulder joint
 		Model->translate(vec3(0.8, 0, 0));
 
-		// TODO: right now this is in the SAME place as the upper arm
-		// --- DRAW FOREARM: begin
+		// --- DRAW RIGHT FOREARM: begin
 		Model->pushMatrix();
-		Model->rotate(upper_arm_theta, vec3(0, 0, 1));
-		Model->translate(vec3(1.5, 0, 0));
-		Model->scale(vec3(0.8, 0.25, 0.25));
+		Model->translate(vec3(0.6, 0, 0));
+		Model->rotate(forearm_theta, vec3(0, 0, 1));
+		Model->translate(vec3(0.6, 0, 0));
+
+		// ---- DRAW RIGHT HAND: begin	
+		Model->pushMatrix();
+		Model->translate(vec3(0.3, 0, 0));
+		Model->rotate(forearm_theta, vec3(0, 0, 1));
+		Model->translate(vec3(0.3, 0, 0));
+		Model->scale(vec3(0.2, 0.2, 0.25));
 		setModel(prog, Model);
 		mesh->draw(prog);
 		Model->popMatrix();
-		// --- DRAW FOREARM: end
+		// ---- DRAW RIGHT HAND: end
+
+		Model->scale(vec3(0.45, 0.2, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// --- DRAW RIGHT FOREARM: end
 
 		// Do final scale ONLY to upper arm then draw
 		// Non-uniform scale
@@ -234,8 +248,52 @@ public:
 		setModel(prog, Model);
 		mesh->draw(prog);
 		Model->popMatrix();
-		// -- DRAW UPPER ARM: end
-		
+		// -- DRAW RIGHT UPPER ARM: end
+
+		// =========================================================================
+
+		// -- DRAW LEFT UPPER ARM: begin
+		Model->pushMatrix();
+		// Place at shoulder
+		Model->translate(vec3(-0.8, 0.8, 0));
+		// Rotate shoulder joint
+		Model->rotate(0.75, vec3(0, 0, 1));
+		// Move to shoulder joint
+		Model->translate(vec3(-0.8, 0, 0));
+
+		// --- DRAW LEFT FOREARM: begin
+		Model->pushMatrix();
+		Model->translate(vec3(-0.6, 0, 0));
+		Model->rotate(1.7, vec3(0, 0, 1));
+		Model->translate(vec3(-0.6, 0, 0));
+
+		// ---- DRAW LEFT HAND: begin	
+		Model->pushMatrix();
+		Model->translate(vec3(-0.3, 0, 0));
+		Model->rotate(0.1, vec3(0, 0, 1));
+		Model->translate(vec3(-0.3, 0, 0));
+		Model->scale(vec3(0.2, 0.2, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// ---- DRAW LEFT HAND: end
+
+		Model->scale(vec3(0.45, 0.2, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// --- DRAW LEFT FOREARM: end
+
+		// Do final scale ONLY to upper arm then draw
+		// Non-uniform scale
+		Model->scale(vec3(0.8, 0.25, 0.25));
+		setModel(prog, Model);
+		mesh->draw(prog);
+		Model->popMatrix();
+		// -- DRAW LEFT UPPER ARM: end
+
+		// =========================================================================
+
 		Model->popMatrix();
 		// - DRAW MESH: end
 		prog->unbind();
@@ -243,7 +301,7 @@ public:
 		// Update Animation Timings
 		if (!paused) {
 			upper_arm_theta = sin(glfwGetTime());
-			forearm_theta = sin(glfwGetTime())*2.0;
+			forearm_theta = sin(glfwGetTime()*2.0)/2.0;
 		}
 
 		// Pop P and V matrix stacks.
