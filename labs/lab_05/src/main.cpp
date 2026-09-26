@@ -74,6 +74,12 @@ public:
 		if (key == GLFW_KEY_X && action == GLFW_PRESS) {
 			paused = !paused;
 		}
+		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+    // 2. Recover the implied time angle t
+			float prev_theta = asin(clamp(forearm_theta / 2.0f, -1.0f, 1.0f));
+			float step = 0.05;
+			forearm_theta = clamp(sin(prev_theta+step)*2.0, 0.0, 100.0);
+		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		}
@@ -228,7 +234,7 @@ public:
 		// ---- DRAW RIGHT HAND: begin	
 		Model->pushMatrix();
 		Model->translate(vec3(0.3, 0, 0));
-		Model->rotate(forearm_theta, vec3(0, 0, 1));
+		Model->rotate(hand_theta, vec3(0, 0, 1));
 		Model->translate(vec3(0.3, 0, 0));
 		Model->scale(vec3(0.2, 0.2, 0.25));
 		setModel(prog, Model);
@@ -301,7 +307,8 @@ public:
 		// Update Animation Timings
 		if (!paused) {
 			upper_arm_theta = sin(glfwGetTime());
-			forearm_theta = sin(glfwGetTime()*2.0)/2.0;
+			forearm_theta = clamp(sin(glfwGetTime())*2.0, 0.0, 100.0);
+			hand_theta = sin(glfwGetTime()*7.0)/3.0;
 		}
 
 		// Pop P and V matrix stacks.
