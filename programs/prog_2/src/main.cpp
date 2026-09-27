@@ -244,7 +244,9 @@ public:
 		// View is global translation along negative z for now
 		View->pushMatrix();
 		View->loadIdentity();
-		View->translate(vec3(gTransX, gTransY, gZoom));
+		// TODO: remove changing the view directly. This should all be done in the 
+		// Model for this project
+		// View->translate(vec3(gTransX, gTransY, gZoom));
 
 		// =========================================================================
 
@@ -254,17 +256,12 @@ public:
 		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 
 
-		// draw hierarchical mesh using matrix stack
+		// Draw hierarchical mesh using matrix stack
 		Model->pushMatrix();
 		Model->loadIdentity();
 		Model->scale(vec3(0.05, 0.05, 0.05));
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 
-			Model->pushMatrix();
-				Model->rotate(0.5, vec3(1, 0, 0));
-				setModel(prog, Model);
-				tree2.getMesh()->draw(prog);
-			Model->popMatrix();
 
 		setModel(prog, Model);
 		tree1.getMesh()->draw(prog);
