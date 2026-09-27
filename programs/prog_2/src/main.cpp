@@ -33,10 +33,6 @@ public:
 	// Our shader program
 	std::shared_ptr<Program> prog;
 
-	// TODO: remove if you don't need shadows
-	// Our shader program
-	std::shared_ptr<Program> solidColorProg;
-
 	// Shape to be used (from  file) - modify to support multiple
 	shared_ptr<Shape> mountainMesh;
 
@@ -48,7 +44,10 @@ public:
 
 	//animation data
 	float sTheta = 0;
-	float gTrans = 0;
+
+	float gTransX = 0;
+	float gTransY = 0;
+	float gZoom = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -56,11 +55,18 @@ public:
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		// Move around in the scene
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			gTrans -= 0.2;
+			gTransX -= 0.2;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			gTrans += 0.2;
+			gTransX += 0.2;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			gTransY -= 0.2;
+		}
+		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+			gTransY += 0.2;
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -105,19 +111,6 @@ public:
 		prog->addUniform("M");
 		prog->addAttribute("vertPos");
 		prog->addAttribute("vertNor");
-
-		// TODO: remove this if you don't want any shadows
-		// // Initialize the GLSL program.
-		// solidColorProg = make_shared<Program>();
-		// solidColorProg->setVerbose(true);
-		// solidColorProg->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/solid_frag.glsl");
-		// solidColorProg->init();
-		// solidColorProg->addUniform("P");
-		// solidColorProg->addUniform("V");
-		// solidColorProg->addUniform("M");
-		// solidColorProg->addUniform("solidColor");
-		// solidColorProg->addAttribute("vertPos");
-		// solidColorProg->addAttribute("vertNor");
 	}
 
 	void initGeom(const std::string& resourceDirectory) {
@@ -131,7 +124,7 @@ public:
 		// =========================================================================
 		//load in the mesh and make the shape(s)
  		vector<tinyobj::shape_t> TOshapes;
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/forest.obj").c_str());
+ 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/mountain.obj").c_str());
 
 		if (!rc) {
 			cerr << errStr << endl;
@@ -224,10 +217,10 @@ public:
 		mountainMesh->draw(prog);
 		prog->unbind();
 
-		// // draw hierarchical mesh using matrix stack
-		// Model->pushMatrix();
-		// 	Model->loadIdentity();
-		// 	Model->translate(vec3(gTrans, 0, 0));
+		// draw hierarchical mesh using matrix stack
+		Model->pushMatrix();
+			Model->loadIdentity();
+			Model->translate(vec3(gTransX, gTransY, 0));
 		// 	/* draw top cube - aka head */
 		// 	Model->pushMatrix();
 		// 		Model->translate(vec3(0, 1.4, 0));
@@ -266,7 +259,9 @@ public:
 		// 	  mesh->draw(prog);
 		// 	Model->popMatrix();
 		// 
-		// Model->popMatrix();
+
+			mountainMesh->draw(prog);
+		Model->popMatrix();
 
 
 		//animation update example
