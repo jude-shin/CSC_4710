@@ -13,6 +13,7 @@
 #include "Shape.h"
 #include "MatrixStack.h"
 #include "WindowManager.h"
+#include "Tree.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -20,6 +21,11 @@
 // value_ptr for glm
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+// Filenames for loaded obj files
+#define TREE_FILE "/tree.obj"
+#define MOUNTAIN_FILE "/mountain.obj"
+#define FLOWER_FILE "/cartoon_flower.obj"
 
 using namespace std;
 using namespace glm;
@@ -33,28 +39,33 @@ public:
 	// Our shader program
 	std::shared_ptr<Program> prog;
 
+	// Tree 1 (Holds a Tree Mesh)
+	Tree tree1;
+	// Tree 2 (Holds a Tree Mesh)
+	Tree tree2;
+	// Tree 3 (Holds a Tree Mesh)
+	Tree tree3;
+
 	// Mountain Mesh
 	shared_ptr<Shape> mountainMesh;
-	// Tree 1 Mesh
-	shared_ptr<Shape> tree1Mesh;
-	// Tree 2 Mesh
-	shared_ptr<Shape> tree2Mesh;
-	// Tree 3 Mesh
-	shared_ptr<Shape> tree3Mesh;
 	// Flower Mesh
 	shared_ptr<Shape> flowerMesh;
 
-	//example data that might be useful when trying to compute bounds on multi-shape
-	vec3 gMin;
+
+	// TODO: remove this if you don't use it
+	// Example data that might be useful when trying to compute bounds on multi-shape
+	// vec3 gMin;
 
 	// Animation angles
-	float petalTheta = 0;
-	float rotationTheta = 0;
+	float flowerPetalTheta = 0;
+	float flowerRotationTheta = 0;
+	float treeWindTheta = 0;
 	
-	// Camera Location
+	// Camera/Scene Updates
 	float gTransX = 0;
 	float gTransY = -0.4;
 	float gZoom = -10;
+	float targetRotation = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -64,10 +75,12 @@ public:
 		}
 		// TODO: (change a and d to rotate around the flower) Move around in the scene (WASD)
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			gTransX -= 0.2;
+			// gTransX -= 0.2;
+			targetRotation -= 0.2;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			gTransX += 0.2;
+			// gTransX += 0.2;
+			targetRotation += 0.2;
 		}
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 			gTransY += 0.2;
@@ -140,20 +153,27 @@ public:
  		// Some obj files contain material information.We'll ignore them for this assignment.
  		vector<tinyobj::material_t> objMaterials;
  		string errStr;
+ 		vector<tinyobj::shape_t> TOshapes;
+		bool rc = false;
 
 		// =========================================================================
-		//load in the mesh and make the shape(s)
- 		vector<tinyobj::shape_t> TOshapes;
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/tree.obj").c_str());
 
-		if (!rc) {
+		// Load Tree 1 as one object
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
 			cerr << errStr << endl;
-		} else {
-			//for now all our shapes will not have textures - change in later labs
-			mountainMesh = make_shared<Shape>(false);
-			mountainMesh->createShape(TOshapes[0]);
-			mountainMesh->measure();
-			mountainMesh->init();
+		} 
+		else {
+			tree1 = Tree(TOshapes);
+		}
+
+		// =========================================================================
+
+		// Load Tree 2 as one object
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			tree2 = Tree(TOshapes);
 		}
 
 		// =========================================================================
@@ -174,10 +194,11 @@ public:
 
 		// =========================================================================
 
+		// TODO: remove this if you don't use it
 		//read out information stored in the shape about its size - something like this...
 		//then do something with that information.....
-		gMin.x = mountainMesh->min.x;
-		gMin.y = mountainMesh->min.y;
+		// gMin.x = mountainMesh->min.x;
+		// gMin.y = mountainMesh->min.y;
 	}
 
 	/* helper for sending top of the matrix strack to GPU */
@@ -237,11 +258,17 @@ public:
 		Model->pushMatrix();
 		Model->loadIdentity();
 		Model->scale(vec3(0.05, 0.05, 0.05));
-		Model->rotate(sTheta, vec3(0, 1, 0));
+		Model->rotate(targetRotation, vec3(0, 1, 0));
 
-		// Use helper function that uses glm to create some transform matrices
+			Model->pushMatrix();
+				Model->rotate(0.5, vec3(1, 0, 0));
+				setModel(prog, Model);
+				tree2.getMesh()->draw(prog);
+			Model->popMatrix();
+
 		setModel(prog, Model);
-		mountainMesh->draw(prog);
+		tree1.getMesh()->draw(prog);
+
 		Model->popMatrix();
 
 		prog->unbind();
@@ -249,7 +276,7 @@ public:
 		// =========================================================================
 
 		// Animation Update
-		sTheta = sin(glfwGetTime());
+		treeWindTheta = sin(glfwGetTime());
 
 		// =========================================================================
 
