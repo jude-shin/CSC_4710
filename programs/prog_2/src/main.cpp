@@ -33,20 +33,27 @@ public:
 	// Our shader program
 	std::shared_ptr<Program> prog;
 
-	// Shape to be used (from  file) - modify to support multiple
+	// Mountain Mesh
 	shared_ptr<Shape> mountainMesh;
-
-	//a different mesh
-	shared_ptr<Shape> clipMesh;
+	// Tree 1 Mesh
+	shared_ptr<Shape> tree1Mesh;
+	// Tree 2 Mesh
+	shared_ptr<Shape> tree2Mesh;
+	// Tree 3 Mesh
+	shared_ptr<Shape> tree3Mesh;
+	// Flower Mesh
+	shared_ptr<Shape> flowerMesh;
 
 	//example data that might be useful when trying to compute bounds on multi-shape
 	vec3 gMin;
 
-	//animation data
-	float sTheta = 0;
-
+	// Animation angles
+	float petalTheta = 0;
+	float rotationTheta = 0;
+	
+	// Camera Location
 	float gTransX = 0;
-	float gTransY = -2;
+	float gTransY = -0.4;
 	float gZoom = -10;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -55,7 +62,7 @@ public:
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		// Move around in the scene (WASD)
+		// TODO: (change a and d to rotate around the flower) Move around in the scene (WASD)
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
 			gTransX -= 0.2;
 		}
@@ -63,10 +70,10 @@ public:
 			gTransX += 0.2;
 		}
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-			gTransY -= 0.2;
+			gTransY += 0.2;
 		}
 		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			gTransY += 0.2;
+			gTransY -= 0.2;
 		}
 
 		// Zoom in the scene
@@ -83,6 +90,10 @@ public:
 		if (key == GLFW_KEY_Z && action == GLFW_RELEASE) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
+
+
+		cout << "View [X, Y, Zoom]: [" << gTransX << ", " << gTransY << ", " 
+			<< gZoom << "]" << endl;
 	}
 
 	void mouseCallback(GLFWwindow *window, int button, int action, int mods)
@@ -133,7 +144,7 @@ public:
 		// =========================================================================
 		//load in the mesh and make the shape(s)
  		vector<tinyobj::shape_t> TOshapes;
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/cartoon_flower.obj").c_str());
+ 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/tree.obj").c_str());
 
 		if (!rc) {
 			cerr << errStr << endl;
@@ -225,7 +236,8 @@ public:
 		// draw hierarchical mesh using matrix stack
 		Model->pushMatrix();
 		Model->loadIdentity();
-		// Model->translate(vec3());
+		Model->scale(vec3(0.05, 0.05, 0.05));
+		Model->rotate(sTheta, vec3(0, 1, 0));
 
 		// Use helper function that uses glm to create some transform matrices
 		setModel(prog, Model);
