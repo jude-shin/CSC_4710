@@ -33,14 +33,15 @@ public:
 	// Our shader program
 	std::shared_ptr<Program> prog;
 
+	// TODO: remove if you don't need shadows
 	// Our shader program
 	std::shared_ptr<Program> solidColorProg;
 
 	// Shape to be used (from  file) - modify to support multiple
-	shared_ptr<Shape> mesh;
+	shared_ptr<Shape> mountainMesh;
 
 	//a different mesh
-	shared_ptr<Shape> bunny;
+	shared_ptr<Shape> clipMesh;
 
 	//example data that might be useful when trying to compute bounds on multi-shape
 	vec3 gMin;
@@ -105,60 +106,65 @@ public:
 		prog->addAttribute("vertPos");
 		prog->addAttribute("vertNor");
 
-		// Initialize the GLSL program.
-		solidColorProg = make_shared<Program>();
-		solidColorProg->setVerbose(true);
-		solidColorProg->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/solid_frag.glsl");
-		solidColorProg->init();
-		solidColorProg->addUniform("P");
-		solidColorProg->addUniform("V");
-		solidColorProg->addUniform("M");
-		solidColorProg->addUniform("solidColor");
-		solidColorProg->addAttribute("vertPos");
-		solidColorProg->addAttribute("vertNor");
+		// TODO: remove this if you don't want any shadows
+		// // Initialize the GLSL program.
+		// solidColorProg = make_shared<Program>();
+		// solidColorProg->setVerbose(true);
+		// solidColorProg->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/solid_frag.glsl");
+		// solidColorProg->init();
+		// solidColorProg->addUniform("P");
+		// solidColorProg->addUniform("V");
+		// solidColorProg->addUniform("M");
+		// solidColorProg->addUniform("solidColor");
+		// solidColorProg->addAttribute("vertPos");
+		// solidColorProg->addAttribute("vertNor");
 	}
 
-	void initGeom(const std::string& resourceDirectory)
-	{
-
+	void initGeom(const std::string& resourceDirectory) {
 		//EXAMPLE set up to read one shape from one obj file - convert to read several
 		// Initialize mesh
 		// Load geometry
  		// Some obj files contain material information.We'll ignore them for this assignment.
- 		vector<tinyobj::shape_t> TOshapes;
  		vector<tinyobj::material_t> objMaterials;
  		string errStr;
+
+		// =========================================================================
 		//load in the mesh and make the shape(s)
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/SmoothSphere.obj").c_str());
-		
+ 		vector<tinyobj::shape_t> TOshapes;
+ 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/forest.obj").c_str());
+
 		if (!rc) {
 			cerr << errStr << endl;
 		} else {
 			//for now all our shapes will not have textures - change in later labs
-			mesh = make_shared<Shape>(false);
-			mesh->createShape(TOshapes[0]);
-			mesh->measure();
-			mesh->init();
+			mountainMesh = make_shared<Shape>(false);
+			mountainMesh->createShape(TOshapes[0]);
+			mountainMesh->measure();
+			mountainMesh->init();
 		}
 
-		//load in another mesh and make the shape(s)
-		vector<tinyobj::shape_t> TOshapes2;
- 		rc = tinyobj::LoadObj(TOshapes2, objMaterials, errStr, (resourceDirectory + "/bunny.obj").c_str());
-		
-		if (!rc) {
-			cerr << errStr << endl;
-		} else {
-			//for now all our shapes will not have textures - change in later labs
-			bunny = make_shared<Shape>(false);
-			bunny->createShape(TOshapes2[0]);
-			bunny->measure();
-			bunny->init();
-		}
+		// =========================================================================
+
+		// //load in another mesh and make the shape(s)
+		// vector<tinyobj::shape_t> TOshapes2;
+ 		// rc = tinyobj::LoadObj(TOshapes2, objMaterials, errStr, (resourceDirectory + "/bunny.obj").c_str());
+		// 
+		// if (!rc) {
+		// 	cerr << errStr << endl;
+		// } else {
+		// 	//for now all our shapes will not have textures - change in later labs
+		// 	bunny = make_shared<Shape>(false);
+		// 	bunny->createShape(TOshapes2[0]);
+		// 	bunny->measure();
+		// 	bunny->init();
+		// }
+
+		// =========================================================================
 
 		//read out information stored in the shape about its size - something like this...
 		//then do something with that information.....
-		gMin.x = mesh->min.x;
-		gMin.y = mesh->min.y;
+		gMin.x = mountainMesh->min.x;
+		gMin.y = mountainMesh->min.y;
 	}
 
 	/* helper for sending top of the matrix strack to GPU */
@@ -192,88 +198,81 @@ public:
 		auto Projection = make_shared<MatrixStack>();
 		auto View = make_shared<MatrixStack>();
 		auto Model = make_shared<MatrixStack>();
+		
+		// =========================================================================
 
 		// Apply perspective projection.
 		Projection->pushMatrix();
 		Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
+		// =========================================================================
+
 		// View is global translation along negative z for now
 		View->pushMatrix();
-			View->loadIdentity();
-			View->translate(vec3(0, 0, -5));
+		View->loadIdentity();
+		View->translate(vec3(0, 0, -5));
 
-		// Draw a solid colored sphere
-		solidColorProg->bind();
-		//send the projetion and view for solid shader
-		glUniformMatrix4fv(solidColorProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(solidColorProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		//send in the color to use
-		glUniform3f(solidColorProg->getUniform("solidColor"), 0.1, 0.2, 0.5);
+		// =========================================================================
 
-		//use helper function that uses glm to create some transform matrices
-		setModel(prog, vec3(-1.7, -1.7, 0), 0, 0, 0.5);
-		mesh->draw(prog);
-
-		solidColorProg->unbind();
-
-		// Draw base Hierarchical person
+		// Draw mountain in the background 
 		prog->bind();
 		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 
 		//use helper function that uses glm to create some transform matrices
-		setModel(prog, vec3(1.7, -1.7, 0), 0, 0, 0.5);
-		bunny->draw(prog);
-
-
-		// draw hierarchical mesh using matrix stack
-		Model->pushMatrix();
-			Model->loadIdentity();
-			Model->translate(vec3(gTrans, 0, 0));
-			/* draw top cube - aka head */
-			Model->pushMatrix();
-				Model->translate(vec3(0, 1.4, 0));
-				Model->scale(vec3(0.5, 0.5, 0.5));
-				setModel(prog, Model);
-				mesh->draw(prog);
-			Model->popMatrix();
-			//draw the torso with these transforms
-			Model->pushMatrix();
-			  Model->scale(vec3(1.25, 1.35, 1.25));
-			  setModel(prog, Model);
-			  mesh->draw(prog);
-			Model->popMatrix();
-			// draw the upper 'arm' - relative 
-			//note you must change this to include 3 components!
-			Model->pushMatrix();
-			  //place at shoulder
-			  Model->translate(vec3(0.8, 0.8, 0));
-			  //rotate shoulder joint
-			  Model->rotate(sTheta, vec3(0, 0, 1));
-			  //move to shoulder joint
-			  Model->translate(vec3(0.8, 0, 0));
-	
-			    //now draw lower arm - this is INCOMPLETE and you will add a 3rd component
-			  	//right now this is in the SAME place as the upper arm
-			  	Model->pushMatrix();
-			      Model->scale(vec3(0.8, 0.25, 0.25));
-			  	  setModel(prog, Model);
-			  	  mesh->draw(prog);
-			  	Model->popMatrix();
-
-			  //Do final scale ONLY to upper arm then draw
-			  //non-uniform scale
-			  Model->scale(vec3(0.8, 0.25, 0.25));
-			  setModel(prog, Model);
-			  mesh->draw(prog);
-			Model->popMatrix();
-		
-		Model->popMatrix();
-
+		setModel(prog, vec3(0, -1.0, 0), 0, 0, 0.5);
+		mountainMesh->draw(prog);
 		prog->unbind();
+
+		// // draw hierarchical mesh using matrix stack
+		// Model->pushMatrix();
+		// 	Model->loadIdentity();
+		// 	Model->translate(vec3(gTrans, 0, 0));
+		// 	/* draw top cube - aka head */
+		// 	Model->pushMatrix();
+		// 		Model->translate(vec3(0, 1.4, 0));
+		// 		Model->scale(vec3(0.5, 0.5, 0.5));
+		// 		setModel(prog, Model);
+		// 		mesh->draw(prog);
+		// 	Model->popMatrix();
+		// 	//draw the torso with these transforms
+		// 	Model->pushMatrix();
+		// 	  Model->scale(vec3(1.25, 1.35, 1.25));
+		// 	  setModel(prog, Model);
+		// 	  mesh->draw(prog);
+		// 	Model->popMatrix();
+		// 	// draw the upper 'arm' - relative 
+		// 	//note you must change this to include 3 components!
+		// 	Model->pushMatrix();
+		// 	  //place at shoulder
+		// 	  Model->translate(vec3(0.8, 0.8, 0));
+		// 	  //rotate shoulder joint
+		// 	  Model->rotate(sTheta, vec3(0, 0, 1));
+		// 	  //move to shoulder joint
+		// 	  Model->translate(vec3(0.8, 0, 0));
+	
+		// 	    //now draw lower arm - this is INCOMPLETE and you will add a 3rd component
+		// 	  	//right now this is in the SAME place as the upper arm
+		// 	  	Model->pushMatrix();
+		// 	      Model->scale(vec3(0.8, 0.25, 0.25));
+		// 	  	  setModel(prog, Model);
+		// 	  	  mesh->draw(prog);
+		// 	  	Model->popMatrix();
+
+		// 	  //Do final scale ONLY to upper arm then draw
+		// 	  //non-uniform scale
+		// 	  Model->scale(vec3(0.8, 0.25, 0.25));
+		// 	  setModel(prog, Model);
+		// 	  mesh->draw(prog);
+		// 	Model->popMatrix();
+		// 
+		// Model->popMatrix();
+
 
 		//animation update example
 		sTheta = sin(glfwGetTime());
+
+		// =========================================================================
 
 		// Pop matrix stacks.
 		Projection->popMatrix();
