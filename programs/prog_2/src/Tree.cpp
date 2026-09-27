@@ -43,7 +43,7 @@ void Tree::render(
 
 	model->scale(vec3(scale, scale, scale));
 	model->translate(pos);
-	// model->rotate(-DEG_90, vec3(1, 0, 0));
+	model->rotate(trunkDelta, vec3(1, 0, 0));
 
 	// Draw the Trunk
 	setModel(prog, model);
@@ -53,7 +53,7 @@ void Tree::render(
 	for (const auto& leaf : leafMeshes) {
 		model->pushMatrix();
 
-		model->translate(vec3(leafDelta*0.5, leafDelta*0.3, leafDelta*0.2));
+		model->translate(vec3(leafDelta*0.3, leafDelta*0.1, leafDelta*0.07));
 		setModel(prog, model);
 		leaf->draw(prog);
 
@@ -64,4 +64,5 @@ void Tree::render(
 
 	// Animate the leaves
 	leafDelta = sin(glfwGetTime());
+	trunkDelta = sin(glfwGetTime())*0.03;
 }

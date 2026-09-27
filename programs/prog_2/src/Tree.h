@@ -24,6 +24,7 @@ class Tree : public MyObject{
     std::shared_ptr<Shape> trunkMesh;
     std::vector<std::shared_ptr<Shape>> leafMeshes;
     float leafDelta = 0;
+    float trunkDelta = 0;
 };
 
 #endif
