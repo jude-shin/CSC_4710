@@ -14,7 +14,16 @@ class Tree : public MyObject{
     Tree();
     Tree(std::vector<tinyobj::shape_t>& TOshapes);
 
-    void render(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack> model);
+    void render(
+        std::shared_ptr<Program> prog, 
+        std::shared_ptr<MatrixStack> model,
+        glm::vec3 pos,
+        float scale);
+
+  private:
+    std::shared_ptr<Shape> trunkMesh;
+    std::vector<std::shared_ptr<Shape>> leafMeshes;
+    float leafDelta = 0;
 };
 
 #endif

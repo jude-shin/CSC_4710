@@ -23,7 +23,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // Filenames for loaded obj files
-#define TREE_FILE "/tree.obj"
+#define TREE_FILE "/big_tree.obj"
 #define MOUNTAIN_FILE "/mountain.obj"
 #define FLOWER_FILE "/cartoon_flower.obj"
 
@@ -56,15 +56,10 @@ public:
 	// Example data that might be useful when trying to compute bounds on multi-shape
 	// vec3 gMin;
 
-	// Animation angles
-	float flowerPetalTheta = 0;
-	float flowerRotationTheta = 0;
-	float treeWindTheta = 0;
-	
 	// Camera/Scene Updates
 	float gTransX = 0.0f;
-	float gTransY = 0.0f;
-	float gZoom = -8.0f;
+	float gTransY = -2.0f;
+	float gTransZ = -8.0f;
 	float targetRotation = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -83,18 +78,18 @@ public:
 			targetRotation += 0.2;
 		}
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-			gTransY += 0.2;
+			gTransY -= 0.2;
 		}
 		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			gTransY -= 0.2;
+			gTransY += 0.2;
 		}
 
 		// Zoom in the scene
 		if (key == GLFW_KEY_EQUAL && mods & GLFW_MOD_SHIFT && action == GLFW_PRESS) {
-			gZoom += 0.2;
+			gTransZ += 0.2;
 		}
 		if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
-			gZoom -= 0.2;
+			gTransZ -= 0.2;
 		}
 
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -106,7 +101,7 @@ public:
 
 
 		cout << "View [X, Y, Zoom]: [" << gTransX << ", " << gTransY << ", " 
-			<< gZoom << "]" << endl;
+			<< gTransZ << "]" << endl;
 	}
 
 	void mouseCallback(GLFWwindow *window, int button, int action, int mods)
@@ -245,20 +240,17 @@ public:
 
 		// Global Scene Translation and Scale
 		Model->loadIdentity();
-		Model->translate(vec3(gTransX, gTransY, gZoom));
-		Model->scale(vec3(0.05, 0.05, 0.05));
+		Model->translate(vec3(gTransX, gTransY, gTransZ));
+		Model->scale(vec3(0.7, 0.7, 0.7));
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model);
+		tree1.render(prog, Model, vec3(0, 0, 0), 0.5);
+
+		// tree2.render(prog, Model, vec3(100, 0, 0), 0.5);
 
 		Model->popMatrix();
 		prog->unbind();
-
-		// =========================================================================
-
-		// Animation Update
-		treeWindTheta = sin(glfwGetTime());
 
 		// =========================================================================
 

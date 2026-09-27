@@ -15,7 +15,6 @@ class MyObject {
     std::shared_ptr<Shape> getMesh();
 
   protected:
-    std::shared_ptr<Shape> mesh;
     void setModel(std::shared_ptr<Program>& prog, std::shared_ptr<MatrixStack>M);
   	void setModel(std::shared_ptr<Program>& curS, glm::vec3 trans, float rotY, float rotX, float sc);
 
