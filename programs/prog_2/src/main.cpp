@@ -46,8 +46,8 @@ public:
 	float sTheta = 0;
 
 	float gTransX = 0;
-	float gTransY = 0;
-	float gZoom = 0;
+	float gTransY = -2;
+	float gZoom = -10;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -55,19 +55,28 @@ public:
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		// Move around in the scene
+		// Move around in the scene (WASD)
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
 			gTransX -= 0.2;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
 			gTransX += 0.2;
 		}
-		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 			gTransY -= 0.2;
 		}
-		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
 			gTransY += 0.2;
 		}
+
+		// Zoom in the scene
+		if (key == GLFW_KEY_EQUAL && mods & GLFW_MOD_SHIFT && action == GLFW_PRESS) {
+			gZoom += 0.2;
+		}
+		if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
+			gZoom -= 0.2;
+		}
+
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		}
@@ -124,7 +133,7 @@ public:
 		// =========================================================================
 		//load in the mesh and make the shape(s)
  		vector<tinyobj::shape_t> TOshapes;
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/mountain.obj").c_str());
+ 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/cartoon_flower.obj").c_str());
 
 		if (!rc) {
 			cerr << errStr << endl;
@@ -203,7 +212,7 @@ public:
 		// View is global translation along negative z for now
 		View->pushMatrix();
 		View->loadIdentity();
-		View->translate(vec3(0, 0, -5));
+		View->translate(vec3(gTransX, gTransY, gZoom));
 
 		// =========================================================================
 
@@ -212,59 +221,22 @@ public:
 		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 
-		//use helper function that uses glm to create some transform matrices
-		setModel(prog, vec3(0, -1.0, 0), 0, 0, 0.5);
-		mountainMesh->draw(prog);
-		prog->unbind();
 
 		// draw hierarchical mesh using matrix stack
 		Model->pushMatrix();
-			Model->loadIdentity();
-			Model->translate(vec3(gTransX, gTransY, 0));
-		// 	/* draw top cube - aka head */
-		// 	Model->pushMatrix();
-		// 		Model->translate(vec3(0, 1.4, 0));
-		// 		Model->scale(vec3(0.5, 0.5, 0.5));
-		// 		setModel(prog, Model);
-		// 		mesh->draw(prog);
-		// 	Model->popMatrix();
-		// 	//draw the torso with these transforms
-		// 	Model->pushMatrix();
-		// 	  Model->scale(vec3(1.25, 1.35, 1.25));
-		// 	  setModel(prog, Model);
-		// 	  mesh->draw(prog);
-		// 	Model->popMatrix();
-		// 	// draw the upper 'arm' - relative 
-		// 	//note you must change this to include 3 components!
-		// 	Model->pushMatrix();
-		// 	  //place at shoulder
-		// 	  Model->translate(vec3(0.8, 0.8, 0));
-		// 	  //rotate shoulder joint
-		// 	  Model->rotate(sTheta, vec3(0, 0, 1));
-		// 	  //move to shoulder joint
-		// 	  Model->translate(vec3(0.8, 0, 0));
-	
-		// 	    //now draw lower arm - this is INCOMPLETE and you will add a 3rd component
-		// 	  	//right now this is in the SAME place as the upper arm
-		// 	  	Model->pushMatrix();
-		// 	      Model->scale(vec3(0.8, 0.25, 0.25));
-		// 	  	  setModel(prog, Model);
-		// 	  	  mesh->draw(prog);
-		// 	  	Model->popMatrix();
+		Model->loadIdentity();
+		// Model->translate(vec3());
 
-		// 	  //Do final scale ONLY to upper arm then draw
-		// 	  //non-uniform scale
-		// 	  Model->scale(vec3(0.8, 0.25, 0.25));
-		// 	  setModel(prog, Model);
-		// 	  mesh->draw(prog);
-		// 	Model->popMatrix();
-		// 
-
-			mountainMesh->draw(prog);
+		// Use helper function that uses glm to create some transform matrices
+		setModel(prog, Model);
+		mountainMesh->draw(prog);
 		Model->popMatrix();
 
+		prog->unbind();
 
-		//animation update example
+		// =========================================================================
+
+		// Animation Update
 		sTheta = sin(glfwGetTime());
 
 		// =========================================================================
@@ -272,7 +244,6 @@ public:
 		// Pop matrix stacks.
 		Projection->popMatrix();
 		View->popMatrix();
-
 	}
 };
 
