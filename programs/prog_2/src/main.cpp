@@ -62,9 +62,9 @@ public:
 	float treeWindTheta = 0;
 	
 	// Camera/Scene Updates
-	float gTransX = 0;
-	float gTransY = -0.4;
-	float gZoom = -10;
+	float gTransX = 0.0f;
+	float gTransY = 0.0f;
+	float gZoom = -8.0f;
 	float targetRotation = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -201,21 +201,6 @@ public:
 		// gMin.y = mountainMesh->min.y;
 	}
 
-	/* helper for sending top of the matrix strack to GPU */
-	void setModel(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>M) {
-		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
-   }
-
-	/* helper function to set model trasnforms */
-  	void setModel(shared_ptr<Program> curS, vec3 trans, float rotY, float rotX, float sc) {
-  		mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
-  		mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
-  		mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
-  		mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
-  		mat4 ctm = Trans*RotX*RotY*ScaleS;
-  		glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
-  	}
-
 	void render() {
 		// Get current frame buffer size.
 		int width, height;
@@ -246,7 +231,6 @@ public:
 		View->loadIdentity();
 		// TODO: remove changing the view directly. This should all be done in the 
 		// Model for this project
-		// View->translate(vec3(gTransX, gTransY, gZoom));
 
 		// =========================================================================
 
@@ -258,16 +242,17 @@ public:
 
 		// Draw hierarchical mesh using matrix stack
 		Model->pushMatrix();
+
+		// Global Scene Translation and Scale
 		Model->loadIdentity();
+		Model->translate(vec3(gTransX, gTransY, gZoom));
 		Model->scale(vec3(0.05, 0.05, 0.05));
 		Model->rotate(targetRotation, vec3(0, 1, 0));
-
-
-		setModel(prog, Model);
-		tree1.getMesh()->draw(prog);
+	
+		// Scene rendering
+		tree1.render(prog, Model);
 
 		Model->popMatrix();
-
 		prog->unbind();
 
 		// =========================================================================

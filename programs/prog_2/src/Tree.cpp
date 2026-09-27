@@ -19,11 +19,10 @@ Tree::Tree(vector<tinyobj::shape_t>& TOshapes)
 	mesh->init();
 };
 
-void Tree::render(shared_ptr<Program> prog, shared_ptr<MatrixStack>& model) {
+void Tree::render(shared_ptr<Program> prog, shared_ptr<MatrixStack> model) {
 	model->pushMatrix();
 	model->rotate(0.5, glm::vec3(1, 0, 0));
 	setModel(prog, model);
 	mesh->draw(prog);
 	model->popMatrix();
-
 }

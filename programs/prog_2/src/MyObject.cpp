@@ -24,7 +24,6 @@ void MyObject::setModel(shared_ptr<Program>& curS, vec3 trans, float rotY, float
 	glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
 }
 
-
 shared_ptr<Shape> MyObject::getMesh() {
 	return mesh;
 }

@@ -14,7 +14,7 @@ class Tree : public MyObject{
     Tree();
     Tree(std::vector<tinyobj::shape_t>& TOshapes);
 
-    void render(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>& model);
+    void render(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack> model);
 };
 
 #endif
