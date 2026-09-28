@@ -12,7 +12,8 @@
 using namespace std;
 using namespace glm;
 
-#define PETAL_COUNT 3
+#define PETAL_HEIGHT 0.3
+#define PETAL_ANGLE -0.7
 
 Flower::Flower() {}
 
@@ -43,26 +44,34 @@ void Flower::render(
 	// Global scale rotate and translates
 	model->translate(translate);
 	model->scale(scale);
-
-	// // Draw the Trunk (sways in the wind)
-	// model->rotate(trunkDelta, vec3(0, 0, 1));
-	// setModel(prog, model);
-	// trunkMesh->draw(prog);
-	// 
-
+	model->rotate(tiltDelta, vec3(0, 0, 1));
+	
+	// Animate the Center of the flower
 	setModel(prog, model);
 	centerMesh->draw(prog);
-
+	
+	// Animate the Petals Rotating
+	model->pushMatrix();
+	model->translate(vec3(0, PETAL_HEIGHT, 0));		// Translate the petals to 0,0
+	model->rotate(PETAL_ANGLE, vec3(1, 0, 0));		// Rotate the petals to 9o deg
+	model->rotate(rotationDelta, vec3(0, 0, 1));	// Rotate the Petals in circle
+	model->rotate(-PETAL_ANGLE, vec3(1, 0, 0));		// Rotate the Petals back
+	model->translate(vec3(0, -PETAL_HEIGHT, 0));	// Translate the petals back
 	setModel(prog, model);
 	petalMesh->draw(prog);
-
+	model->popMatrix();
+	
+	// Animate the stem and leaves
+	model->pushMatrix();
+	model->scale(vec3(stretchDelta, 1, 1));
 	setModel(prog, model);
 	stemMesh->draw(prog);
+	model->popMatrix();
 
 	model->popMatrix();
 
-	// Animate Everything
-	tiltDelta = sin(glfwGetTime());
-	stretchDelta = sin(glfwGetTime());
-	rotationDelta = sin(glfwGetTime())*0.03;
+	// Change the Deltas for Animations
+	tiltDelta = sin(glfwGetTime()*5)/4;
+	stretchDelta = clamp(pow(sin(glfwGetTime()*5), 2), 0.5, 2.0);
+	rotationDelta =  sin(glfwGetTime()*5);
 }

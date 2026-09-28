@@ -284,11 +284,11 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
-		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
-		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
-		mountain.render(prog, Model);
-		tent.render(prog, Model);
+		// tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
+		// tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
+		// tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
+		// mountain.render(prog, Model);
+		// tent.render(prog, Model);
 
 		flower.render(prog, Model, vec3(0, 0, 0), 1);
 
