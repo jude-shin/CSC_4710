@@ -7,8 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
-#define OBJ_FILE "/tree.obj"
-
 using namespace std;
 using namespace glm;
 

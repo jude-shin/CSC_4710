@@ -14,6 +14,7 @@
 #include "MatrixStack.h"
 #include "WindowManager.h"
 #include "Tree.h"
+#include "Mountain.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -25,6 +26,7 @@
 // Filenames for loaded obj files
 #define TREE_FILE "/big_tree.obj"
 #define MOUNTAIN_FILE "/mountain.obj"
+#define TENT_FILE "/tent.obj"
 #define FLOWER_FILE "/cartoon_flower.obj"
 
 using namespace std;
@@ -45,9 +47,9 @@ public:
 	Tree tree2;
 	// Tree 3 (Holds a Tree Mesh)
 	Tree tree3;
+	// Mountain (Holds a Mountain Mesh)
+	Mountain mountain;
 
-	// Mountain Mesh
-	shared_ptr<Shape> mountainMesh;
 	// Flower Mesh
 	shared_ptr<Shape> flowerMesh;
 
@@ -183,6 +185,15 @@ public:
 
 		// =========================================================================
 
+		// Load Tree 3 as one object
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + MOUNTAIN_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			 mountain = Mountain(TOshapes);
+		}
+
+
 		// //load in another mesh and make the shape(s)
 		// vector<tinyobj::shape_t> TOshapes2;
  		// rc = tinyobj::LoadObj(TOshapes2, objMaterials, errStr, (resourceDirectory + "/bunny.obj").c_str());
@@ -255,9 +266,10 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(-15, 0, 0), 0.5);
-		tree2.render(prog, Model, vec3(-10, 2, 0), 0.35);
-		tree3.render(prog, Model, vec3(10, -3, 0), 0.75);
+		tree1.render(prog, Model, vec3(-1.5, 0, 0), 0.05);
+		tree2.render(prog, Model, vec3(-1.0, 2, 0), 0.017);
+		tree3.render(prog, Model, vec3(1.0, -3, 0), 0.037);
+		mountain.render(prog, Model, vec3(2.5, 2.5, -5), 1);
 
 		Model->popMatrix();
 		prog->unbind();

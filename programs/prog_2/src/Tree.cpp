@@ -12,8 +12,6 @@
 using namespace std;
 using namespace glm;
 
-#define DEG_90 90.0*(M_PI/180.0)
-
 #define LEAF_COUNT 5
 
 Tree::Tree() {}
