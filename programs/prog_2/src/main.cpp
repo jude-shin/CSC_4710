@@ -13,8 +13,10 @@
 #include "Shape.h"
 #include "MatrixStack.h"
 #include "WindowManager.h"
+
 #include "Tree.h"
 #include "Mountain.h"
+#include "Tent.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -49,6 +51,8 @@ public:
 	Tree tree3;
 	// Mountain (Holds a Mountain Mesh)
 	Mountain mountain;
+	// Tent (Holds a Mountain Mesh)
+	Tent tent;
 
 	// Flower Mesh
 	shared_ptr<Shape> flowerMesh;
@@ -203,6 +207,14 @@ public:
 			 mountain = Mountain(TOshapes);
 		}
 
+		// Load Tent 
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TENT_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			 tent = Tent(TOshapes);
+		}
+
 		// //load in another mesh and make the shape(s)
 		// vector<tinyobj::shape_t> TOshapes2;
  		// rc = tinyobj::LoadObj(TOshapes2, objMaterials, errStr, (resourceDirectory + "/bunny.obj").c_str());
@@ -279,6 +291,7 @@ public:
 		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
 		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
 		mountain.render(prog, Model, vec3(3, 1.75, -4), 1);
+		tent.render(prog, Model, vec3(0, 0.25, 0), 0.003);
 
 		Model->popMatrix();
 		prog->unbind();
