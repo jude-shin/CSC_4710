@@ -58,7 +58,7 @@ public:
 
 	// Camera/Scene Updates
 	float gTransX = 0.0f;
-	float gTransY = -2.0f;
+	float gTransY = -3.0f;
 	float gTransZ = -8.0f;
 	float targetRotation = 0;
 
@@ -153,7 +153,7 @@ public:
 
 		// =========================================================================
 
-		// Load Tree 1 as one object
+		// Load Tree 1
 		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
 			cerr << errStr << endl;
 		} 
@@ -163,12 +163,22 @@ public:
 
 		// =========================================================================
 
-		// Load Tree 2 as one object
+		// Load Tree 2
 		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
 			cerr << errStr << endl;
 		} 
 		else {
 			tree2 = Tree(TOshapes);
+		}
+
+		// =========================================================================
+
+		// Load Tree 3 as one object
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			tree3 = Tree(TOshapes);
 		}
 
 		// =========================================================================
@@ -245,9 +255,9 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(0, 0, 0), 0.5);
-
-		// tree2.render(prog, Model, vec3(100, 0, 0), 0.5);
+		tree1.render(prog, Model, vec3(-15, 0, 0), 0.5);
+		tree2.render(prog, Model, vec3(-10, 2, 0), 0.35);
+		tree3.render(prog, Model, vec3(10, -3, 0), 0.75);
 
 		Model->popMatrix();
 		prog->unbind();

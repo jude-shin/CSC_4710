@@ -9,20 +9,23 @@
 
 #define OBJ_FILE "/tree.obj"
 
+using namespace std;
+using namespace glm;
+
 class Tree : public MyObject{
   public:
     Tree();
-    Tree(std::vector<tinyobj::shape_t>& TOshapes);
+    Tree(vector<tinyobj::shape_t>& TOshapes);
 
     void render(
-        std::shared_ptr<Program> prog, 
-        std::shared_ptr<MatrixStack> model,
-        glm::vec3 pos,
+        shared_ptr<Program> prog, 
+        shared_ptr<MatrixStack> model,
+        vec3 translate,
         float scale);
 
   private:
-    std::shared_ptr<Shape> trunkMesh;
-    std::vector<std::shared_ptr<Shape>> leafMeshes;
+    shared_ptr<Shape> trunkMesh;
+    vector<shared_ptr<Shape>> leafMeshes;
     float leafDelta = 0;
     float trunkDelta = 0;
 };

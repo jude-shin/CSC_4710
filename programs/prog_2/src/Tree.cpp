@@ -37,19 +37,20 @@ Tree::Tree(vector<tinyobj::shape_t>& TOshapes)
 void Tree::render(
 		shared_ptr<Program> prog, 
 		shared_ptr<MatrixStack> model,
-		vec3 pos,
+		vec3 translate,
 		float scale) {
 	model->pushMatrix();
 
-	model->scale(vec3(scale, scale, scale));
-	model->translate(pos);
-	model->rotate(trunkDelta, vec3(1, 0, 0));
+	// Global scale rotate and translates
+	model->scale(scale);
+	model->translate(translate);
 
-	// Draw the Trunk
+	// Draw the Trunk (sways in the wind)
+	model->rotate(trunkDelta, vec3(1, 0, 0));
 	setModel(prog, model);
 	trunkMesh->draw(prog);
 	
-	// Draw the Leaves
+	// Draw the Leaves (also swaying in the wind)
 	for (const auto& leaf : leafMeshes) {
 		model->pushMatrix();
 
