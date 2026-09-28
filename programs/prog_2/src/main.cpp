@@ -60,9 +60,12 @@ public:
 
 	// Camera/Scene Updates
 	float gTransX = 0.0f;
-	float gTransY = -3.0f;
-	float gTransZ = -8.0f;
+	float gTransY = -0.4f;
+	float gTransZ = -2.4f;
+
 	float targetRotation = 0;
+
+	float tempDelta = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -94,16 +97,23 @@ public:
 			gTransZ -= 0.2;
 		}
 
+		if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+			if (mods & GLFW_MOD_SHIFT) {
+				tempDelta -= 0.2;
+			}
+			else{
+				tempDelta += 0.2;
+			}
+
+			cout << "delta: " << tempDelta << endl;
+		}
+
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		}
 		if (key == GLFW_KEY_Z && action == GLFW_RELEASE) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
-
-
-		cout << "View [X, Y, Zoom]: [" << gTransX << ", " << gTransY << ", " 
-			<< gTransZ << "]" << endl;
 	}
 
 	void mouseCallback(GLFWwindow *window, int button, int action, int mods)
@@ -175,7 +185,7 @@ public:
 
 		// =========================================================================
 
-		// Load Tree 3 as one object
+		// Load Tree 3
 		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
 			cerr << errStr << endl;
 		} 
@@ -185,14 +195,13 @@ public:
 
 		// =========================================================================
 
-		// Load Tree 3 as one object
+		// Load Mountain
 		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + MOUNTAIN_FILE).c_str())) {
 			cerr << errStr << endl;
 		} 
 		else {
 			 mountain = Mountain(TOshapes);
 		}
-
 
 		// //load in another mesh and make the shape(s)
 		// vector<tinyobj::shape_t> TOshapes2;
@@ -266,10 +275,10 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(-1.5, 0, 0), 0.05);
-		tree2.render(prog, Model, vec3(-1.0, 2, 0), 0.017);
-		tree3.render(prog, Model, vec3(1.0, -3, 0), 0.037);
-		mountain.render(prog, Model, vec3(2.5, 2.5, -5), 1);
+		tree1.render(prog, Model, vec3(-10, 0, 0), 0.05);
+		tree2.render(prog, Model, vec3(-9.9, 0, 2), 0.017);
+		tree3.render(prog, Model, vec3(13, 4, 3), 0.037);
+		mountain.render(prog, Model, vec3(3, 1.75, -4), 1);
 
 		Model->popMatrix();
 		prog->unbind();
