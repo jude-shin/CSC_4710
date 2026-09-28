@@ -61,7 +61,7 @@ void Flower::render(
 	petalMesh->draw(prog);
 	model->popMatrix();
 	
-	// Animate the stem and leaves
+	// Animate the stem and leaves to scale in the x direction
 	model->pushMatrix();
 	model->scale(vec3(stretchDelta, 1, 1));
 	setModel(prog, model);
