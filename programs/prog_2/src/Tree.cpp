@@ -44,7 +44,7 @@ void Tree::render(
 	model->scale(scale);
 
 	// Draw the Trunk (sways in the wind)
-	model->rotate(trunkDelta, vec3(1, 0, 0));
+	model->rotate(trunkDelta, vec3(0, 0, 1));
 	setModel(prog, model);
 	trunkMesh->draw(prog);
 	
@@ -52,7 +52,7 @@ void Tree::render(
 	for (const auto& leaf : leafMeshes) {
 		model->pushMatrix();
 
-		model->translate(vec3(leafDelta*0.3, leafDelta*0.1, leafDelta*0.07));
+		model->translate(vec3(leafDelta*0.07, leafDelta*0.1, leafDelta*0.3));
 		setModel(prog, model);
 		leaf->draw(prog);
 
