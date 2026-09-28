@@ -17,6 +17,7 @@
 #include "Tree.h"
 #include "Mountain.h"
 #include "Tent.h"
+#include "Flower.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -29,6 +30,7 @@
 #define TREE_FILE "/big_tree.obj"
 #define MOUNTAIN_FILE "/mountain.obj"
 #define TENT_FILE "/tent.obj"
+// #define FLOWER_FILE "/daffodil.obj"
 #define FLOWER_FILE "/cartoon_flower.obj"
 
 using namespace std;
@@ -51,12 +53,10 @@ public:
 	Tree tree3;
 	// Mountain (Holds a Mountain Mesh)
 	Mountain mountain;
-	// Tent (Holds a Mountain Mesh)
+	// Tent (Holds a Tent Mesh)
 	Tent tent;
-
-	// Flower Mesh
-	shared_ptr<Shape> flowerMesh;
-
+	// Tent (Holds a Flower Mesh)
+	Flower flower;
 
 	// TODO: remove this if you don't use it
 	// Example data that might be useful when trying to compute bounds on multi-shape
@@ -207,6 +207,8 @@ public:
 			 mountain = Mountain(TOshapes);
 		}
 
+		// =========================================================================
+
 		// Load Tent 
 		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TENT_FILE).c_str())) {
 			cerr << errStr << endl;
@@ -215,21 +217,16 @@ public:
 			 tent = Tent(TOshapes);
 		}
 
-		// //load in another mesh and make the shape(s)
-		// vector<tinyobj::shape_t> TOshapes2;
- 		// rc = tinyobj::LoadObj(TOshapes2, objMaterials, errStr, (resourceDirectory + "/bunny.obj").c_str());
-		// 
-		// if (!rc) {
-		// 	cerr << errStr << endl;
-		// } else {
-		// 	//for now all our shapes will not have textures - change in later labs
-		// 	bunny = make_shared<Shape>(false);
-		// 	bunny->createShape(TOshapes2[0]);
-		// 	bunny->measure();
-		// 	bunny->init();
-		// }
-
 		// =========================================================================
+
+		// Load Flower
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + FLOWER_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			 flower = Flower(TOshapes);
+		}
+
 
 		// TODO: remove this if you don't use it
 		//read out information stored in the shape about its size - something like this...
@@ -291,9 +288,9 @@ public:
 		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
 		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
 		mountain.render(prog, Model);
-
-		// TODO: rotate along the z axis
 		tent.render(prog, Model);
+
+		flower.render(prog, Model, vec3(0, 0, 0), 1);
 
 		Model->popMatrix();
 		prog->unbind();
