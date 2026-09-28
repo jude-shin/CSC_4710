@@ -289,7 +289,7 @@ public:
 		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
 		mountain.render(prog, Model);
 		tent.render(prog, Model);
-		flower.render(prog, Model, vec3(0, 0, 0), 1);
+		flower.render(prog, Model, vec3(0, 0, 0.1), 1);
 
 		Model->popMatrix();
 		prog->unbind();
