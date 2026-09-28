@@ -293,7 +293,7 @@ public:
 		mountain.render(prog, Model);
 
 		// TODO: rotate along the z axis
-		tent.render(prog, Model, vec3(0, 0.25, 0), 0.003);
+		tent.render(prog, Model);
 
 		Model->popMatrix();
 		prog->unbind();

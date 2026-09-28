@@ -24,15 +24,13 @@ Tent::Tent(vector<tinyobj::shape_t>& TOshapes)
 
 void Tent::render(
 		shared_ptr<Program> prog, 
-		shared_ptr<MatrixStack> model,
-		vec3 translate,
-		float scale) {
+		shared_ptr<MatrixStack> model) {
 	model->pushMatrix();
-
 	// Global scale rotate and translates
-	model->translate(translate);
+	model->translate(vec3(0, 0.1, -0.4));
+	model->rotate(0.2, vec3(0, 0, 1));
 	model->rotate(-1.57, vec3(1, 0, 0));
-	model->scale(scale);
+	model->scale(0.003);
 
 	// Draw the Tent
 	setModel(prog, model);
