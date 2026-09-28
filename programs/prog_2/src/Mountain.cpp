@@ -30,8 +30,8 @@ void Mountain::render(
 	model->pushMatrix();
 
 	// Global scale rotate and translates
-	model->scale(scale);
 	model->translate(translate);
+	model->scale(scale);
 
 	// Draw the Mountain
 	setModel(prog, model);
