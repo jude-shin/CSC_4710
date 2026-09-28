@@ -24,14 +24,11 @@ Mountain::Mountain(vector<tinyobj::shape_t>& TOshapes)
 
 void Mountain::render(
 		shared_ptr<Program> prog, 
-		shared_ptr<MatrixStack> model,
-		vec3 translate,
-		float scale) {
+		shared_ptr<MatrixStack> model) {
 	model->pushMatrix();
 
 	// Global scale rotate and translates
-	model->translate(translate);
-	model->scale(scale);
+	model->translate(vec3(3, 1.75, -4));
 
 	// Draw the Mountain
 	setModel(prog, model);

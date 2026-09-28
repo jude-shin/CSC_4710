@@ -290,7 +290,9 @@ public:
 		tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
 		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
 		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
-		mountain.render(prog, Model, vec3(3, 1.75, -4), 1);
+		mountain.render(prog, Model);
+
+		// TODO: rotate along the z axis
 		tent.render(prog, Model, vec3(0, 0.25, 0), 0.003);
 
 		Model->popMatrix();

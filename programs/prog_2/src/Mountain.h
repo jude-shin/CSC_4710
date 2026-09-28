@@ -17,9 +17,7 @@ class Mountain : public MyObject{
 
     void render(
         shared_ptr<Program> prog, 
-        shared_ptr<MatrixStack> model,
-        vec3 translate,
-        float scale);
+        shared_ptr<MatrixStack> model);
 
   private:
     shared_ptr<Shape> mesh;
