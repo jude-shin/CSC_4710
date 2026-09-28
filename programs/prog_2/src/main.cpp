@@ -275,9 +275,9 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(-10, 0, 0), 0.05);
-		tree2.render(prog, Model, vec3(-9.9, 0, 2), 0.017);
-		tree3.render(prog, Model, vec3(13, 4, 3), 0.037);
+		tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
+		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
+		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
 		mountain.render(prog, Model, vec3(3, 1.75, -4), 1);
 
 		Model->popMatrix();

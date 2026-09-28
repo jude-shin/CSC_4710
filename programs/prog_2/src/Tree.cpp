@@ -40,8 +40,8 @@ void Tree::render(
 	model->pushMatrix();
 
 	// Global scale rotate and translates
-	model->scale(scale);
 	model->translate(translate);
+	model->scale(scale);
 
 	// Draw the Trunk (sways in the wind)
 	model->rotate(trunkDelta, vec3(1, 0, 0));
