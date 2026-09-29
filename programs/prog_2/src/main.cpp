@@ -279,7 +279,7 @@ public:
 		mountain.render(prog, Model);
 		tent.render(prog, Model);
 		flower.render(prog, Model, vec3(0, 0, 0.1), 1);
-		cloud1.render(prog, Model, vec3(2, 1.5, 0), 0.25);
+		cloud1.render(prog, Model, vec3(-1.5, 1.5, 0.08), 0.25);
 		cloud2.render(prog, Model, vec3(-1, 1.5, 0), 0.13);
 
 		Model->popMatrix();
