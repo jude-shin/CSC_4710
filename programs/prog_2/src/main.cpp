@@ -30,7 +30,6 @@
 #define TREE_FILE "/big_tree.obj"
 #define MOUNTAIN_FILE "/mountain.obj"
 #define TENT_FILE "/tent.obj"
-// #define FLOWER_FILE "/daffodil.obj"
 #define FLOWER_FILE "/cartoon_flower.obj"
 
 using namespace std;
@@ -39,7 +38,6 @@ using namespace glm;
 class Application : public EventCallbacks {
 
 public:
-
 	WindowManager * windowManager = nullptr;
 
 	// Our shader program
@@ -58,10 +56,6 @@ public:
 	// Tent (Holds a Flower Mesh)
 	Flower flower;
 
-	// TODO: remove this if you don't use it
-	// Example data that might be useful when trying to compute bounds on multi-shape
-	// vec3 gMin;
-
 	// Camera/Scene Updates
 	float gTransX = 0.0f;
 	float gTransY = -0.4f;
@@ -69,28 +63,17 @@ public:
 
 	float targetRotation = 0;
 
-	float tempDelta = 0;
-
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		// TODO: (change a and d to rotate around the flower) Move around in the scene (WASD)
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			// gTransX -= 0.2;
 			targetRotation -= 0.2;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			// gTransX += 0.2;
 			targetRotation += 0.2;
-		}
-		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-			gTransY -= 0.2;
-		}
-		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			gTransY += 0.2;
 		}
 
 		// Zoom in the scene
@@ -99,17 +82,6 @@ public:
 		}
 		if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
 			gTransZ -= 0.2;
-		}
-
-		if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-			if (mods & GLFW_MOD_SHIFT) {
-				tempDelta -= 0.2;
-			}
-			else{
-				tempDelta += 0.2;
-			}
-
-			cout << "delta: " << tempDelta << endl;
 		}
 
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
@@ -226,13 +198,6 @@ public:
 		else {
 			 flower = Flower(TOshapes);
 		}
-
-
-		// TODO: remove this if you don't use it
-		//read out information stored in the shape about its size - something like this...
-		//then do something with that information.....
-		// gMin.x = mountainMesh->min.x;
-		// gMin.y = mountainMesh->min.y;
 	}
 
 	void render() {
@@ -263,8 +228,6 @@ public:
 		// View is global translation along negative z for now
 		View->pushMatrix();
 		View->loadIdentity();
-		// TODO: remove changing the view directly. This should all be done in the 
-		// Model for this project
 
 		// =========================================================================
 
