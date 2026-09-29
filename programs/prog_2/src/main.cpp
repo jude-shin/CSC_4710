@@ -84,14 +84,6 @@ public:
 			targetRotation += 0.2;
 		}
 
-		// Zoom in the scene
-		if (key == GLFW_KEY_EQUAL && mods & GLFW_MOD_SHIFT && action == GLFW_PRESS) {
-			gTransZ += 0.2;
-		}
-		if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
-			gTransZ -= 0.2;
-		}
-
 		if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		}
