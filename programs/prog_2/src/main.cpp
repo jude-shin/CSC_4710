@@ -18,6 +18,7 @@
 #include "Mountain.h"
 #include "Tent.h"
 #include "Flower.h"
+#include "Cloud.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -31,6 +32,7 @@
 #define MOUNTAIN_FILE "/mountain.obj"
 #define TENT_FILE "/tent.obj"
 #define FLOWER_FILE "/cartoon_flower.obj"
+#define CLOUD_FILE "/cloud.obj"
 
 using namespace std;
 using namespace glm;
@@ -53,8 +55,12 @@ public:
 	Mountain mountain;
 	// Tent (Holds a Tent Mesh)
 	Tent tent;
-	// Tent (Holds a Flower Mesh)
+	// Flower (Holds a Flower Mesh)
 	Flower flower;
+	// Cloud1 (Holds a Flower Mesh)
+	Cloud cloud1;
+	// Cloud2 (Holds a Flower Mesh)
+	Cloud cloud2;
 
 	// Camera/Scene Updates
 	float gTransX = 0.0f;
@@ -198,6 +204,26 @@ public:
 		else {
 			 flower = Flower(TOshapes);
 		}
+
+		// =========================================================================
+
+		// Load Cloud 1
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + CLOUD_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			 cloud1 = Cloud(TOshapes);
+		}
+
+		// =========================================================================
+
+		// Load Cloud 2
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + CLOUD_FILE).c_str())) {
+			cerr << errStr << endl;
+		} 
+		else {
+			 cloud2 = Cloud(TOshapes);
+		}
 	}
 
 	void render() {
@@ -247,12 +273,15 @@ public:
 		Model->rotate(targetRotation, vec3(0, 1, 0));
 	
 		// Scene rendering
-		tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
-		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
-		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
-		mountain.render(prog, Model);
-		tent.render(prog, Model);
-		flower.render(prog, Model, vec3(0, 0, 0.1), 1);
+		// tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
+		// tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
+		// tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
+		// mountain.render(prog, Model);
+		// tent.render(prog, Model);
+		// flower.render(prog, Model, vec3(0, 0, 0.1), 1);
+
+		cloud1.render(prog, Model, vec3(0, 0, 0.1), 1);
+		cloud2.render(prog, Model, vec3(0, 0, 0.1), 1);
 
 		Model->popMatrix();
 		prog->unbind();

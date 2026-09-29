@@ -26,6 +26,7 @@ void Tent::render(
 		shared_ptr<Program> prog, 
 		shared_ptr<MatrixStack> model) {
 	model->pushMatrix();
+
 	// Global scale rotate and translates
 	model->translate(vec3(0, 0.1, -0.4));
 	model->rotate(0.2, vec3(0, 0, 1));
