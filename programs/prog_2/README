@@ -2,13 +2,36 @@ Jude Shin
 
 Notes for Grading: All steps of this project were completed.
 
-Reflections: The scene is supposed to be Yosemite, CA surrounding a flower that
-opens and closes it's petals. I grew up going to Yosemite for vacation, and I 
-love nature and the outdoors. The flower mesh that was provided for this 
-project was the multi-shaped one. The mountain (Half Dome) in the background is 
-just one large static mesh. When I was looking around, there were a lot of 
-meshes for video games, and meshes for applications that may need to display 
-some geographic data (like Yosemite valley). I also saw a lot of STL files that 
-are used for 3D printing, but there were converters online that could change it 
-from one format to the other. 
+The setting that I chose for my scene is a camping scene. I like camping and 
+nature; I also like to rock climb, so a lot of the times I would go camping in 
+very mountainous regions. Some of my favorite places to climb are Yosemite, CA, 
+Mammoth, CA, and Kings Canyon, CA.
+
+You will see a mountain environment (one mesh), three trees (two meshes each; 
+branch and leaf clusters), two dark clouds (20+ "fluff" meshes), one tent 
+(one mesh), and one dancing flower (three meshes).
+
+The main animation is in the rotation and scaling of the dancing flower. The 
+petals oscillate around the center of the petal, and the leaves/stem scale 
+thin and thick. The trees are also animated more subtly: the branches rotate
+left and right slightly, and each one of the leaf clusters on the trees 
+translate from their original positions by a different constant delta.
+
+The hardest part of this assignment was getting the petals centered so the 
+rotation would look "normal". I had to translate and rotate it so that the 
+petals were in line with one of the axis (at 0, 0, 0), and only then could I 
+rotate it based on an animation delta. After that, then I could reverse the 
+steps to put the petals back into the right location in the original object. 
+Scaling was done on all the parts of the flower (not just one).
+
+The two dark clouds use the solid color shader, whereas the rest of the objects 
+use the rainbow colors to show depth and detail.
+
+When I was searching for the obj file, all of the good ones were not free. I 
+think a lot of them were also used as assets for game development, so I saw a 
+lot of "themed packs" where it could include everything from a rock to a tree 
+and a cloud. It was the gaming demographic and the 3d printing demographic that 
+I seemed to encounter the most. Not a lot of real world representations or 
+moc-ups. I tried to find Yosemite Valley, but all the ones that were free 
+didn't look right (they were also meant to be 3D printed).
 
