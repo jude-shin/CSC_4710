@@ -42,8 +42,10 @@ class Application : public EventCallbacks {
 public:
 	WindowManager * windowManager = nullptr;
 
-	// Our shader program
+	// Rainbow shader
 	std::shared_ptr<Program> prog;
+	// Solid color shader
+	std::shared_ptr<Program> solidColorProg;
 
 	// Tree 1 (Holds a Tree Mesh)
 	Tree tree1;
@@ -126,13 +128,27 @@ public:
 		// Initialize the GLSL program.
 		prog = make_shared<Program>();
 		prog->setVerbose(true);
-		prog->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/simple_frag.glsl");
+		prog->setShaderNames(resourceDirectory + "/simple_vert.glsl", 
+				resourceDirectory + "/simple_frag.glsl");
 		prog->init();
 		prog->addUniform("P");
 		prog->addUniform("V");
 		prog->addUniform("M");
 		prog->addAttribute("vertPos");
 		prog->addAttribute("vertNor");
+
+		// Initialize the GLSL program.
+		solidColorProg = make_shared<Program>();
+		solidColorProg->setVerbose(true);
+		solidColorProg->setShaderNames(resourceDirectory + "/simple_vert.glsl", 
+				resourceDirectory + "/solid_frag.glsl");
+		solidColorProg->init();
+		solidColorProg->addUniform("P");
+		solidColorProg->addUniform("V");
+		solidColorProg->addUniform("M");
+		solidColorProg->addUniform("solidColor");
+		solidColorProg->addAttribute("vertPos");
+		solidColorProg->addAttribute("vertNor");
 	}
 
 	void initGeom(const std::string& resourceDirectory) {
@@ -257,39 +273,52 @@ public:
 
 		// =========================================================================
 
-		// Draw mountain in the background 
-		prog->bind();
-		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-
-
-		// Draw hierarchical mesh using matrix stack
-		Model->pushMatrix();
-
 		// Global Scene Translation and Scale
+		Model->pushMatrix();
 		Model->loadIdentity();
 		Model->translate(vec3(gTransX, gTransY, gTransZ));
 		Model->scale(vec3(0.7, 0.7, 0.7));
 		Model->rotate(targetRotation, vec3(0, 1, 0));
-	
-		// Scene rendering
+
+		// COLORFUL SHADER
+		prog->bind();
+		glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, 
+				value_ptr(Projection->topMatrix()));
+		glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, 
+				value_ptr(View->topMatrix()));
+
+		// Colorful Scene Rendering
 		tree1.render(prog, Model, vec3(-1, 0, 0), 0.05);
 		tree2.render(prog, Model, vec3(-0.75, 0, 0.25), 0.017);
 		tree3.render(prog, Model, vec3(1, 0.25, 0), 0.037);
 		mountain.render(prog, Model);
 		tent.render(prog, Model);
 		flower.render(prog, Model, vec3(0, 0, 0.1), 1);
-		cloud1.render(prog, Model, vec3(-1.5, 1.5, 0.08), 0.25);
-		cloud2.render(prog, Model, vec3(-1, 1.5, 0), 0.13);
 
-		Model->popMatrix();
 		prog->unbind();
+
+		// =========================================================================
+
+		// SOLID SHADER
+		solidColorProg->bind();
+		glUniformMatrix4fv(solidColorProg->getUniform("P"), 1, GL_FALSE, 
+				value_ptr(Projection->topMatrix()));
+		glUniformMatrix4fv(solidColorProg->getUniform("V"), 1, GL_FALSE, 
+				value_ptr(View->topMatrix()));
+		glUniform3f(solidColorProg->getUniform("solidColor"), 0.1, 0.2, 0.5);
+
+		// Solid Scene Rendering
+		cloud1.render(solidColorProg, Model, vec3(-1.5, 1.5, 0.08), 0.25);
+		cloud2.render(solidColorProg, Model, vec3(-1, 1.5, 0), 0.13);
+
+		solidColorProg->unbind();
 
 		// =========================================================================
 
 		// Pop matrix stacks.
 		Projection->popMatrix();
 		View->popMatrix();
+		Model->popMatrix();
 	}
 };
 
