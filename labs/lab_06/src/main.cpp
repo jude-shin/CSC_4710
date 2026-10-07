@@ -132,6 +132,8 @@ public:
 		prog->addUniform("M");
 		prog->addUniform("MatAmb");
 		prog->addUniform("MatDif");
+		prog->addUniform("MatShine");
+		prog->addUniform("MatSpec");
 		prog->addUniform("lightPos");
 		prog->addAttribute("vertPos");
 		prog->addAttribute("vertNor");
@@ -289,20 +291,20 @@ public:
     		case 0: //
     			glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
     			glUniform3f(curS->getUniform("MatDif"), 0.96, 0.46, 0.95);
-    			//glUniform3f(curS->getUniform("MatSpec"), 0.45, 0.23, 0.45);
-    			//glUniform1f(curS->getUniform("MatShine"), 120.0);
+    			glUniform3f(curS->getUniform("MatSpec"), 0.45, 0.23, 0.45);
+    			glUniform1f(curS->getUniform("MatShine"), 120.0);
     		break;
     		case 1: // 
     			glUniform3f(curS->getUniform("MatAmb"), 0.063, 0.038, 0.1);
     			glUniform3f(curS->getUniform("MatDif"), 0.63, 0.38, 1.0);
-    			//glUniform3f(curS->getUniform("MatSpec"), 0.3, 0.2, 0.5);
-    			//glUniform1f(curS->getUniform("MatShine"), 4.0);
+    			glUniform3f(curS->getUniform("MatSpec"), 0.3, 0.2, 0.5);
+    			glUniform1f(curS->getUniform("MatShine"), 4.0);
     		break;
     		case 2: //
     			glUniform3f(curS->getUniform("MatAmb"), 0.004, 0.05, 0.09);
     			glUniform3f(curS->getUniform("MatDif"), 0.04, 0.5, 0.9);
-    			//glUniform3f(curS->getUniform("MatSpec"), 0.02, 0.25, 0.45);
-    			//glUniform1f(curS->getUniform("MatShine"), 27.9);
+    			glUniform3f(curS->getUniform("MatSpec"), 0.02, 0.25, 0.45);
+    			glUniform1f(curS->getUniform("MatShine"), 27.9);
     		break;
   		}
 	}
