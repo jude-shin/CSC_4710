@@ -52,6 +52,9 @@ public:
 	shared_ptr<Texture> texture0;
 	shared_ptr<Texture> texture1;	
 
+	shared_ptr<Texture> textureWorld;
+	shared_ptr<Texture> textureWood;	
+
 	//global data (larger program should be encapsulated)
 	vec3 gMin;
 	float gRot = 0;
@@ -157,16 +160,22 @@ public:
 
 		//read in a load the texture
 		texture0 = make_shared<Texture>();
-  		texture0->setFilename(resourceDirectory + "/Caillebotte.jpg");
-  		texture0->init();
-  		texture0->setUnit(0);
-  		texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		texture0->setFilename(resourceDirectory + "/Caillebotte.jpg");
+		texture0->init();
+		texture0->setUnit(0);
+		texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-  		texture1 = make_shared<Texture>();
-  		texture1->setFilename(resourceDirectory + "/cartoonSky.png");
-  		texture1->init();
-  		texture1->setUnit(1);
-  		texture1->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		texture1 = make_shared<Texture>();
+		texture1->setFilename(resourceDirectory + "/cartoonSky.png");
+		texture1->init();
+		texture1->setUnit(1);
+		texture1->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		textureWorld = make_shared<Texture>();
+		textureWorld->setFilename(resourceDirectory + "/world.jpg");
+		textureWorld->init();
+		textureWorld->setUnit(0);
+		textureWorld->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	}
 
@@ -476,7 +485,8 @@ public:
 
 		//draw the waving HM
 		//SetMaterial(texProg, 1);
-		texture1->bind(texProg->getUniform("Texture0"));
+		// texture1->bind(texProg->getUniform("Texture0"));
+		textureWorld->bind(texProg->getUniform("Texture0"));
 		drawHierModel(Model, texProg);
 
 		//draw big background sphere
