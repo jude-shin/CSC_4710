@@ -152,7 +152,12 @@ public:
 		texProg->addUniform("M");
 		texProg->addUniform("flip");
 		texProg->addUniform("Texture0");
+
+		// texProg->addUniform("MatAmb");
+		// texProg->addUniform("MatDif");
+		// texProg->addUniform("MatSpec");
 		texProg->addUniform("MatShine");
+
 		texProg->addUniform("lightPos");
 		texProg->addAttribute("vertPos");
 		texProg->addAttribute("vertNor");
@@ -176,6 +181,12 @@ public:
 		textureWorld->init();
 		textureWorld->setUnit(0);
 		textureWorld->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		textureWood = make_shared<Texture>();
+		textureWood->setFilename(resourceDirectory + "/cartoonWood.jpg");
+		textureWood->init();
+		textureWood->setUnit(0);
+		textureWood->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	}
 
@@ -463,7 +474,7 @@ public:
 		glUniform3f(texProg->getUniform("lightPos"), 2.0+lightTrans, 2.0, 2.9);
 		glUniform1f(texProg->getUniform("MatShine"), 27.9);
 		glUniform1i(texProg->getUniform("flip"), 1);
-		texture1->bind(texProg->getUniform("Texture0"));
+		textureWood->bind(texProg->getUniform("Texture0"));
 		// draw the array of bunnies
 		Model->pushMatrix();
 
@@ -484,14 +495,13 @@ public:
 		Model->popMatrix();
 
 		//draw the waving HM
-		//SetMaterial(texProg, 1);
-		// texture1->bind(texProg->getUniform("Texture0"));
+		// SetMaterial(texProg, 1);
 		textureWorld->bind(texProg->getUniform("Texture0"));
 		drawHierModel(Model, texProg);
 
 		//draw big background sphere
 		glUniform1i(texProg->getUniform("flip"), 0);
-		texture1->bind(texProg->getUniform("Texture0"));
+		texture1->bind(texProg->getUniform("Texture0")); // TODO: change too grass or something
 		Model->pushMatrix();
 			Model->loadIdentity();
 			Model->scale(vec3(8.0));
