@@ -308,8 +308,6 @@ class Application : public EventCallbacks
 
 		// Helper function to pass material data to the GPU
 		void SetMaterial(shared_ptr<Program> curS, int i) {
-			// TODO: switch based on the material toggle?
-			// TODO: set materialToggle to be an int?
 			switch (i) {
 				case 0: //
 					glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
@@ -344,26 +342,6 @@ class Application : public EventCallbacks
 
 		void setModel(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>M) {
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
-		}
-
-		// Draw waving hierarchical model
-		// TODO: what the heck is this?
-		// Do I even need this?
-		// This just draws a sphereObject
-		void drawHierModel(shared_ptr<MatrixStack> Model) {
-			// draw hierarchical mesh - replace with your code if desired
-			Model->pushMatrix();
-			Model->loadIdentity();
-			Model->translate(vec3(gTrans, 0, 6));
-
-			//draw the torso with these transforms
-			Model->pushMatrix();
-			Model->scale(vec3(1.15, 1.35, 1.0));
-			setModel(prog, Model);
-			sphereObject->draw(prog);
-			Model->popMatrix();
-
-			Model->popMatrix();
 		}
 
 		void render() {
@@ -408,7 +386,8 @@ class Application : public EventCallbacks
 					Model->pushMatrix();
 					Model->translate(vec3(off+sp*i, -1, off+sp*j));
 					Model->scale(vec3(0.85, 0.85, 0.85));
-					SetMaterial(prog, (i+j)%3);
+					// SetMaterial(prog, (i+j)%3);
+					SetMaterial(prog, 3);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					bunnyObject->draw(prog);
 					Model->popMatrix();
@@ -417,16 +396,23 @@ class Application : public EventCallbacks
 
 			Model->popMatrix();
 
-			// -- Draw object WITHOUT normals ------------------------------------------
+			// -- Draw object WITHOUT normals ----------------------------------------
 
-			// TODO: 
-			// Model->pushMatrix();
-			// Model->popMatrix();
 
-			// Draw the waving HM (TODO: remove this?)
-			// What is this?
-			SetMaterial(prog, 1);
-			drawHierModel(Model);
+			// -- Draw the sphere ----------------------------------------------------
+			Model->pushMatrix();
+
+			if (materialToggle) {
+				SetMaterial(prog, 1);
+			}
+			else {
+				SetMaterial(prog, 2);
+			}
+
+			Model->scale(vec3(1.15, 1.35, 1.0));
+			setModel(prog, Model);
+			sphereObject->draw(prog);
+			Model->popMatrix();
 
 			prog->unbind();
 			// =========================================================================
