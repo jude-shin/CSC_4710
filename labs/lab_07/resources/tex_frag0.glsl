@@ -2,6 +2,7 @@
 uniform sampler2D Texture0;
 
 uniform float MatShine;
+uniform int flip;
 
 in vec3 fragNor;
 in vec3 lightDir;
@@ -20,11 +21,18 @@ void main() {
 	// }
 
 	vec3 normal = normalize(fragNor);
+
+	// Since the normals of the world are away, then we have to flip those normals
+	if (flip == 0) {
+		normal = -normal;
+	}
+
 	vec3 light = normalize(lightDir);
 	float dC = max(0, dot(normal, light));
 
-	// Outcolor = vec4(texColor0.rgb * dC, texColor0.a);
-	Outcolor = texColor0;
+
+	Outcolor = vec4(texColor0.rgb * dC, texColor0.a);
+	// Outcolor = texColor0;
 
 	// To set the outcolor as the texture coordinate (for debugging)
 	// Outcolor = vec4(vTexCoord.s, vTexCoord.t, 0, 1);

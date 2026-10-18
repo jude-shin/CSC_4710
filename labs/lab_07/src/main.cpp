@@ -495,13 +495,12 @@ public:
 		Model->popMatrix();
 
 		//draw the waving HM
-		// SetMaterial(texProg, 1);
 		textureWorld->bind(texProg->getUniform("Texture0"));
 		drawHierModel(Model, texProg);
 
 		//draw big background sphere
 		glUniform1i(texProg->getUniform("flip"), 0);
-		texture1->bind(texProg->getUniform("Texture0")); // TODO: change too grass or something
+		texture1->bind(texProg->getUniform("Texture0"));
 		Model->pushMatrix();
 			Model->loadIdentity();
 			Model->scale(vec3(8.0));
