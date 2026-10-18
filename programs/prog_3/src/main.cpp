@@ -38,7 +38,7 @@ class Application : public EventCallbacks
 		std::shared_ptr<Program> texProg;	// Texture shader program
 
 		// Loaded Geometries
-		shared_ptr<Shape> sphereObject; // TODO: where is this?
+		shared_ptr<Shape> sphereObject;
 		shared_ptr<Shape> bunnyObject; 
 
 		// Global data for ground plane
@@ -196,12 +196,6 @@ class Application : public EventCallbacks
 			TOshapes.clear();
 			objMaterials.clear();
 			errStr = "";
-
-			// // TODO: remove this?
-			// // Read out information stored in the shape about its size - something like this...
-			// // Then do something with that information.....
-			// gMin.x = sphereObject->min.x;
-			// gMin.y = sphereObject->min.y;
 
 			// -- Load Bunny Mesh ------------------------------------------------------
 			rc = tinyobj::LoadObj(
