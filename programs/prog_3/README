@@ -2,15 +2,16 @@ Jude Shin (jshin53@calpoly.edu)
 
 All parts of this program were completed.
 
-The base code for lab_06 was used.
+The base code for lab_06 was used. Basic Blinn-Phong lighting was implemented
+in for all meshes in my scene.
 
 Keyboard controls implemented:
 "q" -> a light to the left
 "e" -> a light to the right
 "a" -> rotates the view of the camera to look more left
 "d" -> rotates the view of the camera to look more right 
+"w" -> translate the camera up
 "s" -> translate the camera down 
-"f" -> translate the camera up
 
 TODO
 Demonstration of handling a mesh with no normals is included in the default 
