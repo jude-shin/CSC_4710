@@ -386,8 +386,7 @@ class Application : public EventCallbacks
 					Model->pushMatrix();
 					Model->translate(vec3(off+sp*i, -1, off+sp*j));
 					Model->scale(vec3(0.85, 0.85, 0.85));
-					// SetMaterial(prog, (i+j)%3);
-					SetMaterial(prog, 3);
+					SetMaterial(prog, 0);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					bunnyObject->draw(prog);
 					Model->popMatrix();
@@ -401,7 +400,6 @@ class Application : public EventCallbacks
 
 			// -- Draw the sphere ----------------------------------------------------
 			Model->pushMatrix();
-
 			if (materialToggle) {
 				SetMaterial(prog, 1);
 			}
@@ -409,6 +407,7 @@ class Application : public EventCallbacks
 				SetMaterial(prog, 2);
 			}
 
+			Model->translate(vec3(gTrans, 0, 6));
 			Model->scale(vec3(1.15, 1.35, 1.0));
 			setModel(prog, Model);
 			sphereObject->draw(prog);
