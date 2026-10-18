@@ -14,8 +14,7 @@ in vec3 lightDir;
 //position of the vertex in camera space
 in vec3 EPos;
 
-void main()
-{
+void main() {
 	//you will need to work with these for lighting
 	vec3 normal = normalize(fragNor);
 	vec3 light = normalize(lightDir);

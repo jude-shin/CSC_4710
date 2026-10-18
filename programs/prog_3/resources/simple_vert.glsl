@@ -7,16 +7,21 @@ uniform mat4 M;
 
 uniform vec3 lightPos;
 
-//keep these and set them correctly
+// Keep these and set them correctly
 out vec3 fragNor;
 out vec3 lightDir;
 out vec3 EPos;
 
-void main()
-{
+void main() {
 	gl_Position = P * V * M * vertPos;
-	//update these as needed
+
+	// Update these as needed
+
+	// TODO: if there is no verNor, then we need to interpolate the values from 
+	// all other verticies?
+
 	fragNor = (M * vec4(vertNor, 0.0)).xyz; 
 	lightDir = lightPos - (M*vertPos).xyz;
 	EPos = (M*vertPos).xyz;
+
 }
