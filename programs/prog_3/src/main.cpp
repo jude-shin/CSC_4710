@@ -78,10 +78,10 @@ class Application : public EventCallbacks
 			}
 
 			// Update camera height
-			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
 				gCamH  += 0.25;
 			}
-			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 				gCamH  -= 0.25;
 			}
 
