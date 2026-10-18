@@ -1,0 +1,18 @@
+Jude Shin (jshin53@calpoly.edu)
+
+All parts of this program were completed.
+
+The base code for lab_06 was used.
+
+Keyboard controls implemented:
+"q" -> a light to the left
+"e" -> a light to the right
+"a" -> rotates the view of the camera to look more left
+"d" -> rotates the view of the camera to look more right 
+"s" -> translate the camera down 
+"f" -> translate the camera up
+
+TODO
+Demonstration of handling a mesh with no normals is included in the default 
+execution. The mesh with no normals is <description> from <OBJ mesh name>, 
+located in the scene at <location>.
