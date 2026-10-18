@@ -26,6 +26,13 @@ using namespace glm;
 
 #define BUNNY_OBJ "/bunny.obj"
 #define SPHERE_OBJ "/sphere.obj"
+#define DUMMY_OBJ "/dummy.obj"
+#define GROUND_TEX "/flower_grass.obj"
+
+#define NUM_DUMMIES_X 3
+#define NUM_DUMMIES_Y 4
+#define NUM_BUNNIES_X 3
+#define NUM_BUNNIES_Y 3
 
 class Application : public EventCallbacks
 {
@@ -40,6 +47,7 @@ class Application : public EventCallbacks
 		// Loaded Geometries
 		shared_ptr<Shape> sphereObject;
 		shared_ptr<Shape> bunnyObject; 
+		vector<shared_ptr<Shape>> dummyObject; 
 
 		// Global data for ground plane
 		// Direct load constant defined CPU data to GPU (not obj)
@@ -165,7 +173,7 @@ class Application : public EventCallbacks
 
 			//read in a load the texture
 			texture0 = make_shared<Texture>();
-			texture0->setFilename(resourceDirectory + "/flowers.jpg");
+			texture0->setFilename(resourceDirectory + GROUND_TEX);
 			texture0->init();
 			texture0->setUnit(0);
 			texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -192,12 +200,13 @@ class Application : public EventCallbacks
 				sphereObject->measure();
 				sphereObject->init();
 			}
-
+	
+			// Clean up shapes for the next object setup
 			TOshapes.clear();
 			objMaterials.clear();
 			errStr = "";
 
-			// -- Load Bunny Mesh ------------------------------------------------------
+			// -- Load Bunny Mesh ----------------------------------------------------
 			rc = tinyobj::LoadObj(
 					TOshapes,
 					objMaterials,
@@ -213,6 +222,37 @@ class Application : public EventCallbacks
 				bunnyObject->measure();
 				bunnyObject->init();
 			}
+
+			// Clean up shapes for the next object setup
+			TOshapes.clear();
+			objMaterials.clear();
+			errStr = "";
+
+			// -- Load Dummy Mesh ----------------------------------------------------
+			rc = tinyobj::LoadObj(
+					TOshapes,
+					objMaterials,
+					errStr, 
+					(resourceDirectory + DUMMY_OBJ).c_str());
+
+			if (!rc) {
+				cerr << errStr << endl;
+			} 
+			else {
+				for (int i = 0; i < TOshapes.size(); ++i) {
+					auto obj = make_shared<Shape>();
+					obj->createShape(TOshapes[i]);
+					obj->measure();
+					obj->init();
+
+					dummyObject.push_back(obj);
+				}
+			}
+
+			// Clean up shapes for the next object setup
+			TOshapes.clear();
+			objMaterials.clear();
+			errStr = "";
 
 			// -- Load Ground --------------------------------------------------------
 			initGround();
@@ -363,52 +403,22 @@ class Application : public EventCallbacks
 			View->translate(vec3(0, gCamH, 0)); // Move the camera up and down
 			View->rotate(gRot, vec3(0, 1, 0)); // Rotate the camera left and right
 
-			// == LIGHTING GLSL PROGRAM ================================================
+			// == LIGHTING GLSL PROGRAM ==============================================
 			prog->bind();
 
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniform3f(prog->getUniform("lightPos"), 2.0, 2.0, 2.9);
 
-			// -- Draw Bunnies ---------------------------------------------------------
-			Model->pushMatrix();
-
-			float sp = 3.0;
-			float off = -3.5;
-			for (int i =0; i < 3; i++) {
-				for (int j=0; j < 3; j++) {
-					Model->pushMatrix();
-					Model->translate(vec3(off+sp*i, -1, off+sp*j));
-					Model->scale(vec3(0.85, 0.85, 0.85));
-					SetMaterial(prog, 0);
-					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
-					bunnyObject->draw(prog);
-					Model->popMatrix();
-				}
-			}
-
-			Model->popMatrix();
+			// -- Draw objects WITH Normals ------------------------------------------
+			renderBunnies(Model);
+			renderSphere(Model);
+			renderDummies(Model);
 
 			// -- Draw object WITHOUT normals ----------------------------------------
-
-
-			// -- Draw the sphere ----------------------------------------------------
-			Model->pushMatrix();
-			if (materialToggle) {
-				SetMaterial(prog, 1);
-			}
-			else {
-				SetMaterial(prog, 2);
-			}
-
-			Model->translate(vec3(gTrans, 0, 6));
-			Model->scale(vec3(1.15, 1.35, 1.0));
-			setModel(prog, Model);
-			sphereObject->draw(prog);
-			Model->popMatrix();
+			// TODO
 
 			prog->unbind();
-			// =========================================================================
 
 			// == TEXTURE GLSL PROGRAM =================================================
 			texProg->bind();
@@ -430,7 +440,65 @@ class Application : public EventCallbacks
 			// Pop matrix stacks.
 			Projection->popMatrix();
 			View->popMatrix();
+		}
 
+		void renderBunnies(std::shared_ptr<MatrixStack>Model) {
+			Model->pushMatrix();
+
+			float sp = 3.0;
+			float off = -3.5;
+			for (int i =0; i < NUM_BUNNIES_X; i++) {
+				for (int j=0; j < NUM_BUNNIES_Y; j++) {
+					Model->pushMatrix();
+					Model->translate(vec3(off+sp*i, -1, off+sp*j));
+					Model->scale(vec3(0.85, 0.85, 0.85));
+					SetMaterial(prog, 0);
+					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+					bunnyObject->draw(prog);
+					Model->popMatrix();
+				}
+			}
+
+			Model->popMatrix();
+		}
+
+		void renderDummies(std::shared_ptr<MatrixStack>Model) {
+			Model->pushMatrix();
+
+			float sp = 1.5;
+			float off = -2.7;
+			for (int i =0; i < NUM_DUMMIES_X; i++) {
+				for (int j=0; j < NUM_DUMMIES_Y; j++) {
+					Model->pushMatrix();
+					Model->translate(vec3(off+sp*i, -1, off+sp*j));
+					Model->scale(vec3(0.01, 0.01, 0.01));
+					Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
+					SetMaterial(prog, 0);
+					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+					for (auto& o : dummyObject) { o->draw(prog); }
+					Model->popMatrix();
+				}
+			}
+
+			Model->popMatrix();
+		}
+
+		void renderSphere(std::shared_ptr<MatrixStack>Model) {
+			Model->pushMatrix();
+
+			if (materialToggle) {
+				SetMaterial(prog, 1);
+			}
+			else {
+				SetMaterial(prog, 2);
+			}
+
+			Model->translate(vec3(gTrans, 0, 6));
+			Model->scale(vec3(1.15, 1.35, 1.0));
+			setModel(prog, Model);
+			sphereObject->draw(prog);
+
+			Model->popMatrix();
 		}
 };
 
