@@ -27,7 +27,7 @@ using namespace glm;
 #define BUNNY_OBJ "/bunny.obj"
 #define SPHERE_OBJ "/sphere.obj"
 #define DUMMY_OBJ "/dummy.obj"
-#define GROUND_TEX "/flower_grass.obj"
+#define GROUND_TEX "/flower_grass.jpg"
 
 #define NUM_DUMMIES_X 3
 #define NUM_DUMMIES_Y 4
