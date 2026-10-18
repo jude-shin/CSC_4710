@@ -447,11 +447,12 @@ class Application : public EventCallbacks
 
 			float sp = 3.0;
 			float off = -3.5;
-			for (int i =0; i < NUM_BUNNIES_X; i++) {
+			for (int i=0; i < NUM_BUNNIES_X; i++) {
 				for (int j=0; j < NUM_BUNNIES_Y; j++) {
 					Model->pushMatrix();
 					Model->translate(vec3(off+sp*i, -1, off+sp*j));
 					Model->scale(vec3(0.85, 0.85, 0.85));
+					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
 					SetMaterial(prog, 0);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					bunnyObject->draw(prog);
@@ -467,11 +468,12 @@ class Application : public EventCallbacks
 
 			float sp = 1.5;
 			float off = -2.7;
-			for (int i =0; i < NUM_DUMMIES_X; i++) {
+			for (int i=0; i < NUM_DUMMIES_X; i++) {
 				for (int j=0; j < NUM_DUMMIES_Y; j++) {
 					Model->pushMatrix();
 					Model->translate(vec3(off+sp*i, -1, off+sp*j));
 					Model->scale(vec3(0.01, 0.01, 0.01));
+					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
 					Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
 					SetMaterial(prog, 0);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
