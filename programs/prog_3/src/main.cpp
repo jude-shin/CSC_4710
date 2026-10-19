@@ -95,10 +95,10 @@ class Application : public EventCallbacks
 
 			// Update one of the light's position along an axis
 			if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-				lightPos1Trans += 0.25;
+				lightPos1Trans -= 0.25;
 			}
 			if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-				lightPos1Trans -= 0.25;
+				lightPos1Trans += 0.25;
 			}
 
 			// Show/Hide wireframe of all objects
@@ -153,7 +153,9 @@ class Application : public EventCallbacks
 			prog->addUniform("MatShine");
 			prog->addUniform("MatSpec");
 			prog->addUniform("lightPos0"); // Static light source {-2, 2, 2} color {1, 1, 1}
+			prog->addUniform("lightColor0");
 			prog->addUniform("lightPos1"); // Moving with "q" and "e" color {1, 1, 1}
+			prog->addUniform("lightColor1");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
 
@@ -408,7 +410,9 @@ class Application : public EventCallbacks
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
+			glUniform3f(prog->getUniform("lightColor0"), 1.0, 1.0, 1.0);
 			glUniform3f(prog->getUniform("lightPos1"), lightPos1Trans, 4.0, 3.0);
+			glUniform3f(prog->getUniform("lightColor1"), 0.992, 0.855, 0.051);
 
 			// -- Draw objects WITH Normals ------------------------------------------
 			renderBunnies(Model);
