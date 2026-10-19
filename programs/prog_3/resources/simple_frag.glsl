@@ -19,20 +19,26 @@ in vec3 lightDir1;
 // Position of the vertex in camera space
 in vec3 EPos;
 
-void main() {
-	vec3 normal = normalize(fragNor);
-	vec3 light0 = normalize(lightDir0); // TODO: USE THIS LIGHT TOO! (for testing I am just using the moving light)
-	vec3 light1 = normalize(lightDir1);
-	
+vec3 blinnPhong(vec3 normal, vec3 light) {
 	// Diffuse Component
-	float dC = max(0.0, dot(normal, light1));
+	float dC = max(0.0, dot(normal, light));
 
 	// Blinn–Phong specular
-	vec3 halfway = normalize(light1 + normalize(-EPos));
+	vec3 halfway = normalize(light + normalize(-EPos));
 	float ssC = pow(max(dot(normal, halfway), 0.0), MatShine);
 
 	// TODO: have a vec3 input that represents all three of the intensities?
 	// OR just pass in one scalar for every one of the intensities 
 	// (ambient, diffuse, specular)
-	color = vec4(MatAmb + dC*MatDif + ssC*MatSpec, 1.0);
+	return dC*MatDif + ssC*MatSpec;
+}
+
+void main() {
+	vec3 normal = normalize(fragNor);
+	vec3 light0 = normalize(lightDir0);
+	vec3 light1 = normalize(lightDir1);
+
+	vec3 bpl = MatAmb + blinnPhong(normal, light0) + blinnPhong(normal, light1);
+	
+	color = vec4(bpl, 1.0);
 }

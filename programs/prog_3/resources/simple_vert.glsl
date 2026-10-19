@@ -17,8 +17,6 @@ out vec3 EPos;
 void main() {
 	gl_Position = P * V * M * vertPos;
 
-	// Update these as needed
-
 	// TODO: if there is no verNor, then we need to interpolate the values from 
 	// all other verticies?
 
@@ -26,5 +24,4 @@ void main() {
 	lightDir0 = lightPos0 - (M*vertPos).xyz;
 	lightDir1 = lightPos1 - (M*vertPos).xyz;
 	EPos = (M*vertPos).xyz;
-
 }

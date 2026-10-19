@@ -408,7 +408,7 @@ class Application : public EventCallbacks
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
-			glUniform3f(prog->getUniform("lightPos1"), -2.0, lightPos1Trans, 3.0);
+			glUniform3f(prog->getUniform("lightPos1"), lightPos1Trans, 4.0, 3.0);
 
 			// -- Draw objects WITH Normals ------------------------------------------
 			renderBunnies(Model);
