@@ -27,6 +27,7 @@ using namespace glm;
 #define BUNNY_OBJ "/bunny.obj"
 #define SPHERE_OBJ "/sphere.obj"
 #define DUMMY_OBJ "/dummy.obj"
+#define NO_NORMAL "/bunnyNoNorm.obj"
 #define GROUND_TEX "/flower_grass.jpg"
 
 #define NUM_DUMMIES_X 3
@@ -34,11 +35,9 @@ using namespace glm;
 #define NUM_BUNNIES_X 3
 #define NUM_BUNNIES_Y 3
 
-class Application : public EventCallbacks
-{
+class Application : public EventCallbacks {
 
 	public:
-
 		WindowManager * windowManager = nullptr;
 
 		std::shared_ptr<Program> prog;		// Blinn-Phong shader program
@@ -48,6 +47,7 @@ class Application : public EventCallbacks
 		shared_ptr<Shape> sphereObject;
 		shared_ptr<Shape> bunnyObject; 
 		vector<shared_ptr<Shape>> dummyObject; 
+		shared_ptr<Shape> noNormalObject; 
 
 		// Global data for ground plane
 		// Direct load constant defined CPU data to GPU (not obj)
@@ -255,6 +255,29 @@ class Application : public EventCallbacks
 			objMaterials.clear();
 			errStr = "";
 
+			// -- Load Mesh Without Normals ------------------------------------------
+			rc = tinyobj::LoadObj(
+					TOshapes,
+					objMaterials,
+					errStr, 
+					(resourceDirectory + NO_NORMAL).c_str());
+
+			if (!rc) {
+				cerr << errStr << endl;
+			} 
+			else {
+				noNormalObject = make_shared<Shape>();
+				noNormalObject->createShape(TOshapes[0]);
+				noNormalObject->measure();
+				noNormalObject->init();
+			}
+
+			// Clean up shapes for the next object setup
+			TOshapes.clear();
+			objMaterials.clear();
+			errStr = "";
+
+
 			// -- Load Ground --------------------------------------------------------
 			initGround();
 		}
@@ -415,12 +438,12 @@ class Application : public EventCallbacks
 			glUniform3f(prog->getUniform("lightColor1"), 0.9, 0.8, 0.05);
 
 			// -- Draw objects WITH Normals ------------------------------------------
-			renderBunnies(Model);
-			renderSphere(Model);
-			renderDummies(Model);
+			// TODO: renderBunnies(Model);
+			// TODO: uncomment this renderSphere(Model);
+			// TODO: renderDummies(Model);
 
 			// -- Draw object WITHOUT normals ----------------------------------------
-			// TODO
+			renderNoNormal(Model);
 
 			prog->unbind();
 
@@ -444,6 +467,18 @@ class Application : public EventCallbacks
 			// Pop matrix stacks.
 			Projection->popMatrix();
 			View->popMatrix();
+		}
+
+		void renderNoNormal(std::shared_ptr<MatrixStack>Model) {
+			Model->pushMatrix();
+
+			Model->translate(vec3(0.0, -1.0, -3.0));
+			Model->scale(vec3(5.0, 5.0, 5.0));
+			SetMaterial(prog, 0);
+			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+			noNormalObject->draw(prog);
+
+			Model->popMatrix();
 		}
 
 		void renderBunnies(std::shared_ptr<MatrixStack>Model) {
