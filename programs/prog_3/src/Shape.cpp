@@ -7,26 +7,24 @@
 #include "Program.h"
 
 using namespace std;
-
+using namespace glm;
 
 // copy the data from the shape to this object
-void Shape::createShape(tinyobj::shape_t & shape)
-{
-	posBuf = shape.mesh.positions;
+void Shape::createShape(tinyobj::shape_t & shape) {
+	posBuf = shape.mesh.positions; // vertices?
 	norBuf = shape.mesh.normals;
 	texBuf = shape.mesh.texcoords;
 	eleBuf = shape.mesh.indices;
 }
 
-void Shape::measure()
-{
+void Shape::measure() {
 	float minX, minY, minZ;
 	float maxX, maxY, maxZ;
 
 	minX = minY = minZ = std::numeric_limits<float>::max();
 	maxX = maxY = maxZ = -std::numeric_limits<float>::max();
 
-	//Go through all vertices to determine min and max of each dimension
+	// Go through all vertices to determine min and max of each dimension
 	for (size_t v = 0; v < posBuf.size() / 3; v++)
 	{
 		if (posBuf[3*v+0] < minX) minX = posBuf[3 * v + 0];
@@ -47,8 +45,43 @@ void Shape::measure()
 	max.z = maxZ;
 }
 
-void Shape::init()
-{
+// Interpolates the normals for each of the VERTICES
+void Shape::interpNormals() {
+	// Make sure norBuf can hold all of the new normals
+  norBuf.resize(posBuf.size(), 0.0f); 
+
+	for (size_t i = 0; i < eleBuf.size(); i += 3) {
+		// Vertex Indexes
+		unsigned int idx0 = eleBuf[i];
+		unsigned int idx1 = eleBuf[i+1];
+		unsigned int idx2 = eleBuf[i+2];
+	
+		// Actual Vertex Values
+		vec3 p0(posBuf[3 * idx0], posBuf[3 * idx0 + 1], posBuf[3 * idx0 + 2]);
+		vec3 p1(posBuf[3 * idx1], posBuf[3 * idx1 + 1], posBuf[3 * idx1 + 2]);
+		vec3 p2(posBuf[3 * idx2], posBuf[3 * idx2 + 1], posBuf[3 * idx2 + 2]);
+
+		// Calculate the normal using the cross product of the edges
+    vec3 edge1 = p1 - p0;
+    vec3 edge2 = p2 - p0;
+    vec3 faceNormal = glm::cross(edge1, edge2);
+
+		// Accumulate (sum) this face normal into all 3 neighboring vertices
+		norBuf[3 * idx0 + 0] += faceNormal.x; 
+		norBuf[3 * idx0 + 1] += faceNormal.y; 
+		norBuf[3 * idx0 + 2] += faceNormal.z;
+
+		norBuf[3 * idx1 + 0] += faceNormal.x; 
+		norBuf[3 * idx1 + 1] += faceNormal.y; 
+		norBuf[3 * idx1 + 2] += faceNormal.z;
+
+		norBuf[3 * idx2 + 0] += faceNormal.x; 
+		norBuf[3 * idx2 + 1] += faceNormal.y; 
+		norBuf[3 * idx2 + 2] += faceNormal.z;
+	}
+}
+
+void Shape::init() {
 	// Initialize the vertex array object
 	CHECKED_GL_CALL(glGenVertexArrays(1, &vaoID));
 	CHECKED_GL_CALL(glBindVertexArray(vaoID));
@@ -59,24 +92,20 @@ void Shape::init()
 	CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, posBuf.size()*sizeof(float), &posBuf[0], GL_STATIC_DRAW));
 
 	// Send the normal array to the GPU
-	if (norBuf.empty())
-	{
+	if (norBuf.empty()) {
 		norBufID = 0;
 	}
-	else
-	{
+	else {
 		CHECKED_GL_CALL(glGenBuffers(1, &norBufID));
 		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, norBufID));
 		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, norBuf.size()*sizeof(float), &norBuf[0], GL_STATIC_DRAW));
 	}
 
 	// Send the texture array to the GPU
-	if (texBuf.empty())
-	{
+	if (texBuf.empty()) {
 		texBufID = 0;
 	}
-	else
-	{
+	else {
 		CHECKED_GL_CALL(glGenBuffers(1, &texBufID));
 		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, texBufID));
 		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, texBuf.size()*sizeof(float), &texBuf[0], GL_STATIC_DRAW));
@@ -92,8 +121,7 @@ void Shape::init()
 	CHECKED_GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
-void Shape::draw(const shared_ptr<Program> prog) const
-{
+void Shape::draw(const shared_ptr<Program> prog) const {
 	int h_pos, h_nor, h_tex;
 	h_pos = h_nor = h_tex = -1;
 

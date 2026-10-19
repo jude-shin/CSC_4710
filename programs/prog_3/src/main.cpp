@@ -269,6 +269,7 @@ class Application : public EventCallbacks {
 				noNormalObject = make_shared<Shape>();
 				noNormalObject->createShape(TOshapes[0]);
 				noNormalObject->measure();
+				noNormalObject->interpNormals();
 				noNormalObject->init();
 			}
 
@@ -366,6 +367,7 @@ class Application : public EventCallbacks {
 
 		// Helper function to pass material data to the GPU
 		void SetMaterial(shared_ptr<Program> curS, int i) {
+			// TODO: make a bunch more (at least three new ones)
 			switch (i) {
 				case 0: //
 					glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
@@ -474,7 +476,7 @@ class Application : public EventCallbacks {
 
 			Model->translate(vec3(0.0, -1.0, -3.0));
 			Model->scale(vec3(5.0, 5.0, 5.0));
-			SetMaterial(prog, 0);
+			SetMaterial(prog, 2);
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 			noNormalObject->draw(prog);
 

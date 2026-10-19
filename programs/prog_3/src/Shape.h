@@ -13,13 +13,12 @@
 class Program;
 
 
-class Shape
-{
+class Shape {
 
 public:
-
 	void createShape(tinyobj::shape_t & shape);
 	void init();
+  void interpNormals();
 	void measure();
 	void draw(const std::shared_ptr<Program> prog) const;
 

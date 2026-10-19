@@ -9,12 +9,12 @@ uniform float MatShine;
 uniform vec3 lightColor0;
 uniform vec3 lightColor1;
 
+// TODO: (see todo below)
 // uniform float ambIntensity;
 // uniform float difIntensity;
 // uniform float specIntensity;
 
-// Interpolated normal and light vector in camera space
-in vec3 fragNor; // Will always have something (vertex shader passes normal to the fragment (this shader))
+in vec3 fragNor; // if the normal is missing, then the default is vec3(0.0)
 in vec3 lightDir0;
 in vec3 lightDir1;
 
