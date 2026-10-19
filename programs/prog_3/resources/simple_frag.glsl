@@ -7,24 +7,32 @@ uniform vec3 MatDif;
 uniform vec3 MatSpec;
 uniform float MatShine;
 
-//interpolated normal and light vector in camera space
-in vec3 fragNor;
-in vec3 lightDir;
+// uniform float ambIntensity;
+// uniform float difIntensity;
+// uniform float specIntensity;
 
-//position of the vertex in camera space
+// Interpolated normal and light vector in camera space
+in vec3 fragNor; // Will always have something (vertex shader passes normal to the fragment (this shader))
+in vec3 lightDir0;
+in vec3 lightDir1;
+
+// Position of the vertex in camera space
 in vec3 EPos;
 
 void main() {
-	//you will need to work with these for lighting
 	vec3 normal = normalize(fragNor);
-	vec3 light = normalize(lightDir);
+	vec3 light0 = normalize(lightDir0); // TODO: USE THIS LIGHT TOO! (for testing I am just using the moving light)
+	vec3 light1 = normalize(lightDir1);
 	
 	// Diffuse Component
-	float dC = max(0.0, dot(normal, light));
+	float dC = max(0.0, dot(normal, light1));
 
 	// Blinn–Phong specular
-	vec3 halfway = normalize(light + normalize(-EPos));
+	vec3 halfway = normalize(light1 + normalize(-EPos));
 	float ssC = pow(max(dot(normal, halfway), 0.0), MatShine);
-	
+
+	// TODO: have a vec3 input that represents all three of the intensities?
+	// OR just pass in one scalar for every one of the intensities 
+	// (ambient, diffuse, specular)
 	color = vec4(MatAmb + dC*MatDif + ssC*MatSpec, 1.0);
 }

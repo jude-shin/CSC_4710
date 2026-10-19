@@ -65,7 +65,7 @@ class Application : public EventCallbacks
 		float gCamH = 0;
 
 		// Animation data
-		float lightTrans = 0;
+		float lightPos1Trans = 2.0;
 		float gTrans = -3;
 		float sTheta = 0;
 		float eTheta = 0;
@@ -94,13 +94,11 @@ class Application : public EventCallbacks
 			}
 
 			// Update one of the light's position along an axis
-			// TODO: check that E moves to the RIGHT
-			// TODO: check that Q moves to the LEFT 
 			if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-				lightTrans += 0.25;
+				lightPos1Trans += 0.25;
 			}
 			if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-				lightTrans -= 0.25;
+				lightPos1Trans -= 0.25;
 			}
 
 			// Show/Hide wireframe of all objects
@@ -154,7 +152,8 @@ class Application : public EventCallbacks
 			prog->addUniform("MatDif");
 			prog->addUniform("MatShine");
 			prog->addUniform("MatSpec");
-			prog->addUniform("lightPos");
+			prog->addUniform("lightPos0"); // Static light source {-2, 2, 2} color {1, 1, 1}
+			prog->addUniform("lightPos1"); // Moving with "q" and "e" color {1, 1, 1}
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
 
@@ -408,7 +407,8 @@ class Application : public EventCallbacks
 
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-			glUniform3f(prog->getUniform("lightPos"), 2.0, 2.0, 2.9);
+			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
+			glUniform3f(prog->getUniform("lightPos1"), -2.0, lightPos1Trans, 3.0);
 
 			// -- Draw objects WITH Normals ------------------------------------------
 			renderBunnies(Model);
