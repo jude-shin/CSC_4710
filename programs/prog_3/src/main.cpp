@@ -412,7 +412,7 @@ class Application : public EventCallbacks
 			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
 			glUniform3f(prog->getUniform("lightColor0"), 1.0, 1.0, 1.0);
 			glUniform3f(prog->getUniform("lightPos1"), lightPos1Trans, 4.0, 3.0);
-			glUniform3f(prog->getUniform("lightColor1"), 0.992, 0.855, 0.051);
+			glUniform3f(prog->getUniform("lightColor1"), 0.9, 0.8, 0.05);
 
 			// -- Draw objects WITH Normals ------------------------------------------
 			renderBunnies(Model);

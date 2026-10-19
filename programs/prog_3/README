@@ -3,7 +3,11 @@ Jude Shin (jshin53@calpoly.edu)
 All parts of this program were completed.
 
 The base code for lab_06 was used. Basic Blinn-Phong lighting was implemented
-in for all meshes in my scene.
+in for all meshes in my scene. I also added a color vec3 for the lights. This
+uniform variable is passed into the shaders. These values are normalized rgb 
+values from 0.0 to 1.0. For the static light, I keep it as a "white" color 
+(1.0, 1.0, 1.0), but the light that moves has a more yellow tint (0.9, 0.8, 
+0.05).
 
 Keyboard controls implemented:
 "q" -> a light to the left
