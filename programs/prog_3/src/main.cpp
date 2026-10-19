@@ -24,28 +24,29 @@
 using namespace std;
 using namespace glm;
 
-#define BUNNY_OBJ "/bunny.obj"
-#define SPHERE_OBJ "/sphere.obj"
+#define TREE_OBJ "/tree.obj"
+// #define SPHERE_OBJ "/sphere.obj"
+#define SPHERE_OBJ "/SmoothSphere.obj"
 #define DUMMY_OBJ "/dummy.obj"
 #define NO_NORMAL "/bunnyNoNorm.obj"
 #define GROUND_TEX "/flower_grass.jpg"
 
 #define NUM_DUMMIES_X 3
 #define NUM_DUMMIES_Y 4
-#define NUM_BUNNIES_X 3
-#define NUM_BUNNIES_Y 3
+#define NUM_TREES_X 3
+#define NUM_TREES_Y 3
 
 class Application : public EventCallbacks {
 
 	public:
 		WindowManager * windowManager = nullptr;
 
-		std::shared_ptr<Program> prog;		// Blinn-Phong shader program
-		std::shared_ptr<Program> texProg;	// Texture shader program
+		shared_ptr<Program> prog;		// Blinn-Phong shader program
+		shared_ptr<Program> texProg;	// Texture shader program
 
 		// Loaded Geometries
 		shared_ptr<Shape> sphereObject;
-		shared_ptr<Shape> bunnyObject; 
+		vector<shared_ptr<Shape>> treeObject; 
 		vector<shared_ptr<Shape>> dummyObject; 
 		shared_ptr<Shape> noNormalObject; 
 
@@ -158,6 +159,7 @@ class Application : public EventCallbacks {
 			prog->addUniform("lightColor1");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
+			prog->addAttribute("vertTex"); // Added bc the tree objects have vt in them
 
 			// Initialize the GLSL program that we will use for texture mapping
 			texProg = make_shared<Program>();
@@ -207,21 +209,25 @@ class Application : public EventCallbacks {
 			objMaterials.clear();
 			errStr = "";
 
-			// -- Load Bunny Mesh ----------------------------------------------------
+			// -- Load Tree Mesh ----------------------------------------------------
 			rc = tinyobj::LoadObj(
 					TOshapes,
 					objMaterials,
 					errStr, 
-					(resourceDirectory + BUNNY_OBJ).c_str());
+					(resourceDirectory + TREE_OBJ).c_str());
 
 			if (!rc) {
 				cerr << errStr << endl;
 			} 
 			else {
-				bunnyObject = make_shared<Shape>();
-				bunnyObject->createShape(TOshapes[0]);
-				bunnyObject->measure();
-				bunnyObject->init();
+				for (int i = 0; i < TOshapes.size(); ++i) {
+					auto obj = make_shared<Shape>();
+					obj->createShape(TOshapes[i]);
+					obj->measure();
+					obj->init();
+
+					treeObject.push_back(obj);
+				}
 			}
 
 			// Clean up shapes for the next object setup
@@ -277,7 +283,6 @@ class Application : public EventCallbacks {
 			TOshapes.clear();
 			objMaterials.clear();
 			errStr = "";
-
 
 			// -- Load Ground --------------------------------------------------------
 			initGround();
@@ -366,26 +371,49 @@ class Application : public EventCallbacks {
 		}
 
 		// Helper function to pass material data to the GPU
-		void SetMaterial(shared_ptr<Program> curS, int i) {
-			// TODO: make a bunch more (at least three new ones)
+		void setMaterial(shared_ptr<Program> curS, int i) {
 			switch (i) {
-				case 0: //
+				case 0: // Shiny Pink
 					glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
 					glUniform3f(curS->getUniform("MatDif"), 0.96, 0.46, 0.95);
 					glUniform3f(curS->getUniform("MatSpec"), 0.45, 0.23, 0.45);
 					glUniform1f(curS->getUniform("MatShine"), 120.0);
 					break;
-				case 1: // 
+				case 1: // Matte Purple
 					glUniform3f(curS->getUniform("MatAmb"), 0.063, 0.038, 0.1);
 					glUniform3f(curS->getUniform("MatDif"), 0.63, 0.38, 1.0);
 					glUniform3f(curS->getUniform("MatSpec"), 0.3, 0.2, 0.5);
 					glUniform1f(curS->getUniform("MatShine"), 4.0);
 					break;
-				case 2: //
+				case 2: // Metallic Blue
 					glUniform3f(curS->getUniform("MatAmb"), 0.004, 0.05, 0.09);
 					glUniform3f(curS->getUniform("MatDif"), 0.04, 0.5, 0.9);
 					glUniform3f(curS->getUniform("MatSpec"), 0.02, 0.25, 0.45);
 					glUniform1f(curS->getUniform("MatShine"), 27.9);
+					break;
+				case 3: // Polished Gold
+					glUniform3f(curS->getUniform("MatAmb"), 0.247, 0.225, 0.065);
+					glUniform3f(curS->getUniform("MatDif"), 0.401, 0.365, 0.106);
+					glUniform3f(curS->getUniform("MatSpec"), 0.797, 0.723, 0.210);
+					glUniform1f(curS->getUniform("MatShine"), 83.2);
+					break;
+				case 4: // Emerald Green
+					glUniform3f(curS->getUniform("MatAmb"), 0.021, 0.174, 0.021);
+					glUniform3f(curS->getUniform("MatDif"), 0.075, 0.614, 0.075);
+					glUniform3f(curS->getUniform("MatSpec"), 0.633, 0.727, 0.633);
+					glUniform1f(curS->getUniform("MatShine"), 76.8);
+					break;
+				case 5: // Mat Red
+					glUniform3f(curS->getUniform("MatAmb"), 0.100, 0.000, 0.000);
+					glUniform3f(curS->getUniform("MatDif"), 0.700, 0.100, 0.100);
+					glUniform3f(curS->getUniform("MatSpec"), 0.200, 0.200, 0.200);
+					glUniform1f(curS->getUniform("MatShine"), 10.0);
+					break;
+				case 6: // Shiny Black
+					glUniform3f(curS->getUniform("MatAmb"), 0.053, 0.053, 0.063);
+					glUniform3f(curS->getUniform("MatDif"), 0.100, 0.100, 0.120);
+					glUniform3f(curS->getUniform("MatSpec"), 0.950, 0.950, 0.950);
+					glUniform1f(curS->getUniform("MatShine"), 150.0);
 					break;
 			}
 		}
@@ -440,9 +468,9 @@ class Application : public EventCallbacks {
 			glUniform3f(prog->getUniform("lightColor1"), 0.9, 0.8, 0.05);
 
 			// -- Draw objects WITH Normals ------------------------------------------
-			// TODO: renderBunnies(Model);
-			// TODO: uncomment this renderSphere(Model);
-			// TODO: renderDummies(Model);
+			renderTrees(Model);
+			renderSphere(Model);
+			renderDummies(Model);
 
 			// -- Draw object WITHOUT normals ----------------------------------------
 			renderNoNormal(Model);
@@ -476,27 +504,27 @@ class Application : public EventCallbacks {
 
 			Model->translate(vec3(0.0, -1.0, -3.0));
 			Model->scale(vec3(5.0, 5.0, 5.0));
-			SetMaterial(prog, 2);
+			setMaterial(prog, 2);
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 			noNormalObject->draw(prog);
 
 			Model->popMatrix();
 		}
 
-		void renderBunnies(std::shared_ptr<MatrixStack>Model) {
+		void renderTrees(std::shared_ptr<MatrixStack>Model) {
 			Model->pushMatrix();
 
-			float sp = 3.0;
+			float sp = 5.0;
 			float off = -3.5;
-			for (int i=0; i < NUM_BUNNIES_X; i++) {
-				for (int j=0; j < NUM_BUNNIES_Y; j++) {
+			for (int i=0; i < NUM_TREES_X; i++) {
+				for (int j=0; j < NUM_TREES_Y; j++) {
 					Model->pushMatrix();
 					Model->translate(vec3(off+sp*i, -1, off+sp*j));
-					Model->scale(vec3(0.85, 0.85, 0.85));
+					Model->scale(vec3(0.15, 0.15, 0.15));
 					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
-					SetMaterial(prog, 0);
+					setMaterial(prog, (i+j)%6);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
-					bunnyObject->draw(prog);
+					for (auto& o : treeObject) { o->draw(prog); }
 					Model->popMatrix();
 				}
 			}
@@ -507,7 +535,7 @@ class Application : public EventCallbacks {
 		void renderDummies(std::shared_ptr<MatrixStack>Model) {
 			Model->pushMatrix();
 
-			float sp = 1.5;
+			float sp = 4;
 			float off = -2.7;
 			for (int i=0; i < NUM_DUMMIES_X; i++) {
 				for (int j=0; j < NUM_DUMMIES_Y; j++) {
@@ -516,7 +544,7 @@ class Application : public EventCallbacks {
 					Model->scale(vec3(0.01, 0.01, 0.01));
 					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
 					Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
-					SetMaterial(prog, 0);
+					setMaterial(prog, (i+j)%6);
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					for (auto& o : dummyObject) { o->draw(prog); }
 					Model->popMatrix();
@@ -530,13 +558,13 @@ class Application : public EventCallbacks {
 			Model->pushMatrix();
 
 			if (materialToggle) {
-				SetMaterial(prog, 1);
+				setMaterial(prog, 2);
 			}
 			else {
-				SetMaterial(prog, 2);
+				setMaterial(prog, 6);
 			}
 
-			Model->translate(vec3(gTrans, 0, 6));
+			Model->translate(vec3(1, 2, 4));
 			Model->scale(vec3(1.15, 1.35, 1.0));
 			setModel(prog, Model);
 			sphereObject->draw(prog);
