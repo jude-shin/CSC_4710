@@ -7,7 +7,12 @@ in for all meshes in my scene. I also added a color vec3 for the lights. This
 uniform variable is passed into the shaders. These values are normalized rgb 
 values from 0.0 to 1.0. For the static light, I keep it as a "white" color 
 (1.0, 1.0, 1.0), but the light that moves has a more yellow tint (0.9, 0.8, 
-0.05).
+0.05). Note that the disco ball object that changes materials when pressing "m"
+is initially behind the camera.
+
+Demonstration of handling a mesh with no normals is included in the default 
+execution. The mesh with no normals is the classic bunny given in the program 
+description from "bunnyNoNorm.obj", located in the scene at <0.0, -1.0, -3.0>.
 
 Keyboard controls implemented:
 "q" -> a light to the left
@@ -16,8 +21,4 @@ Keyboard controls implemented:
 "d" -> rotates the view of the camera to look more right 
 "w" -> translate the camera up
 "s" -> translate the camera down 
-
-TODO
-Demonstration of handling a mesh with no normals is included in the default 
-execution. The mesh with no normals is <description> from <OBJ mesh name>, 
-located in the scene at <location>.
+"m" -> toggles the disco ball material
