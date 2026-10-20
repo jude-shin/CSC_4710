@@ -25,7 +25,6 @@ using namespace std;
 using namespace glm;
 
 #define TREE_OBJ "/tree.obj"
-// #define SPHERE_OBJ "/sphere.obj"
 #define SPHERE_OBJ "/SmoothSphere.obj"
 #define DUMMY_OBJ "/dummy.obj"
 #define NO_NORMAL "/bunnyNoNorm.obj"
@@ -374,7 +373,8 @@ class Application : public EventCallbacks {
 		void setMaterial(shared_ptr<Program> curS, int i) {
 			switch (i) {
 				case 0: // Shiny Pink
-					glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
+					// glUniform3f(curS->getUniform("MatAmb"), 0.096, 0.046, 0.095);
+					glUniform3f(curS->getUniform("MatAmb"), 0.050, 0.500, 0.050);
 					glUniform3f(curS->getUniform("MatDif"), 0.96, 0.46, 0.95);
 					glUniform3f(curS->getUniform("MatSpec"), 0.45, 0.23, 0.45);
 					glUniform1f(curS->getUniform("MatShine"), 120.0);
@@ -383,7 +383,7 @@ class Application : public EventCallbacks {
 					glUniform3f(curS->getUniform("MatAmb"), 0.063, 0.038, 0.1);
 					glUniform3f(curS->getUniform("MatDif"), 0.63, 0.38, 1.0);
 					glUniform3f(curS->getUniform("MatSpec"), 0.3, 0.2, 0.5);
-					glUniform1f(curS->getUniform("MatShine"), 4.0);
+					glUniform1f(curS->getUniform("MatShine"), 1.0);
 					break;
 				case 2: // Metallic Blue
 					glUniform3f(curS->getUniform("MatAmb"), 0.004, 0.05, 0.09);
@@ -467,12 +467,10 @@ class Application : public EventCallbacks {
 			glUniform3f(prog->getUniform("lightPos1"), lightPos1Trans, 4.0, 3.0);
 			glUniform3f(prog->getUniform("lightColor1"), 0.9, 0.8, 0.05);
 
-			// -- Draw objects WITH Normals ------------------------------------------
+			// -- Draw objects -------------------------------------------------------
 			renderTrees(Model);
 			renderSphere(Model);
 			renderDummies(Model);
-
-			// -- Draw object WITHOUT normals ----------------------------------------
 			renderNoNormal(Model);
 
 			prog->unbind();
@@ -504,7 +502,7 @@ class Application : public EventCallbacks {
 
 			Model->translate(vec3(0.0, -1.0, -3.0));
 			Model->scale(vec3(5.0, 5.0, 5.0));
-			setMaterial(prog, 2);
+			setMaterial(prog, 4);
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 			noNormalObject->draw(prog);
 
@@ -519,10 +517,10 @@ class Application : public EventCallbacks {
 			for (int i=0; i < NUM_TREES_X; i++) {
 				for (int j=0; j < NUM_TREES_Y; j++) {
 					Model->pushMatrix();
-					Model->translate(vec3(off+sp*i, -1, off+sp*j));
+					Model->translate(vec3(off+sp*j, -1, off+sp*i));
 					Model->scale(vec3(0.15, 0.15, 0.15));
 					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
-					setMaterial(prog, (i+j)%6);
+					setMaterial(prog, 0+((i+j)%2)); // 0 and 1
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					for (auto& o : treeObject) { o->draw(prog); }
 					Model->popMatrix();
@@ -544,7 +542,7 @@ class Application : public EventCallbacks {
 					Model->scale(vec3(0.01, 0.01, 0.01));
 					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
 					Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
-					setMaterial(prog, (i+j)%6);
+					setMaterial(prog, 2+((i+j)%2)); // 2 and 3
 					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 					for (auto& o : dummyObject) { o->draw(prog); }
 					Model->popMatrix();
@@ -558,7 +556,7 @@ class Application : public EventCallbacks {
 			Model->pushMatrix();
 
 			if (materialToggle) {
-				setMaterial(prog, 2);
+				setMaterial(prog, 5);
 			}
 			else {
 				setMaterial(prog, 6);
