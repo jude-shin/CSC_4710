@@ -10,6 +10,11 @@ values from 0.0 to 1.0. For the static light, I keep it as a "white" color
 0.05). Note that the disco ball object that changes materials when pressing "m"
 is initially behind the camera.
 
+The texture that is used is some grass with flowers and is mapped to the ground
+plane. I also added a wall with stones. This mesh had a "mossy_rock_texture.png"
+texture that I converted to .jpg. This will hopefully be incorporated into my 
+final maze generation project.
+
 Demonstration of handling a mesh with no normals is included in the default 
 execution. The mesh with no normals is the classic bunny given in the program 
 description from "bunnyNoNorm.obj", located in the scene at <0.0, -1.0, -3.0>.

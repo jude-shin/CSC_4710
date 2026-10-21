@@ -24,14 +24,21 @@
 using namespace std;
 using namespace glm;
 
+// .obj mesh files
 #define TREE_OBJ "/tree.obj"
 #define SPHERE_OBJ "/SmoothSphere.obj"
 #define DUMMY_OBJ "/dummy.obj"
-#define NO_NORMAL "/bunnyNoNorm.obj"
-#define GROUND_TEX "/flower_grass.jpg"
+#define NO_NORMAL_OBJ "/bunnyNoNorm.obj"
+#define WALL_OBJ "/rock_wall.obj"
 
+// .jpg texture files
+#define GROUND_TEX "/flower_grass.jpg"
+#define ROCK_TEX "/mossy_rock_texture.jpg"
+
+// TODO: remove this
 #define NUM_DUMMIES_X 3
 #define NUM_DUMMIES_Y 4
+
 #define NUM_TREES_X 3
 #define NUM_TREES_Y 3
 
@@ -43,11 +50,12 @@ class Application : public EventCallbacks {
 		shared_ptr<Program> prog;		// Blinn-Phong shader program
 		shared_ptr<Program> texProg;	// Texture shader program
 
-		// Loaded Geometries
+		// Loaded Meshes 
 		shared_ptr<Shape> sphereObject;
 		vector<shared_ptr<Shape>> treeObject; 
 		vector<shared_ptr<Shape>> dummyObject; 
 		shared_ptr<Shape> noNormalObject; 
+		vector<shared_ptr<Shape>> wallObject;  // This might just be one object!
 
 		// Global data for ground plane
 		// Direct load constant defined CPU data to GPU (not obj)
@@ -56,8 +64,9 @@ class Application : public EventCallbacks {
 		// Ground VAO
 		GLuint GroundVertexArrayID;
 
-		// The image to use as a texture (ground)
-		shared_ptr<Texture> texture0;
+		// Images for the textures 
+		shared_ptr<Texture> groundTexture;
+		shared_ptr<Texture> rockTexture;
 
 		// Global data (larger program should be encapsulated)
 		vec3 gMin;
@@ -158,7 +167,9 @@ class Application : public EventCallbacks {
 			prog->addUniform("lightColor1");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
-			prog->addAttribute("vertTex"); // Added bc the tree objects have vt in them
+			// NOTE: Added bc the tree objects have vt in them
+			// This will produce a warning that glsl will silently ignore these
+			prog->addAttribute("vertTex");
 
 			// Initialize the GLSL program that we will use for texture mapping
 			texProg = make_shared<Program>();
@@ -173,12 +184,19 @@ class Application : public EventCallbacks {
 			texProg->addAttribute("vertNor");
 			texProg->addAttribute("vertTex");
 
-			//read in a load the texture
-			texture0 = make_shared<Texture>();
-			texture0->setFilename(resourceDirectory + GROUND_TEX);
-			texture0->init();
-			texture0->setUnit(0);
-			texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+			// Load the ground texture
+			groundTexture = make_shared<Texture>();
+			groundTexture->setFilename(resourceDirectory + GROUND_TEX);
+			groundTexture->init();
+			groundTexture->setUnit(0);
+			groundTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+			// Load in the rock texture (for the walls)
+			rockTexture = make_shared<Texture>();
+			rockTexture->setFilename(resourceDirectory + ROCK_TEX);
+			rockTexture->init();
+			rockTexture->setUnit(0);
+			rockTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		}
 
 		void initGeom(const std::string& resourceDirectory) {
@@ -265,7 +283,7 @@ class Application : public EventCallbacks {
 					TOshapes,
 					objMaterials,
 					errStr, 
-					(resourceDirectory + NO_NORMAL).c_str());
+					(resourceDirectory + NO_NORMAL_OBJ).c_str());
 
 			if (!rc) {
 				cerr << errStr << endl;
@@ -276,6 +294,32 @@ class Application : public EventCallbacks {
 				noNormalObject->measure();
 				noNormalObject->interpNormals();
 				noNormalObject->init();
+			}
+
+			// Clean up shapes for the next object setup
+			TOshapes.clear();
+			objMaterials.clear();
+			errStr = "";
+
+			// -- Load Wall Mesh -----------------------------------------------------
+			rc = tinyobj::LoadObj(
+					TOshapes,
+					objMaterials,
+					errStr, 
+					(resourceDirectory + WALL_OBJ).c_str());
+
+			if (!rc) {
+				cerr << errStr << endl;
+			} 
+			else {
+				for (int i = 0; i < TOshapes.size(); ++i) {
+					auto obj = make_shared<Shape>();
+					obj->createShape(TOshapes[i]);
+					obj->measure();
+					obj->init();
+
+					wallObject.push_back(obj);
+				}
 			}
 
 			// Clean up shapes for the next object setup
@@ -340,11 +384,22 @@ class Application : public EventCallbacks {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
 		}
 
-		// Code to draw the ground plane
+		void drawWall(shared_ptr<Program> curS) {
+			rockTexture->bind(curS->getUniform("Texture0"));
+		
+			// Change these until the wall is where you want it.
+			SetModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
+		
+			for (auto& rock : wallObject) {
+				rock->draw(curS);
+			}
+		}
+
 		void drawGround(shared_ptr<Program> curS) {
 			curS->bind();
 			glBindVertexArray(GroundVertexArrayID);
-			texture0->bind(curS->getUniform("Texture0"));
+			groundTexture->bind(curS->getUniform("Texture0"));
+
 			// Draw the ground plane 
 			SetModel(vec3(0, -1, 0), 0, 0, 1, curS);
 			glEnableVertexAttribArray(0);
@@ -482,7 +537,10 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(texProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniformMatrix4fv(texProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 
+			// -- Draw objects -------------------------------------------------------
+			drawWall(texProg);
 			drawGround(texProg);
+
 			// =========================================================================
 
 			texProg->unbind();
@@ -532,6 +590,8 @@ class Application : public EventCallbacks {
 
 		void renderDummies(std::shared_ptr<MatrixStack>Model) {
 			Model->pushMatrix();
+
+			// TODO: just render two dummies, each with different materials
 
 			float sp = 4;
 			float off = -2.7;
