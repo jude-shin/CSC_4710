@@ -163,8 +163,11 @@ class Application : public EventCallbacks {
 			prog->addUniform("lightColor1");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
+
 			// NOTE: Added bc the tree objects have vt in them
-			// This will produce a warning that glsl will silently ignore these
+			// This will produce the following warning:
+			// "WARN: vertTex cannot be bound (it either doesn't exist or has been 
+			// optimized away). safe_glAttrib calls will silently ignore it."
 			prog->addAttribute("vertTex");
 
 			// Initialize the GLSL program that we will use for texture mapping
