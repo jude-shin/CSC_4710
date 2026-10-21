@@ -35,10 +35,6 @@ using namespace glm;
 #define GROUND_TEX "/flower_grass.jpg"
 #define ROCK_TEX "/mossy_rock_texture.jpg"
 
-// TODO: remove this
-#define NUM_DUMMIES_X 3
-#define NUM_DUMMIES_Y 4
-
 #define NUM_TREES_X 3
 #define NUM_TREES_Y 3
 
@@ -589,26 +585,26 @@ class Application : public EventCallbacks {
 		}
 
 		void renderDummies(std::shared_ptr<MatrixStack>Model) {
+			// Render Dummy 1
 			Model->pushMatrix();
+			Model->translate(vec3(2, -1, -4.0));
+			Model->scale(vec3(0.01, 0.01, 0.01));
+			Model->rotate(1.5, vec3(0.0, 1.0, 0.0));
+			Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
+			setMaterial(prog, 2); // different material
+			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+			for (auto& o : dummyObject) { o->draw(prog); }
+			Model->popMatrix();
 
-			// TODO: just render two dummies, each with different materials
-
-			float sp = 4;
-			float off = -2.7;
-			for (int i=0; i < NUM_DUMMIES_X; i++) {
-				for (int j=0; j < NUM_DUMMIES_Y; j++) {
-					Model->pushMatrix();
-					Model->translate(vec3(off+sp*i, -1, off+sp*j));
-					Model->scale(vec3(0.01, 0.01, 0.01));
-					Model->rotate(sp*i+sp*j, vec3(0.0, 1.0, 0.0));
-					Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
-					setMaterial(prog, 2+((i+j)%2)); // 2 and 3
-					glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
-					for (auto& o : dummyObject) { o->draw(prog); }
-					Model->popMatrix();
-				}
-			}
-
+			// Render Dummy 2
+			Model->pushMatrix();
+			Model->translate(vec3(-2, -1, -3.0));
+			Model->scale(vec3(0.01, 0.01, 0.01));
+			Model->rotate(1, vec3(0.0, 1.0, 0.0));
+			Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
+			setMaterial(prog, 3); // different materials
+			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+			for (auto& o : dummyObject) { o->draw(prog); }
 			Model->popMatrix();
 		}
 
