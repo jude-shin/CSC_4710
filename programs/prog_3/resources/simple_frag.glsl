@@ -9,12 +9,7 @@ uniform float MatShine;
 uniform vec3 lightColor0;
 uniform vec3 lightColor1;
 
-// TODO: (see todo below)
-// uniform float ambIntensity;
-// uniform float difIntensity;
-// uniform float specIntensity;
-
-in vec3 fragNor; // if the normal is missing, then the default is vec3(0.0)
+in vec3 fragNor;
 in vec3 lightDir0;
 in vec3 lightDir1;
 
@@ -29,9 +24,6 @@ vec3 blinnPhong(vec3 normal, vec3 light, vec3 lightColor) {
 	vec3 halfway = normalize(light + normalize(-EPos));
 	float ssC = pow(max(dot(normal, halfway), 0.0), MatShine);
 
-	// TODO: have a vec3 input that represents all three of the intensities?
-	// OR just pass in one scalar for every one of the intensities 
-	// (ambient, diffuse, specular)
 	return lightColor * (dC*MatDif + ssC*MatSpec);
 }
 
