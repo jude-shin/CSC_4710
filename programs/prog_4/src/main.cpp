@@ -24,6 +24,8 @@
 using namespace std;
 using namespace glm;
 
+// === MAGIC FILES =============================================================
+
 // .obj mesh files
 #define DUMMY_OBJ "/dummy.obj"
 #define WALL_OBJ "/rock_wall.obj"
@@ -31,6 +33,16 @@ using namespace glm;
 // .jpg texture files
 #define GROUND_TEX "/flower_grass.jpg"
 #define ROCK_TEX "/mossy_rock_texture.jpg"
+
+// === MAGIC CONTROLS ==========================================================
+
+// FPS sensitivity for wasd controls and mouse (for moving the camera)
+#define WASD_FPS_SENSE 0.2
+// #define MOUSE_FPS_SENSE 1.0
+
+// BIRD sensitivity for wasd controls (for moving the dummy)
+// #define WASD_BIRD_SENSE 1.0 // TODO
+
 
 class Application : public EventCallbacks {
 
@@ -55,35 +67,45 @@ class Application : public EventCallbacks {
 		shared_ptr<Texture> groundTexture;
 		shared_ptr<Texture> rockTexture;
 
-		// Global data (larger program should be encapsulated)
-		vec3 gMin;
-		float gRot = 0;
-		float gCamH = 0;
+		// Camera Data
+		enum CameraMode {
+			FPS, 
+			BIRD,
+		};
+		CameraMode cameraMode = FPS;
+
+		// FPS Camera State
+		float cam_fps_x = 0.0f;
+		float cam_fps_z = 0.0f;
+		// TODO: change this with mouse movement // float cam_fps_rot = 0.0f;
+
+		// Birds Eye View State
+		// float cam_bird_x = 0.0f;
+		// float cam_bird_y = 0.0f;
+		// // TODO: change this with mouse movement // float cam_bird_rot = 0.0f;
 
 		// Animation data
+		// TODO: get rid of this NEXT
 		float lightPos1Trans = 2.0;
-		float gTrans = -3;
-
-		bool cameraMode = false;
 
 		void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window, GL_TRUE);
 			}
-			// Update global camera rotate
+
+			// Camera Translation
+			// TODO: test this
 			if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-				gRot -= 0.2;
+				cam_fps_x += WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-				gRot += 0.2;
+				cam_fps_x -= WASD_FPS_SENSE;
 			}
-
-			// Update camera height
 			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-				gCamH  += 0.25;
+				cam_fps_z -= WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-				gCamH  -= 0.25;
+				cam_fps_z += WASD_FPS_SENSE;
 			}
 
 			// Update one of the light's position along an axis
@@ -102,10 +124,21 @@ class Application : public EventCallbacks {
 				glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 			}
 
-			// TODO: make an enum for modes (birds eye view, fps)
 			// Use enum instead of the boolean
 			if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-				cameraMode = !cameraMode;
+				switch (cameraMode) {
+					case FPS:
+						cameraMode = BIRD;
+						break;
+					case BIRD:
+						cameraMode = FPS;
+						break;
+					default:
+						// We should never get here..
+						// Just default to Birds Eye View
+						cout << "Invalid Camera Mode: " << cameraMode << endl;
+						cameraMode = BIRD;
+				}
 			}
 		}
 
@@ -379,11 +412,23 @@ class Application : public EventCallbacks {
 			Projection->pushMatrix();
 			Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
-			// Update the Global Camera independent of anything else
+			// Update the Global Camera
+			// TODO: I feel like this is going to get weird when we add rotation...
 			View->pushMatrix();
 			View->loadIdentity();
-			View->translate(vec3(0, gCamH, 0)); // Move the camera up and down
-			View->rotate(gRot, vec3(0, 1, 0)); // Rotate the camera left and right
+			switch (cameraMode) {
+				case FPS:
+					View->translate(vec3(cam_fps_x, 0, cam_fps_z));
+					// View->rotate(gRot, vec3(0, 1, 0));
+					break;
+				case BIRD:
+					View->translate(vec3(cam_fps_x, 0, cam_fps_z));
+					// View->rotate(gRot, vec3(0, 1, 0));
+					break;
+				default:
+					cout << "Invalid Camera Mode: " << cameraMode << endl;
+					cameraMode = BIRD;
+			}
 
 			// == LIGHTING GLSL PROGRAM ==============================================
 			prog->bind();
@@ -429,13 +474,11 @@ class Application : public EventCallbacks {
 
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	// Where the resources are loaded from
 	std::string resourceDir = "../resources";
 
-	if (argc >= 2)
-	{
+	if (argc >= 2) {
 		resourceDir = argv[1];
 	}
 
@@ -456,8 +499,7 @@ int main(int argc, char *argv[])
 	application->initGeom(resourceDir);
 
 	// Loop until the user closes the window.
-	while (! glfwWindowShouldClose(windowManager->getHandle()))
-	{
+	while (! glfwWindowShouldClose(windowManager->getHandle())) {
 		// Render scene.
 		application->render();
 
