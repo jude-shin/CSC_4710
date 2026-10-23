@@ -40,6 +40,7 @@ using namespace glm;
 #define WASD_FPS_SENSE 0.2
 #define MOUSE_FPS_SENSE_PITCH 0.004	// vertical
 #define MOUSE_FPS_SENSE_YAW 0.002		// horizontal
+#define INVERTED_MOUSE_CONTROLS false  // TODO: set to true before submitting
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
@@ -84,8 +85,8 @@ class Application : public EventCallbacks {
 		float camFpsZ = 0.0f;
 		float camFpsYaw = 0.0f; // horizontal
 		float camFpsPitch = 0.0f; // vertical
-		double prevMouseX= 0.0;
-		double prevMouseY = 0.0;
+		double prevMouseX= 0.0f;
+		double prevMouseY = 0.0f;
 		bool initMousePos = true; // If we have no "prev" mouse positions
 
 		// Birds Eye View State
@@ -99,17 +100,25 @@ class Application : public EventCallbacks {
 			}
 
 			// Camera Translation
-			if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-				camFpsX += WASD_FPS_SENSE;
-			}
-			if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-				camFpsX -= WASD_FPS_SENSE;
+			float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
+			vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
+			vec3 right(cos(yaw), 0.0f, -sin(yaw));
+			
+			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+			    camFpsX += forward.x * WASD_FPS_SENSE;
+			    camFpsZ += forward.z * WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-				camFpsZ -= WASD_FPS_SENSE;
+			    camFpsX -= forward.x * WASD_FPS_SENSE;
+			    camFpsZ -= forward.z * WASD_FPS_SENSE;
 			}
-			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-				camFpsZ += WASD_FPS_SENSE;
+			if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+			    camFpsX += right.x * WASD_FPS_SENSE;
+			    camFpsZ += right.z * WASD_FPS_SENSE;
+			}
+			if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+			    camFpsX -= right.x * WASD_FPS_SENSE;
+			    camFpsZ -= right.z * WASD_FPS_SENSE;
 			}
 
 			// Show/Hide wireframe of all objects
@@ -148,6 +157,11 @@ class Application : public EventCallbacks {
 		}
 
 		void cursorPosCallback(GLFWwindow *window, double pos_x, double pos_y) {
+			if (INVERTED_MOUSE_CONTROLS) {
+				pos_x = -pos_x;
+				pos_y = -pos_y;
+			}
+			
 			if (initMousePos) {
 				prevMouseX = pos_x;
 				prevMouseY = pos_y;
@@ -160,8 +174,8 @@ class Application : public EventCallbacks {
     	prevMouseY = pos_y;
 
 			// Use Deltas to calculate the yaw and pitch of the camera
-			camFpsPitch -= deltax;
-			camFpsYaw -= deltay;
+			camFpsPitch += deltay;
+			camFpsYaw += deltax;
 		}
 
 		void resizeCallback(GLFWwindow *window, int width, int height) {
@@ -428,9 +442,9 @@ class Application : public EventCallbacks {
 			View->loadIdentity();
 			switch (cameraMode) {
 				case FPS:
-					View->rotate(camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(0, 1, 0));
-					View->rotate(camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(1, 0, 0));
-					View->translate(vec3(camFpsX, 0, camFpsZ));
+					View->rotate(-camFpsPitch * MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
+    			View->rotate(-camFpsYaw * MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
+    			View->translate(vec3(-camFpsX, 0.0f, -camFpsZ));
 					break;
 				case BIRD:
 					// View->rotate(gRot, vec3(0, 1, 0));
