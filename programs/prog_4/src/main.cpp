@@ -301,13 +301,8 @@ class Application : public EventCallbacks {
 
 		void drawWall(shared_ptr<Program> curS) {
 			rockTexture->bind(curS->getUniform("Texture0"));
-		
-			// Change these until the wall is where you want it.
-			SetModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
-		
-			for (auto& rock : wallObject) {
-				rock->draw(curS);
-			}
+			initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
+			for (auto& rock : wallObject) { rock->draw(curS); }
 		}
 
 		void drawGround(shared_ptr<Program> curS) {
@@ -316,7 +311,7 @@ class Application : public EventCallbacks {
 			groundTexture->bind(curS->getUniform("Texture0"));
 
 			// Draw the ground plane 
-			SetModel(vec3(0, -1, 0), 0, 0, 1, curS);
+			initModel(vec3(0, -1, 0), 0, 0, 1, curS);
 			glEnableVertexAttribArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -352,9 +347,7 @@ class Application : public EventCallbacks {
 		}
 
 		// Helper function to set model trasnforms
-		// TODO: lower case the first character pleAAseeeee
-		// rename to orientModel or something
-		void SetModel(vec3 trans, float rotY, float rotX, float sc, shared_ptr<Program> curS) {
+		void initModel(vec3 trans, float rotY, float rotX, float sc, shared_ptr<Program> curS) {
 			mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
 			mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
 			mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
@@ -427,18 +420,11 @@ class Application : public EventCallbacks {
 			View->popMatrix();
 		}
 
+		// Render The Dummy (player lol)
 		void renderDummy(std::shared_ptr<MatrixStack>Model) {
-			// Render Dummy 1
-			// TODO: use SetModel here?
-			Model->pushMatrix();
-			Model->translate(vec3(2, -1, -4.0));
-			Model->scale(vec3(0.01, 0.01, 0.01));
-			Model->rotate(1.5, vec3(0.0, 1.0, 0.0));
-			Model->rotate(-1.57, vec3(1.0, 0.0, 0.0)); // Rotate the dummy upright
-			setMaterial(prog, 0); // different material
-			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+			initModel(vec3(2, -1, -4.0), 0.0f, -1.57f, 0.01f, prog);
+			setMaterial(prog, 0);
 			for (auto& o : dummyObject) { o->draw(prog); }
-			Model->popMatrix();
 		}
 
 };
