@@ -70,48 +70,49 @@ bool WindowManager::init(int const width, int const height)
 	glfwSwapInterval(1);
 
 	glfwSetKeyCallback(windowHandle, key_callback);
-	glfwSetMouseButtonCallback(windowHandle, mouse_callback);
+	glfwSetMouseButtonCallback(windowHandle, mouse_button_callback);
+	glfwSetCursorPosCallback(windowHandle, cursor_pos_callback);
 	glfwSetFramebufferSizeCallback(windowHandle, resize_callback);
+
+	// FPS lock of cursor (and make it dissapear)
+	glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	return true;
 }
 
-void WindowManager::shutdown()
-{
+void WindowManager::shutdown() {
 	glfwDestroyWindow(windowHandle);
 	glfwTerminate();
 }
 
-void WindowManager::setEventCallbacks(EventCallbacks * callbacks_in)
-{
+void WindowManager::setEventCallbacks(EventCallbacks * callbacks_in) {
 	callbacks = callbacks_in;
 }
 
-GLFWwindow * WindowManager::getHandle()
-{
+GLFWwindow * WindowManager::getHandle() {
 	return windowHandle;
 }
 
-void WindowManager::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-	if (instance && instance->callbacks)
-	{
+void WindowManager::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods) {
+	if (instance && instance->callbacks) {
 		instance->callbacks->keyCallback(window, key, scancode, action, mods);
 	}
 }
 
-void WindowManager::mouse_callback(GLFWwindow * window, int button, int action, int mods)
-{
-	if (instance && instance->callbacks)
-	{
-		instance->callbacks->mouseCallback(window, button, action, mods);
+void WindowManager::mouse_button_callback(GLFWwindow * window, int button, int action, int mods) {
+	if (instance && instance->callbacks) {
+		instance->callbacks->mouseButtonCallback(window, button, action, mods);
 	}
 }
 
-void WindowManager::resize_callback(GLFWwindow * window, int in_width, int in_height)
-{
-	if (instance && instance->callbacks)
-	{
+void WindowManager::cursor_pos_callback(GLFWwindow * window, double pos_x, double pos_y) {
+	if (instance && instance->callbacks) {
+		instance->callbacks->cursorPosCallback(window, pos_x, pos_y);
+	}
+}
+
+void WindowManager::resize_callback(GLFWwindow * window, int in_width, int in_height) {
+	if (instance && instance->callbacks) {
 		instance->callbacks->resizeCallback(window, in_width, in_height);
 	}
 }

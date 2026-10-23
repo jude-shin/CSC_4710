@@ -38,11 +38,11 @@ using namespace glm;
 
 // FPS sensitivity for wasd controls and mouse (for moving the camera)
 #define WASD_FPS_SENSE 0.2
-// #define MOUSE_FPS_SENSE 1.0
+#define MOUSE_FPS_SENSE_PITCH 0.004	// vertical
+#define MOUSE_FPS_SENSE_YAW 0.002		// horizontal
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
-
 
 class Application : public EventCallbacks {
 
@@ -56,16 +56,21 @@ class Application : public EventCallbacks {
 		vector<shared_ptr<Shape>> dummyObject; 
 		vector<shared_ptr<Shape>> wallObject;
 
-		// Global data for ground plane
-		// Direct load constant defined CPU data to GPU (not obj)
-		GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
-		int g_GiboLen;
-		// Ground VAO
-		GLuint GroundVertexArrayID;
-
 		// Images for the textures 
 		shared_ptr<Texture> groundTexture;
 		shared_ptr<Texture> rockTexture;
+
+		// Keymap Binary Array
+		// TODO: Use this instead to track which keys are being presed
+		// TODO: FIRST check that the camera translation works as expected in our main loop
+		// Then start playing around with the keypresses.
+		// bool keys[1024] = { false };
+
+		// Global data for ground plane
+		// Direct load constant defined CPU data to GPU (not obj)
+		GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
+		GLuint GroundVertexArrayID;		// Ground VAO
+		int g_GiboLen;
 
 		// Camera Data
 		enum CameraMode {
@@ -75,9 +80,13 @@ class Application : public EventCallbacks {
 		CameraMode cameraMode = FPS;
 
 		// FPS Camera State
-		float cam_fps_x = 0.0f;
-		float cam_fps_z = 0.0f;
-		// TODO: change this with mouse movement // float cam_fps_rot = 0.0f;
+		float camFpsX = 0.0f;
+		float camFpsZ = 0.0f;
+		float camFpsYaw = 0.0f; // horizontal
+		float camFpsPitch = 0.0f; // vertical
+		double prevMouseX= 0.0;
+		double prevMouseY = 0.0;
+		bool initMousePos = true; // If we have no "prev" mouse positions
 
 		// Birds Eye View State
 		// float cam_bird_x = 0.0f;
@@ -90,18 +99,17 @@ class Application : public EventCallbacks {
 			}
 
 			// Camera Translation
-			// TODO: test this
 			if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-				cam_fps_x += WASD_FPS_SENSE;
+				camFpsX += WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-				cam_fps_x -= WASD_FPS_SENSE;
+				camFpsX -= WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-				cam_fps_z -= WASD_FPS_SENSE;
+				camFpsZ -= WASD_FPS_SENSE;
 			}
 			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-				cam_fps_z += WASD_FPS_SENSE;
+				camFpsZ += WASD_FPS_SENSE;
 			}
 
 			// Show/Hide wireframe of all objects
@@ -125,19 +133,35 @@ class Application : public EventCallbacks {
 						// We should never get here..
 						// Just default to Birds Eye View
 						cout << "Invalid Camera Mode: " << cameraMode << endl;
-						cameraMode = BIRD;
+						cameraMode = FPS;
 				}
 			}
 		}
 
-		void mouseCallback(GLFWwindow *window, int button, int action, int mods) {
+		void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 			double posX, posY;
 
-			if (action == GLFW_PRESS)
-			{
-				glfwGetCursorPos(window, &posX, &posY);
+			if (action == GLFW_PRESS) {
+				// TODO: set a lamp to the closest lamp node position if you have any lamps left?
 				cout << "Pos X " << posX <<  " Pos Y " << posY << endl;
 			}
+		}
+
+		void cursorPosCallback(GLFWwindow *window, double pos_x, double pos_y) {
+			if (initMousePos) {
+				prevMouseX = pos_x;
+				prevMouseY = pos_y;
+				initMousePos = false;
+			}
+			// Get the change in mouse position from the previous poll 
+    	float deltax = prevMouseX - pos_x;
+    	float deltay = prevMouseY - pos_y;
+    	prevMouseX = pos_x;
+    	prevMouseY = pos_y;
+
+			// Use Deltas to calculate the yaw and pitch of the camera
+			camFpsPitch -= deltax;
+			camFpsYaw -= deltay;
 		}
 
 		void resizeCallback(GLFWwindow *window, int width, int height) {
@@ -164,7 +188,7 @@ class Application : public EventCallbacks {
 			prog->addUniform("MatDif");
 			prog->addUniform("MatShine");
 			prog->addUniform("MatSpec");
-			prog->addUniform("lightPos0"); // Static light source {-2, 2, 2} color {1, 1, 1}
+			prog->addUniform("lightPos0");
 			prog->addUniform("lightColor0");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
@@ -202,7 +226,7 @@ class Application : public EventCallbacks {
 			rockTexture->setUnit(0);
 			rockTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		}
-
+		
 		void initGeom(const std::string& resourceDirectory) {
 			string errStr;
 			bool rc;
@@ -399,21 +423,22 @@ class Application : public EventCallbacks {
 			Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
 			// Update the Global Camera
-			// TODO: I feel like this is going to get weird when we add rotation...
+			// Rotate first, then (in the same stack) translate the camera.
 			View->pushMatrix();
 			View->loadIdentity();
 			switch (cameraMode) {
 				case FPS:
-					View->translate(vec3(cam_fps_x, 0, cam_fps_z));
-					// View->rotate(gRot, vec3(0, 1, 0));
+					View->rotate(camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(0, 1, 0));
+					View->rotate(camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(1, 0, 0));
+					View->translate(vec3(camFpsX, 0, camFpsZ));
 					break;
 				case BIRD:
-					View->translate(vec3(cam_fps_x, 0, cam_fps_z));
 					// View->rotate(gRot, vec3(0, 1, 0));
+					// View->translate(vec3(cam_bird_x, 0, cam_bird_z));
 					break;
 				default:
 					cout << "Invalid Camera Mode: " << cameraMode << endl;
-					cameraMode = BIRD;
+					cameraMode = FPS;
 			}
 
 			// == LIGHTING GLSL PROGRAM ==============================================
@@ -478,17 +503,17 @@ int main(int argc, char *argv[]) {
 
 	// This is the code that will likely change program to program as you
 	// may need to initialize or set up different data and state
-
 	application->init(resourceDir);
 	application->initGeom(resourceDir);
 
 	// Loop until the user closes the window.
-	while (! glfwWindowShouldClose(windowManager->getHandle())) {
+	while (!glfwWindowShouldClose(windowManager->getHandle())) {
 		// Render scene.
 		application->render();
 
 		// Swap front and back buffers.
 		glfwSwapBuffers(windowManager->getHandle());
+
 		// Poll for and process events.
 		glfwPollEvents();
 	}
