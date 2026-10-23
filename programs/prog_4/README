@@ -1,0 +1,12 @@
+Jude Shin (jshin53@calpoly.edu)
+
+All parts of this program were completed.
+
+I built off the code given for program 3, but I started making more changes 
+that will be implemented in my final project. The main milestone that I wanted 
+to complete was the maze generation. The wall object and texture was added in 
+program 3, and I am just going to use that as a unit of measurement for one 
+"wall".
+
+To change views from FPS mode to Birds-Eye-View, press "m". This will change 
+the camera angle.
