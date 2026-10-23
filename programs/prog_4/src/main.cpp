@@ -84,10 +84,6 @@ class Application : public EventCallbacks {
 		// float cam_bird_y = 0.0f;
 		// // TODO: change this with mouse movement // float cam_bird_rot = 0.0f;
 
-		// Animation data
-		// TODO: get rid of this NEXT
-		float lightPos1Trans = 2.0;
-
 		void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window, GL_TRUE);
@@ -106,14 +102,6 @@ class Application : public EventCallbacks {
 			}
 			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 				cam_fps_z += WASD_FPS_SENSE;
-			}
-
-			// Update one of the light's position along an axis
-			if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-				lightPos1Trans -= 0.25;
-			}
-			if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-				lightPos1Trans += 0.25;
 			}
 
 			// Show/Hide wireframe of all objects
@@ -178,8 +166,6 @@ class Application : public EventCallbacks {
 			prog->addUniform("MatSpec");
 			prog->addUniform("lightPos0"); // Static light source {-2, 2, 2} color {1, 1, 1}
 			prog->addUniform("lightColor0");
-			prog->addUniform("lightPos1"); // Moving with "q" and "e" color {1, 1, 1}
-			prog->addUniform("lightColor1");
 			prog->addAttribute("vertPos");
 			prog->addAttribute("vertNor");
 
@@ -437,8 +423,6 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
 			glUniform3f(prog->getUniform("lightColor0"), 1.0, 1.0, 1.0);
-			glUniform3f(prog->getUniform("lightPos1"), lightPos1Trans, 4.0, 3.0);
-			glUniform3f(prog->getUniform("lightColor1"), 0.9, 0.8, 0.05);
 
 			// -- Draw objects -------------------------------------------------------
 			renderDummy(Model);

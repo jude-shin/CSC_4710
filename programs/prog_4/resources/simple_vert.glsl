@@ -7,11 +7,9 @@ uniform mat4 V;
 uniform mat4 M;
 
 uniform vec3 lightPos0;
-uniform vec3 lightPos1;
 
 out vec3 fragNor;
 out vec3 lightDir0;
-out vec3 lightDir1;
 out vec3 EPos;
 
 void main() {
@@ -19,6 +17,5 @@ void main() {
 
 	fragNor = (M * vec4(vertNor, 0.0)).xyz; 
 	lightDir0 = lightPos0 - (M*vertPos).xyz;
-	lightDir1 = lightPos1 - (M*vertPos).xyz;
 	EPos = (M*vertPos).xyz;
 }
