@@ -41,6 +41,7 @@ using namespace glm;
 #define MOUSE_FPS_SENSE_PITCH 0.004	// vertical
 #define MOUSE_FPS_SENSE_YAW 0.002		// horizontal
 #define INVERTED_MOUSE_CONTROLS false  // TODO: set to true before submitting
+#define PITCH_CLAMP_DEG 80.0f
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
@@ -176,6 +177,9 @@ class Application : public EventCallbacks {
 			// Use Deltas to calculate the yaw and pitch of the camera
 			camFpsPitch += deltay;
 			camFpsYaw += deltax;
+
+			// Clamp pitch to +- 80
+			camFpsPitch = clamp(camFpsPitch, -PITCH_CLAMP_DEG, PITCH_CLAMP_DEG);
 		}
 
 		void resizeCallback(GLFWwindow *window, int width, int height) {
