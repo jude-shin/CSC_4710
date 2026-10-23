@@ -446,8 +446,8 @@ class Application : public EventCallbacks {
 			View->loadIdentity();
 			switch (cameraMode) {
 				case FPS:
-					View->rotate(-camFpsPitch * MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
-    			View->rotate(-camFpsYaw * MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
+					View->rotate(-camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
+    			View->rotate(-camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
     			View->translate(vec3(-camFpsX, 0.0f, -camFpsZ));
 					break;
 				case BIRD:
