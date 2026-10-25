@@ -46,6 +46,7 @@ using namespace glm;
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
+#define BIRD_HEIGHT 60.0f
 
 // Game Dimensions
 #define MAZE_H 10
@@ -86,9 +87,10 @@ class Application : public EventCallbacks {
 			FPS, 
 			BIRD,
 		};
-		CameraMode cameraMode = FPS;
+		CameraMode cameraMode = BIRD;
 
 		// FPS Camera State
+		// TODO: move these to vec3 s
 		float camFpsX = 0.0f;
 		float camFpsZ = 0.0f;
 		float camFpsYaw = 0.0f; // horizontal
@@ -97,37 +99,37 @@ class Application : public EventCallbacks {
 		double prevMouseY = 0.0f;
 		bool initMousePos = true; // If we have no "prev" mouse positions
 
-		// Birds Eye View State
-		// float cam_bird_x = 0.0f;
-		// float cam_bird_y = 0.0f;
-		// // TODO: change this with mouse movement // float cam_bird_rot = 0.0f;
-
 		// =========================================================================
 
 		// Maze Data
 		Maze maze = Maze(MAZE_W, MAZE_H);
 
 		void processKeyboardState() {
-			// === WASD FPS Controls =================================================
-			float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
-			vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
-			vec3 right(cos(yaw), 0.0f, -sin(yaw));
+			if (cameraMode == FPS) {
+				float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
+				vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
+				vec3 right(cos(yaw), 0.0f, -sin(yaw));
 
-			if (keys[GLFW_KEY_W]) {
-				camFpsX += forward.x * WASD_FPS_SENSE;
-				camFpsZ += forward.z * WASD_FPS_SENSE;
+				// === WASD FPS Controls =================================================
+				if (keys[GLFW_KEY_W]) {
+					camFpsX += forward.x * WASD_FPS_SENSE;
+					camFpsZ += forward.z * WASD_FPS_SENSE;
+				}
+				if (keys[GLFW_KEY_S]) {
+					camFpsX -= forward.x * WASD_FPS_SENSE;
+					camFpsZ -= forward.z * WASD_FPS_SENSE;
+				}
+				if (keys[GLFW_KEY_D]) {
+					camFpsX += right.x * WASD_FPS_SENSE;
+					camFpsZ += right.z * WASD_FPS_SENSE;
+				}
+				if (keys[GLFW_KEY_A]) {
+					camFpsX -= right.x * WASD_FPS_SENSE;
+					camFpsZ -= right.z * WASD_FPS_SENSE;
+				}
 			}
-			if (keys[GLFW_KEY_S]) {
-				camFpsX -= forward.x * WASD_FPS_SENSE;
-				camFpsZ -= forward.z * WASD_FPS_SENSE;
-			}
-			if (keys[GLFW_KEY_D]) {
-				camFpsX += right.x * WASD_FPS_SENSE;
-				camFpsZ += right.z * WASD_FPS_SENSE;
-			}
-			if (keys[GLFW_KEY_A]) {
-				camFpsX -= right.x * WASD_FPS_SENSE;
-				camFpsZ -= right.z * WASD_FPS_SENSE;
+			else if (cameraMode == BIRD) {
+				// TODO: Just move the person
 			}
 		}
 
@@ -137,7 +139,6 @@ class Application : public EventCallbacks {
 			}
 
 			// === WASD FPS Controls =================================================
-			// TODO: Do another if statement for what kind of control mode we have
 			if (key == GLFW_KEY_W || 
 					key == GLFW_KEY_A || 
 					key == GLFW_KEY_S || 
@@ -152,20 +153,14 @@ class Application : public EventCallbacks {
 			}
 
 			// === Switching FPS to Birds Eye View ===================================
-			if (key == GLFW_KEY_M && GLFW_PRESS) {
-				switch (cameraMode) {
-					case FPS:
-						cameraMode = BIRD;
-						break;
-					case BIRD:
-						cameraMode = FPS;
-						break;
-					default:
-						// We should never get here..
-						// Just default to Birds Eye View
-						cout << "Invalid Camera Mode: " << cameraMode << endl;
-						cameraMode = FPS;
-				}
+			// Try to get one key to toggle
+			// TODO: I really want a switch case, but I guess not...
+			if (key == GLFW_KEY_F && GLFW_PRESS) {
+				cameraMode = FPS;
+			}
+
+			if (key == GLFW_KEY_B && GLFW_PRESS) {
+				cameraMode = BIRD;
 			}
 		}
 
@@ -475,12 +470,9 @@ class Application : public EventCallbacks {
     			View->translate(vec3(-camFpsX, 0.0f, -camFpsZ));
 					break;
 				case BIRD:
-					// View->rotate(gRot, vec3(0, 1, 0));
-					// View->translate(vec3(cam_bird_x, 0, cam_bird_z));
+					View->rotate(1.57f, vec3(1.0f, 0.0f, 0.0f));
+					View->translate(vec3(0.0f, -BIRD_HEIGHT, 0.0f));
 					break;
-				default:
-					cout << "Invalid Camera Mode: " << cameraMode << endl;
-					cameraMode = FPS;
 			}
 
 			// == LIGHTING GLSL PROGRAM ==============================================
