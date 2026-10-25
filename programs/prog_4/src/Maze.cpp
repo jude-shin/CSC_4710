@@ -94,30 +94,51 @@ void Maze::render(
 		shared_ptr<Shape> wallObject, 
 		shared_ptr<MatrixStack> Model) {
 
-	// true means wall; false means traversable space.
-	vector<vector<bool>> walls(
-			2 * height + 1,
-			vector<bool>(2 * width + 1, true)
-			);
+	const float WALL_LENGTH = 2.0f;
+	const float WALL_HEIGHT = 1.0f;
+	const float WALL_THICKNESS = 0.15f;
 
-	for (int y = 0; y < 2 * height + 1; y++) {
-		for (int x = 0; x < 2 * width + 1; x++) {
-			if (walls[y][x]) {
-				Model->pushMatrix();
+	// Draws a wall whose unrotated long direction is the X axis.
+	auto drawWall = [&](float x, float z, bool horizontal) {
+		Model->pushMatrix();
 
-				// Centers the maze around the origin.
-				Model->translate(vec3(
-					static_cast<float>(x - width),
-					0.0f,
-					static_cast<float>(y - height)
-				));
+		Model->translate(vec3(x, 0.0f, z));
 
-				// Adjust these dimensions to fit your wall mesh.
-				Model->scale(vec3(0.5f, 1.0f, 0.5f));
+		// North/south walls extend along X.
+		// East/west walls extend along Z.
+		if (!horizontal) {
+			Model->rotate(radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
+		}
 
-				wallObject->draw(prog);
+		Model->scale(vec3(WALL_LENGTH, WALL_HEIGHT, WALL_THICKNESS));
+		wallObject->draw(prog);
 
-				Model->popMatrix();
+		Model->popMatrix();
+	};
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			// Center of this maze cell in world coordinates.
+			float cellX = 2.0f * x + 1.0f - width;
+			float cellZ = 2.0f * y + 1.0f - height;
+
+			// North/front wall: horizontal, extends along X.
+			if (nodes[y][x] & NORTH) {
+				drawWall(cellX, cellZ - 1.0f, true);
+			}
+
+			// West/left wall: vertical, extends along Z.
+			if (nodes[y][x] & WEST) {
+				drawWall(cellX - 1.0f, cellZ, false);
+			}
+
+			// Draw these only at the outside edge, avoiding duplicates.
+			if (y == height - 1 && (nodes[y][x] & SOUTH)) {
+				drawWall(cellX, cellZ + 1.0f, true);
+			}
+
+			if (x == width - 1 && (nodes[y][x] & EAST)) {
+				drawWall(cellX + 1.0f, cellZ, false);
 			}
 		}
 	}
