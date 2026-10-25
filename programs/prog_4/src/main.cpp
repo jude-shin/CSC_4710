@@ -379,6 +379,7 @@ class Application : public EventCallbacks {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
 		}
 
+		// TODO: remove this
 		void drawWall(shared_ptr<Program> curS) {
 			rockTexture->bind(curS->getUniform("Texture0"));
 			initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
@@ -470,7 +471,7 @@ class Application : public EventCallbacks {
     			View->translate(vec3(-camFpsX, 0.0f, -camFpsZ));
 					break;
 				case BIRD:
-					View->rotate(1.57f, vec3(1.0f, 0.0f, 0.0f));
+					View->rotate(radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 					View->translate(vec3(0.0f, -BIRD_HEIGHT, 0.0f));
 					break;
 			}
@@ -485,7 +486,6 @@ class Application : public EventCallbacks {
 
 			// -- Draw objects -------------------------------------------------------
 			renderDummy(Model);
-
 			prog->unbind();
 
 			// == TEXTURE GLSL PROGRAM =================================================
@@ -496,7 +496,10 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(texProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 
 			// -- Draw objects -------------------------------------------------------
-			drawWall(texProg);
+
+			rockTexture->bind(texProg->getUniform("Texture0"));
+			maze.render(texProg, wallObject, Model);
+
 			drawGround(texProg);
 
 			// =========================================================================

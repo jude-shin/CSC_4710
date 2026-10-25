@@ -22,7 +22,7 @@ class Maze {
     Maze(int w, int h);
     void render(
         shared_ptr<Program> prog, 
-        shared_ptr<Shape> wallObject, 
+        vector<shared_ptr<Shape>> wallObject, 
         shared_ptr<MatrixStack> Model);
     void generateRecursiveBacktracker(int seed);
 

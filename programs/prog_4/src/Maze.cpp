@@ -85,33 +85,37 @@ void Maze::generateRecursive(int x, int y, mt19937 &generator) {
 	}
 }
 
-// This is done before the render function is called (you don't have to worry,
-// everything works):
-// tex->bind(curS->getUniform("Texture0"));
-// initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
+// TODO: make drawWall() a private function
 void Maze::render(
 		shared_ptr<Program> prog, 
-		shared_ptr<Shape> wallObject, 
+		vector<shared_ptr<Shape>> wallObject, 
 		shared_ptr<MatrixStack> Model) {
 
-	const float WALL_LENGTH = 2.0f;
-	const float WALL_HEIGHT = 1.0f;
-	const float WALL_THICKNESS = 0.15f;
+	const float MAZE_SCALE = 1.5f;
+
+	const float WALL_LENGTH = 0.007f;
+	const float WALL_HEIGHT = 0.01f;
+	const float WALL_THICKNESS = 0.01f;
+
+	const float WALL_Y_LOCATION = -1.5f;
 
 	// Draws a wall whose unrotated long direction is the X axis.
 	auto drawWall = [&](float x, float z, bool horizontal) {
 		Model->pushMatrix();
 
-		Model->translate(vec3(x, 0.0f, z));
+		Model->scale(vec3(MAZE_SCALE));
 
-		// North/south walls extend along X.
-		// East/west walls extend along Z.
-		if (!horizontal) {
+		Model->translate(vec3(x, WALL_Y_LOCATION, z));
+	
+		// Rotate the walls depending on their orientation.
+		if (horizontal) {
 			Model->rotate(radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
 		}
 
-		Model->scale(vec3(WALL_LENGTH, WALL_HEIGHT, WALL_THICKNESS));
-		wallObject->draw(prog);
+		Model->scale(vec3(WALL_THICKNESS, WALL_HEIGHT, WALL_LENGTH));
+
+		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+		for (auto& rock : wallObject) { rock->draw(prog); }
 
 		Model->popMatrix();
 	};
