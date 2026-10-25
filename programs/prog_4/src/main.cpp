@@ -13,6 +13,7 @@
 #include "MatrixStack.h"
 #include "WindowManager.h"
 #include "Texture.h"
+#include "Maze.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -46,6 +47,11 @@ using namespace glm;
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
 
+// Game Dimensions
+#define MAZE_H 10
+#define MAZE_W 10
+#define MAZE_SEED 100
+
 class Application : public EventCallbacks {
 
 	public:
@@ -62,6 +68,8 @@ class Application : public EventCallbacks {
 		shared_ptr<Texture> groundTexture;
 		shared_ptr<Texture> rockTexture;
 
+		// =========================================================================
+
 		// Keymap Binary Array
 		bool keys[1024] = { false };
 
@@ -70,6 +78,8 @@ class Application : public EventCallbacks {
 		GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
 		GLuint GroundVertexArrayID;		// Ground VAO
 		int g_GiboLen;
+
+		// =========================================================================
 
 		// Camera Data
 		enum CameraMode {
@@ -91,6 +101,11 @@ class Application : public EventCallbacks {
 		// float cam_bird_x = 0.0f;
 		// float cam_bird_y = 0.0f;
 		// // TODO: change this with mouse movement // float cam_bird_rot = 0.0f;
+
+		// =========================================================================
+
+		// Maze Data
+		Maze maze = Maze(MAZE_W, MAZE_H);
 
 		void processKeyboardState() {
 			// === WASD FPS Controls =================================================
@@ -249,6 +264,9 @@ class Application : public EventCallbacks {
 			rockTexture->init();
 			rockTexture->setUnit(0);
 			rockTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+			// === Generate the Maze =================================================
+			maze.generateRecursiveBacktracker(MAZE_SEED);
 		}
 		
 		void initGeom(const std::string& resourceDirectory) {
