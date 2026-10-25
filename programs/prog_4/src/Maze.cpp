@@ -4,8 +4,11 @@
 #include <algorithm>
 #include <array>
 #include <stdexcept>
+#include <random>
+#include <glad/glad.h>
 
 using namespace std;
+using namespace glm;
 
 // Wall-bit values
 constexpr int NORTH = 1;
@@ -82,36 +85,40 @@ void Maze::generateRecursive(int x, int y, mt19937 &generator) {
 	}
 }
 
-vector<vector<bool>> Maze::render() {
+// This is done before the render function is called (you don't have to worry,
+// everything works):
+// tex->bind(curS->getUniform("Texture0"));
+// initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
+void Maze::render(
+		shared_ptr<Program> prog, 
+		shared_ptr<Shape> wallObject, 
+		shared_ptr<MatrixStack> Model) {
+
 	// true means wall; false means traversable space.
 	vector<vector<bool>> walls(
 			2 * height + 1,
 			vector<bool>(2 * width + 1, true)
 			);
 
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			int renderX = 2 * x + 1;
-			int renderY = 2 * y + 1;
+	for (int y = 0; y < 2 * height + 1; y++) {
+		for (int x = 0; x < 2 * width + 1; x++) {
+			if (walls[y][x]) {
+				Model->pushMatrix();
 
-			// The center of every cell is open.
-			walls[renderY][renderX] = false;
+				// Centers the maze around the origin.
+				Model->translate(vec3(
+					static_cast<float>(x - width),
+					0.0f,
+					static_cast<float>(y - height)
+				));
 
-			// Remove a rendered wall when the maze cell has no matching wall.
-			if (!(nodes[y][x] & NORTH)) {
-				walls[renderY - 1][renderX] = false;
-			}
-			if (!(nodes[y][x] & EAST)) {
-				walls[renderY][renderX + 1] = false;
-			}
-			if (!(nodes[y][x] & SOUTH)) {
-				walls[renderY + 1][renderX] = false;
-			}
-			if (!(nodes[y][x] & WEST)) {
-				walls[renderY][renderX - 1] = false;
+				// Adjust these dimensions to fit your wall mesh.
+				Model->scale(vec3(0.5f, 1.0f, 0.5f));
+
+				wallObject->draw(prog);
+
+				Model->popMatrix();
 			}
 		}
 	}
-
-	return walls;
 }
