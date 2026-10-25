@@ -63,10 +63,7 @@ class Application : public EventCallbacks {
 		shared_ptr<Texture> rockTexture;
 
 		// Keymap Binary Array
-		// TODO: Use this instead to track which keys are being presed
-		// TODO: FIRST check that the camera translation works as expected in our main loop
-		// Then start playing around with the keypresses.
-		// bool keys[1024] = { false };
+		bool keys[1024] = { false };
 
 		// Global data for ground plane
 		// Direct load constant defined CPU data to GPU (not obj)
@@ -95,43 +92,52 @@ class Application : public EventCallbacks {
 		// float cam_bird_y = 0.0f;
 		// // TODO: change this with mouse movement // float cam_bird_rot = 0.0f;
 
+		void processKeyboardState() {
+			// === WASD FPS Controls =================================================
+			float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
+			vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
+			vec3 right(cos(yaw), 0.0f, -sin(yaw));
+
+			if (keys[GLFW_KEY_W]) {
+				camFpsX += forward.x * WASD_FPS_SENSE;
+				camFpsZ += forward.z * WASD_FPS_SENSE;
+			}
+			if (keys[GLFW_KEY_S]) {
+				camFpsX -= forward.x * WASD_FPS_SENSE;
+				camFpsZ -= forward.z * WASD_FPS_SENSE;
+			}
+			if (keys[GLFW_KEY_D]) {
+				camFpsX += right.x * WASD_FPS_SENSE;
+				camFpsZ += right.z * WASD_FPS_SENSE;
+			}
+			if (keys[GLFW_KEY_A]) {
+				camFpsX -= right.x * WASD_FPS_SENSE;
+				camFpsZ -= right.z * WASD_FPS_SENSE;
+			}
+		}
+
 		void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window, GL_TRUE);
 			}
 
-			// Camera Translation
-			float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
-			vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
-			vec3 right(cos(yaw), 0.0f, -sin(yaw));
-			
-			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-			    camFpsX += forward.x * WASD_FPS_SENSE;
-			    camFpsZ += forward.z * WASD_FPS_SENSE;
-			}
-			if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			    camFpsX -= forward.x * WASD_FPS_SENSE;
-			    camFpsZ -= forward.z * WASD_FPS_SENSE;
-			}
-			if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			    camFpsX += right.x * WASD_FPS_SENSE;
-			    camFpsZ += right.z * WASD_FPS_SENSE;
-			}
-			if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			    camFpsX -= right.x * WASD_FPS_SENSE;
-			    camFpsZ -= right.z * WASD_FPS_SENSE;
+			// === WASD FPS Controls =================================================
+			// TODO: Do another if statement for what kind of control mode we have
+			if (key == GLFW_KEY_W || 
+					key == GLFW_KEY_A || 
+					key == GLFW_KEY_S || 
+					key == GLFW_KEY_D) {
+				// No matter what, if the key is pressed, then set the flag to be true
+				if (action == GLFW_PRESS) {
+					keys[key] = true;
+				}
+				else if (action == GLFW_RELEASE) {
+					keys[key] = false;
+				}
 			}
 
-			// Show/Hide wireframe of all objects
-			if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-			}
-			if (key == GLFW_KEY_Z && action == GLFW_RELEASE) {
-				glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-			}
-
-			// Use enum instead of the boolean
-			if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+			// === Switching FPS to Birds Eye View ===================================
+			if (key == GLFW_KEY_M && GLFW_PRESS) {
 				switch (cameraMode) {
 					case FPS:
 						cameraMode = BIRD;
@@ -526,6 +532,9 @@ int main(int argc, char *argv[]) {
 
 	// Loop until the user closes the window.
 	while (!glfwWindowShouldClose(windowManager->getHandle())) {
+		// Process Keyboard State
+		application->processKeyboardState();
+
 		// Render scene.
 		application->render();
 
