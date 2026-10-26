@@ -32,7 +32,7 @@ using namespace glm;
 #define WALL_OBJ "/rock_wall.obj"
 
 // .jpg texture files
-#define GROUND_TEX "/flower_grass.jpg"
+#define GROUND_TEX "/dirt.jpg"
 #define ROCK_TEX "/mossy_rock_texture.jpg"
 
 // === MAGIC CONTROLS ==========================================================
@@ -251,7 +251,8 @@ class Application : public EventCallbacks {
 			groundTexture->setFilename(resourceDirectory + GROUND_TEX);
 			groundTexture->init();
 			groundTexture->setUnit(0);
-			groundTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+			// groundTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+			groundTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
 
 			// Load in the rock texture (for the walls)
 			rockTexture = make_shared<Texture>();
@@ -351,9 +352,9 @@ class Application : public EventCallbacks {
 
 			static GLfloat GrndTex[] = {
 				0, 0, // back
-				0, 1,
-				1, 1,
-				1, 0 };
+				0, 10.0,
+				10.0, 10.0,
+				10.0, 0 };
 
 			unsigned short idx[] = {0, 1, 2, 0, 2, 3};
 
