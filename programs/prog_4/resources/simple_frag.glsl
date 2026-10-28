@@ -1,5 +1,7 @@
 #version 330 core 
 
+// Simple Material Fragment Shader
+
 out vec4 color;
 
 uniform vec3 MatAmb;

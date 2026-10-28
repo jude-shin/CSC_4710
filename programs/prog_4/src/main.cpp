@@ -246,6 +246,12 @@ class Application : public EventCallbacks {
 			texProg->addAttribute("vertPos");
 			texProg->addAttribute("vertNor");
 			texProg->addAttribute("vertTex");
+			texProg->addUniform("MatAmb");
+			texProg->addUniform("MatDif");
+			texProg->addUniform("MatSpec");
+			texProg->addUniform("MatShine");
+			texProg->addUniform("lightPos0");
+			texProg->addUniform("lightColor0");
 
 			groundTexture = make_shared<Texture>();
 			groundTexture->setFilename(resourceDirectory + GROUND_TEX);
@@ -495,6 +501,14 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(texProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(texProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 			glUniformMatrix4fv(texProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+
+			// Material for textured objects
+			glUniform3f(texProg->getUniform("lightPos0"), -2.0f, 2.0f, 2.0f);
+			glUniform3f(texProg->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+			glUniform3f(texProg->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
+			glUniform3f(texProg->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
+			glUniform3f(texProg->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
+			glUniform1f(texProg->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
 

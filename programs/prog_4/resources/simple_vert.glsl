@@ -1,4 +1,5 @@
 #version  330 core
+// Simple Material Vertex Shader
 layout(location = 0) in vec4 vertPos;
 layout(location = 1) in vec3 vertNor;
 layout(location = 2) in vec2 vertTex;
