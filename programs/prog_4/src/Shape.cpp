@@ -45,40 +45,83 @@ void Shape::measure() {
 	max.z = maxZ;
 }
 
-// Interpolates the normals for each of the VERTICES
 void Shape::interpNormals() {
-	// Make sure norBuf can hold all of the new normals
-  norBuf.resize(posBuf.size(), 0.0f); 
+    const size_t vertexCount = posBuf.size() / 3;
 
-	for (size_t i = 0; i < eleBuf.size(); i += 3) {
-		// Vertex Indexes
-		unsigned int idx0 = eleBuf[i];
-		unsigned int idx1 = eleBuf[i+1];
-		unsigned int idx2 = eleBuf[i+2];
-	
-		// Actual Vertex Values
-		vec3 p0(posBuf[3 * idx0], posBuf[3 * idx0 + 1], posBuf[3 * idx0 + 2]);
-		vec3 p1(posBuf[3 * idx1], posBuf[3 * idx1 + 1], posBuf[3 * idx1 + 2]);
-		vec3 p2(posBuf[3 * idx2], posBuf[3 * idx2 + 1], posBuf[3 * idx2 + 2]);
+    // One accumulated normal per vertex.
+    norBuf.assign(posBuf.size(), 0.0f);
+    vector<unsigned int> connectedFaceCount(vertexCount, 0);
 
-		// Calculate the normal using the cross product of the edges
-    vec3 edge1 = p1 - p0;
-    vec3 edge2 = p2 - p0;
-    vec3 faceNormal = glm::cross(edge1, edge2);
+    // Add each unit face normal to its three connected vertices.
+    for (size_t i = 0; i + 2 < eleBuf.size(); i += 3) {
+        unsigned int idx0 = eleBuf[i];
+        unsigned int idx1 = eleBuf[i + 1];
+        unsigned int idx2 = eleBuf[i + 2];
 
-		// Accumulate (sum) this face normal into all 3 neighboring vertices
-		norBuf[3 * idx0 + 0] += faceNormal.x; 
-		norBuf[3 * idx0 + 1] += faceNormal.y; 
-		norBuf[3 * idx0 + 2] += faceNormal.z;
+        vec3 p0(
+            posBuf[3 * idx0],
+            posBuf[3 * idx0 + 1],
+            posBuf[3 * idx0 + 2]
+        );
 
-		norBuf[3 * idx1 + 0] += faceNormal.x; 
-		norBuf[3 * idx1 + 1] += faceNormal.y; 
-		norBuf[3 * idx1 + 2] += faceNormal.z;
+        vec3 p1(
+            posBuf[3 * idx1],
+            posBuf[3 * idx1 + 1],
+            posBuf[3 * idx1 + 2]
+        );
 
-		norBuf[3 * idx2 + 0] += faceNormal.x; 
-		norBuf[3 * idx2 + 1] += faceNormal.y; 
-		norBuf[3 * idx2 + 2] += faceNormal.z;
-	}
+        vec3 p2(
+            posBuf[3 * idx2],
+            posBuf[3 * idx2 + 1],
+            posBuf[3 * idx2 + 2]
+        );
+
+        vec3 faceNormal = cross(p1 - p0, p2 - p0);
+
+        // Ignore degenerate triangles.
+        if (length(faceNormal) == 0.0f) {
+            continue;
+        }
+
+        faceNormal = normalize(faceNormal);
+        norBuf[3 * idx0] += faceNormal.x;
+        norBuf[3 * idx0 + 1] += faceNormal.y;
+        norBuf[3 * idx0 + 2] += faceNormal.z;
+        connectedFaceCount[idx0]++;
+
+        norBuf[3 * idx1] += faceNormal.x;
+        norBuf[3 * idx1 + 1] += faceNormal.y;
+        norBuf[3 * idx1 + 2] += faceNormal.z;
+        connectedFaceCount[idx1]++;
+
+        norBuf[3 * idx2] += faceNormal.x;
+        norBuf[3 * idx2 + 1] += faceNormal.y;
+        norBuf[3 * idx2 + 2] += faceNormal.z;
+        connectedFaceCount[idx2]++;
+    }
+
+    // Average connected face normals, then make each vertex normal unit length.
+    for (size_t v = 0; v < vertexCount; v++) {
+        if (connectedFaceCount[v] == 0) {
+            continue;
+        }
+
+        vec3 averageNormal(
+            norBuf[3 * v],
+            norBuf[3 * v + 1],
+            norBuf[3 * v + 2]
+        );
+
+        averageNormal /= static_cast<float>(connectedFaceCount[v]);
+
+        if (length(averageNormal) > 0.0f) {
+            averageNormal = normalize(averageNormal);
+        }
+
+        norBuf[3 * v] = averageNormal.x;
+        norBuf[3 * v + 1] = averageNormal.y;
+        norBuf[3 * v + 2] = averageNormal.z;
+    }
 }
 
 void Shape::init() {

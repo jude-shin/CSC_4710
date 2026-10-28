@@ -15,7 +15,7 @@ out vec3 EPos;
 void main() {
 	gl_Position = P * V * M * vertPos;
 
-	fragNor = (M * vec4(vertNor, 0.0)).xyz; 
-	lightDir0 = lightPos0 - (M*vertPos).xyz;
-	EPos = (M*vertPos).xyz;
+	fragNor = (V*M * vec4(vertNor, 0.0)).xyz; 
+	EPos = (V*M*vertPos).xyz;
+	lightDir0 = (V*vec4(lightPos0 - (M*vertPos).xyz, 0.0)).xyz;
 }

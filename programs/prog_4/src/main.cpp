@@ -351,7 +351,7 @@ class Application : public EventCallbacks {
 			};
 
 			static GLfloat GrndTex[] = {
-				0, 0, // back
+				0, 0,
 				0, 10.0,
 				10.0, 10.0,
 				10.0, 0 };
