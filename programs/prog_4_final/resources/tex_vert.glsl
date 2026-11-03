@@ -16,13 +16,16 @@ out vec3 EPos;
 
 void main() {
 	vec4 worldPos = M * vec4(vertPos, 1.0);
+	vec4 viewPos = V * worldPos;
 
-	gl_Position = P * V * worldPos;
+	gl_Position = P * viewPos;
 
-	// Keep normal and lighting data in camera/view space.
-	fragNor = (V * M * vec4(vertNor, 0.0)).xyz;
-	EPos = (V * worldPos).xyz;
-	lightDir0 = (V * vec4(lightPos0 - worldPos.xyz, 0.0)).xyz;
+	mat3 normalMatrix = transpose(inverse(mat3(V * M)));
+	fragNor = normalize(normalMatrix * vertNor);
+
+	vec3 viewLightPos = (V * vec4(lightPos0, 1.0)).xyz;
+	EPos = viewPos.xyz;
+	lightDir0 = viewLightPos - EPos;
 
 	vTexCoord = vertTex;
 }
