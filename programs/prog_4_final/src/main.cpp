@@ -112,18 +112,18 @@ class Application : public EventCallbacks {
 				vec3 right(cos(yaw), 0.0f, -sin(yaw));
 				vec3 delta(0.0f, 0.0f, 0.0f);
 
-				// === WASD FPS Controls =================================================
+				// === WASD FPS Controls ===============================================
 				if (keys[GLFW_KEY_W]) {
-					delta -= vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
-				}
-				if (keys[GLFW_KEY_S]) {
 					delta += vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
 				}
+				if (keys[GLFW_KEY_S]) {
+					delta -= vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
+				}
 				if (keys[GLFW_KEY_D]) {
-					delta -= vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
+					delta += vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
 				}
 				if (keys[GLFW_KEY_A]) {
-					delta += vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
+					delta -= vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
 				}
 
 				camFpsPos += delta;
@@ -475,7 +475,7 @@ class Application : public EventCallbacks {
 				case FPS:
 					View->rotate(-camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
     			View->rotate(-camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
-    			View->translate(camFpsPos);
+    			View->translate(-camFpsPos);
 					break;
 				case BIRD:
 					View->rotate(radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
@@ -484,17 +484,17 @@ class Application : public EventCallbacks {
 			}
 
 			// == LIGHTING GLSL PROGRAM ==============================================
-			prog->bind();
+			// prog->bind();
 
-			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+			// glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+			// glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 
-			glUniform3f(prog->getUniform("lightPos0"), -2.0f, 2.0f, 2.0f);
-			glUniform3f(prog->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+			// glUniform3f(prog->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
+			// glUniform3f(prog->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
 
-			// -- Draw objects -------------------------------------------------------
-			// renderDummy(Model);
-			prog->unbind();
+			// // -- Draw objects -------------------------------------------------------
+			// // renderDummy(Model);
+			// prog->unbind();
 
 			// == TEXTURE GLSL PROGRAM =================================================
 			texProg->bind();
@@ -504,7 +504,7 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(texProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 
 			// Material for textured objects
-			glUniform3f(texProg->getUniform("lightPos0"), -2.0f, 2.0f, 2.0f);
+			glUniform3f(texProg->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
 			glUniform3f(texProg->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
 
 			glUniform3f(texProg->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
