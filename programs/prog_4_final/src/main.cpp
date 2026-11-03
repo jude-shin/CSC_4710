@@ -91,11 +91,11 @@ class Application : public EventCallbacks {
 		CameraMode cameraMode = BIRD;
 
 		// FPS Camera State
-		// TODO: move these to vec3 s
-		float camFpsX = 0.0f;
-		float camFpsZ = 0.0f;
+		vec3 camFpsPos = vec3(0.0f, 0.0f, 0.0f);
+
 		float camFpsYaw = 0.0f; // horizontal
 		float camFpsPitch = 0.0f; // vertical
+
 		double prevMouseX= 0.0f;
 		double prevMouseY = 0.0f;
 		bool initMousePos = true; // If we have no "prev" mouse positions
@@ -110,24 +110,23 @@ class Application : public EventCallbacks {
 				float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
 				vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
 				vec3 right(cos(yaw), 0.0f, -sin(yaw));
+				vec3 delta(0.0f, 0.0f, 0.0f);
 
 				// === WASD FPS Controls =================================================
 				if (keys[GLFW_KEY_W]) {
-					camFpsX += forward.x * WASD_FPS_SENSE;
-					camFpsZ += forward.z * WASD_FPS_SENSE;
+					delta -= vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
 				}
 				if (keys[GLFW_KEY_S]) {
-					camFpsX -= forward.x * WASD_FPS_SENSE;
-					camFpsZ -= forward.z * WASD_FPS_SENSE;
+					delta += vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
 				}
 				if (keys[GLFW_KEY_D]) {
-					camFpsX += right.x * WASD_FPS_SENSE;
-					camFpsZ += right.z * WASD_FPS_SENSE;
+					delta -= vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
 				}
 				if (keys[GLFW_KEY_A]) {
-					camFpsX -= right.x * WASD_FPS_SENSE;
-					camFpsZ -= right.z * WASD_FPS_SENSE;
+					delta += vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
 				}
+
+				camFpsPos += delta;
 			}
 			else if (cameraMode == BIRD) {
 				// TODO: Just move the person
@@ -476,7 +475,7 @@ class Application : public EventCallbacks {
 				case FPS:
 					View->rotate(-camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
     			View->rotate(-camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
-    			View->translate(vec3(-camFpsX, 0.0f, -camFpsZ));
+    			View->translate(camFpsPos);
 					break;
 				case BIRD:
 					View->rotate(radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
@@ -489,8 +488,9 @@ class Application : public EventCallbacks {
 
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 			glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-			glUniform3f(prog->getUniform("lightPos0"), -2.0, 2.0, 2.0);
-			glUniform3f(prog->getUniform("lightColor0"), 1.0, 1.0, 1.0);
+
+			glUniform3f(prog->getUniform("lightPos0"), -2.0f, 2.0f, 2.0f);
+			glUniform3f(prog->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
 
 			// -- Draw objects -------------------------------------------------------
 			// renderDummy(Model);
@@ -506,6 +506,7 @@ class Application : public EventCallbacks {
 			// Material for textured objects
 			glUniform3f(texProg->getUniform("lightPos0"), -2.0f, 2.0f, 2.0f);
 			glUniform3f(texProg->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+
 			glUniform3f(texProg->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
 			glUniform3f(texProg->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
 			glUniform3f(texProg->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
