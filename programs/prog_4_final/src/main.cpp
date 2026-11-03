@@ -49,8 +49,9 @@ using namespace glm;
 #define BIRD_HEIGHT 60.0f
 
 // Game Dimensions
-#define MAZE_H 10
-#define MAZE_W 10
+#define MAZE_H 20
+#define MAZE_W 20
+#define MAZE_SCALE 1.00
 #define MAZE_SEED 100
 
 class Application : public EventCallbacks {
@@ -492,7 +493,7 @@ class Application : public EventCallbacks {
 			glUniform3f(prog->getUniform("lightColor0"), 1.0, 1.0, 1.0);
 
 			// -- Draw objects -------------------------------------------------------
-			renderDummy(Model);
+			// renderDummy(Model);
 			prog->unbind();
 
 			// == TEXTURE GLSL PROGRAM =================================================
@@ -513,7 +514,7 @@ class Application : public EventCallbacks {
 			// -- Draw objects -------------------------------------------------------
 
 			rockTexture->bind(texProg->getUniform("Texture0"));
-			maze.render(texProg, wallObject, Model);
+			maze.render(texProg, wallObject, Model, MAZE_SCALE);
 
 			drawGround(texProg);
 

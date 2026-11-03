@@ -23,7 +23,8 @@ class Maze {
     void render(
         shared_ptr<Program> prog, 
         vector<shared_ptr<Shape>> wallObject, 
-        shared_ptr<MatrixStack> Model);
+        shared_ptr<MatrixStack> Model,
+        float mazeScale);
     void generateRecursiveBacktracker(int seed);
 
   private:

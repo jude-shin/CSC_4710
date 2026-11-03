@@ -10,3 +10,7 @@ program 3, and I am just going to use that as a unit of measurement for one
 
 To change views from FPS mode to Birds-Eye-View, press "m". This will change 
 the camera angle.
+
+
+
+AABB (Axis alligned bounding box for collision detection)

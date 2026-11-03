@@ -89,9 +89,8 @@ void Maze::generateRecursive(int x, int y, mt19937 &generator) {
 void Maze::render(
 		shared_ptr<Program> prog, 
 		vector<shared_ptr<Shape>> wallObject, 
-		shared_ptr<MatrixStack> Model) {
-
-	const float MAZE_SCALE = 1.5f;
+		shared_ptr<MatrixStack> Model,
+		float mazeScale) {
 
 	const float WALL_LENGTH = 0.007f;
 	const float WALL_HEIGHT = 0.01f;
@@ -103,7 +102,7 @@ void Maze::render(
 	auto drawWall = [&](float x, float z, bool horizontal) {
 		Model->pushMatrix();
 
-		Model->scale(vec3(MAZE_SCALE));
+		Model->scale(vec3(mazeScale));
 
 		Model->translate(vec3(x, WALL_Y_LOCATION, z));
 	
