@@ -63,20 +63,12 @@ class Application : public EventCallbacks {
 	public:
 		WindowManager * windowManager = nullptr;
 
-		shared_ptr<Program> prog;		// Blinn-Phong shader program
 		shared_ptr<Program> texProg;	// Texture shader program
-
-		// Loaded Meshes 
-		// vector<shared_ptr<Shape>> dummyObject; 
-		// vector<shared_ptr<Shape>> wallObject;
-
-		// Images for the textures 
-		shared_ptr<Texture> groundTexture;
-		// shared_ptr<Texture> rockTexture;
 
 		// Objects
 		MyObject wallObject;
 		Ground groundObject;
+		// TODO: make a skybox object?
 
 		// =========================================================================
 
@@ -220,31 +212,6 @@ class Application : public EventCallbacks {
 			// Enable z-buffer test.
 			glEnable(GL_DEPTH_TEST);
 
-			// Initialize the GLSL program that we will use for local shading
-			// TODO: remove this if you don't need it
-			prog = make_shared<Program>();
-			prog->setVerbose(true);
-			prog->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/simple_frag.glsl");
-			prog->init();
-			prog->addUniform("P");
-			prog->addUniform("V");
-			prog->addUniform("M");
-			prog->addUniform("MatAmb");
-			prog->addUniform("MatDif");
-			prog->addUniform("MatShine");
-			prog->addUniform("MatSpec");
-			prog->addUniform("lightPos0");
-			prog->addUniform("lightColor0");
-			prog->addAttribute("vertPos");
-			prog->addAttribute("vertNor");
-
-			// TODO: remove if you don't ever need this again.
-			// // NOTE: Added bc the tree objects have vt in them
-			// // This will produce the following warning:
-			// // "WARN: vertTex cannot be bound (it either doesn't exist or has been 
-			// // optimized away). safe_glAttrib calls will silently ignore it."
-			// prog->addAttribute("vertTex");
-
 			// Initialize the GLSL program that we will use for texture mapping
 			texProg = make_shared<Program>();
 			texProg->setVerbose(true);
@@ -279,17 +246,6 @@ class Application : public EventCallbacks {
 					break;
 			}
 		}
-
-		// // Helper function to set model trasnforms
-		// // TODO: remove this
-		// void initModel(vec3 trans, float rotY, float rotX, float sc, shared_ptr<Program> curS) {
-		// 	mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
-		// 	mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
-		// 	mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
-		// 	mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
-		// 	mat4 ctm = Trans*RotX*RotY*ScaleS;
-		// 	glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
-		// }
 
 		void setModel(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>M) {
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
@@ -329,19 +285,6 @@ class Application : public EventCallbacks {
 					View->translate(vec3(0.0f, -BIRD_HEIGHT, 0.0f));
 					break;
 			}
-
-			// == LIGHTING GLSL PROGRAM ==============================================
-			// prog->bind();
-
-			// glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-			// glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-
-			// glUniform3f(prog->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
-			// glUniform3f(prog->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
-
-			// // -- Draw objects -------------------------------------------------------
-			// // renderDummy(Model);
-			// prog->unbind();
 
 			// == TEXTURE GLSL PROGRAM =================================================
 			texProg->bind();
@@ -395,8 +338,8 @@ int main(int argc, char *argv[]) {
 
 	// This is the code that will likely change program to program as you
 	// may need to initialize or set up different data and state
-	application->initObjects(resourceDir);
 	application->init(resourceDir);
+	application->initObjects(resourceDir);
 
 	// Loop until the user closes the window.
 	while (!glfwWindowShouldClose(windowManager->getHandle())) {
