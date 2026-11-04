@@ -15,6 +15,7 @@
 #include "Texture.h"
 #include "Maze.h"
 #include "MyObject.h"
+#include "Ground.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -35,8 +36,8 @@ using namespace glm;
 
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
-#define ROCK_TEX "/mossy_rock_texture.jpg"
-// #define ROCK_TEX "/bamboo.jpg"
+#define WALL_TEX "/mossy_rock_texture.jpg"
+// #define WALL_TEX "/bamboo.jpg"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -75,17 +76,12 @@ class Application : public EventCallbacks {
 
 		// Objects
 		MyObject wallObject;
+		Ground groundObject;
 
 		// =========================================================================
 
 		// Keymap Binary Array
 		bool keys[1024] = { false };
-
-		// Global data for ground plane
-		// Direct load constant defined CPU data to GPU (not obj)
-		GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
-		GLuint GroundVertexArrayID;		// Ground VAO
-		int g_GiboLen;
 
 		// =========================================================================
 
@@ -211,7 +207,8 @@ class Application : public EventCallbacks {
 		void initObjects(const std::string& resourceDirectory) {
 			GLSL::checkVersion();
 
-			wallObject = MyObject(resourceDirectory+ROCK_TEX, resourceDirectory+WALL_OBJ);
+			wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ);
+			groundObject = Ground(resourceDirectory+GROUND_TEX);
 		}
 
 		// TODO: rename this to initShaders or something
@@ -267,117 +264,10 @@ class Application : public EventCallbacks {
 			texProg->addUniform("lightPos0");
 			texProg->addUniform("lightColor0");
 
-			groundTexture = make_shared<Texture>();
-			groundTexture->setFilename(resourceDirectory + GROUND_TEX);
-			groundTexture->init();
-			groundTexture->setUnit(0);
-			// groundTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-			groundTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
-
 			// === Generate the Maze =================================================
 			maze.generateRecursiveBacktracker(MAZE_SEED);
 		}
 	
-		// TODO: get rid of this
-		void initGeom(const std::string& resourceDirectory) {
-			string errStr;
-			bool rc;
-			vector<tinyobj::shape_t> TOshapes;
-			vector<tinyobj::material_t> objMaterials;
-
-			// -- Load Ground --------------------------------------------------------
-			initGround();
-		}
-
-		// Directly pass quad for the ground to the GPU
-		void initGround() {
-
-			float g_groundSize = 20;
-			float g_groundY = -0.25;
-
-			// A x-z plane at y = g_groundY of dimension [-g_groundSize, g_groundSize]^2
-			float GrndPos[] = {
-				-g_groundSize, g_groundY, -g_groundSize,
-				-g_groundSize, g_groundY,  g_groundSize,
-				g_groundSize, g_groundY,  g_groundSize,
-				g_groundSize, g_groundY, -g_groundSize
-			};
-
-			float GrndNorm[] = {
-				0, 1, 0,
-				0, 1, 0,
-				0, 1, 0,
-				0, 1, 0,
-				0, 1, 0,
-				0, 1, 0
-			};
-
-			static GLfloat GrndTex[] = {
-				0, 0,
-				0, 10.0,
-				10.0, 10.0,
-				10.0, 0 };
-
-			unsigned short idx[] = {0, 1, 2, 0, 2, 3};
-
-			// Generate the ground VAO
-			glGenVertexArrays(1, &GroundVertexArrayID);
-			glBindVertexArray(GroundVertexArrayID);
-
-			g_GiboLen = 6;
-			glGenBuffers(1, &GrndBuffObj);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GrndPos), GrndPos, GL_STATIC_DRAW);
-
-			glGenBuffers(1, &GrndNorBuffObj);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GrndNorm), GrndNorm, GL_STATIC_DRAW);
-
-			glGenBuffers(1, &GrndTexBuffObj);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GrndTex), GrndTex, GL_STATIC_DRAW);
-
-			glGenBuffers(1, &GIndxBuffObj);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
-		}
-
-		// // TODO: remove this
-		// void drawWall(shared_ptr<Program> curS) {
-		// 	rockTexture->bind(curS->getUniform("Texture0"));
-		// 	initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
-		// 	for (auto& rock : wallObject) { rock->draw(curS); }
-		// }
-
-		void drawGround(shared_ptr<Program> curS) {
-			curS->bind();
-			glBindVertexArray(GroundVertexArrayID);
-			groundTexture->bind(curS->getUniform("Texture0"));
-
-			// Draw the ground plane 
-			initModel(vec3(0, -1, 0), 0, 0, 1, curS);
-			glEnableVertexAttribArray(0);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-			glEnableVertexAttribArray(1);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-			glEnableVertexAttribArray(2);
-			glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-			// Draw!
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-			glDrawElements(GL_TRIANGLES, g_GiboLen, GL_UNSIGNED_SHORT, 0);
-
-			glDisableVertexAttribArray(0);
-			glDisableVertexAttribArray(1);
-			glDisableVertexAttribArray(2);
-			curS->unbind();
-		}
-
 		// Helper function to pass material data to the GPU
 		void setMaterial(shared_ptr<Program> curS, int i) {
 			switch (i) {
@@ -390,15 +280,16 @@ class Application : public EventCallbacks {
 			}
 		}
 
-		// Helper function to set model trasnforms
-		void initModel(vec3 trans, float rotY, float rotX, float sc, shared_ptr<Program> curS) {
-			mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
-			mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
-			mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
-			mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
-			mat4 ctm = Trans*RotX*RotY*ScaleS;
-			glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
-		}
+		// // Helper function to set model trasnforms
+		// // TODO: remove this
+		// void initModel(vec3 trans, float rotY, float rotX, float sc, shared_ptr<Program> curS) {
+		// 	mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
+		// 	mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
+		// 	mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
+		// 	mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
+		// 	mat4 ctm = Trans*RotX*RotY*ScaleS;
+		// 	glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
+		// }
 
 		void setModel(std::shared_ptr<Program> prog, std::shared_ptr<MatrixStack>M) {
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
@@ -472,9 +363,9 @@ class Application : public EventCallbacks {
 			wallObject.getTexture()->bind(texProg->getUniform("Texture0"));
 			maze.render(texProg, wallObject.getGeometry(), Model, MAZE_SCALE);
 
-			drawGround(texProg);
+			groundObject.render(texProg);
 
-			// =========================================================================
+			// =======================================================================
 
 			texProg->unbind();
 
@@ -506,7 +397,6 @@ int main(int argc, char *argv[]) {
 	// may need to initialize or set up different data and state
 	application->initObjects(resourceDir);
 	application->init(resourceDir);
-	application->initGeom(resourceDir);
 
 	// Loop until the user closes the window.
 	while (!glfwWindowShouldClose(windowManager->getHandle())) {
