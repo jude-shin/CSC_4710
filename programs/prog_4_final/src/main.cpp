@@ -14,6 +14,7 @@
 #include "WindowManager.h"
 #include "Texture.h"
 #include "Maze.h"
+#include "MyObject.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -30,10 +31,12 @@ using namespace glm;
 // .obj mesh files
 #define DUMMY_OBJ "/dummy.obj"
 #define WALL_OBJ "/rock_wall.obj"
+// #define WALL_OBJ "/bamboo.obj"
 
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
 #define ROCK_TEX "/mossy_rock_texture.jpg"
+// #define ROCK_TEX "/bamboo.jpg"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -63,12 +66,15 @@ class Application : public EventCallbacks {
 		shared_ptr<Program> texProg;	// Texture shader program
 
 		// Loaded Meshes 
-		vector<shared_ptr<Shape>> dummyObject; 
-		vector<shared_ptr<Shape>> wallObject;
+		// vector<shared_ptr<Shape>> dummyObject; 
+		// vector<shared_ptr<Shape>> wallObject;
 
 		// Images for the textures 
 		shared_ptr<Texture> groundTexture;
-		shared_ptr<Texture> rockTexture;
+		// shared_ptr<Texture> rockTexture;
+
+		// Objects
+		MyObject wallObject;
 
 		// =========================================================================
 
@@ -202,6 +208,13 @@ class Application : public EventCallbacks {
 			glViewport(0, 0, width, height);
 		}
 
+		void initObjects(const std::string& resourceDirectory) {
+			GLSL::checkVersion();
+
+			wallObject = MyObject(resourceDirectory+ROCK_TEX, resourceDirectory+WALL_OBJ);
+		}
+
+		// TODO: rename this to initShaders or something
 		void init(const std::string& resourceDirectory) {
 			GLSL::checkVersion();
 
@@ -211,6 +224,7 @@ class Application : public EventCallbacks {
 			glEnable(GL_DEPTH_TEST);
 
 			// Initialize the GLSL program that we will use for local shading
+			// TODO: remove this if you don't need it
 			prog = make_shared<Program>();
 			prog->setVerbose(true);
 			prog->setShaderNames(resourceDirectory + "/simple_vert.glsl", resourceDirectory + "/simple_frag.glsl");
@@ -260,74 +274,16 @@ class Application : public EventCallbacks {
 			// groundTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 			groundTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
 
-			// Load in the rock texture (for the walls)
-			rockTexture = make_shared<Texture>();
-			rockTexture->setFilename(resourceDirectory + ROCK_TEX);
-			rockTexture->init();
-			rockTexture->setUnit(0);
-			rockTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
 			// === Generate the Maze =================================================
 			maze.generateRecursiveBacktracker(MAZE_SEED);
 		}
-		
+	
+		// TODO: get rid of this
 		void initGeom(const std::string& resourceDirectory) {
 			string errStr;
 			bool rc;
 			vector<tinyobj::shape_t> TOshapes;
 			vector<tinyobj::material_t> objMaterials;
-
-			// -- Load Dummy Mesh ----------------------------------------------------
-			rc = tinyobj::LoadObj(
-					TOshapes,
-					objMaterials,
-					errStr, 
-					(resourceDirectory + DUMMY_OBJ).c_str());
-
-			if (!rc) {
-				cerr << errStr << endl;
-			} 
-			else {
-				for (int i = 0; i < TOshapes.size(); ++i) {
-					auto obj = make_shared<Shape>();
-					obj->createShape(TOshapes[i]);
-					obj->measure();
-					obj->init();
-
-					dummyObject.push_back(obj);
-				}
-			}
-
-			// Clean up shapes for the next object setup
-			TOshapes.clear();
-			objMaterials.clear();
-			errStr = "";
-
-			// -- Load Wall Mesh -----------------------------------------------------
-			rc = tinyobj::LoadObj(
-					TOshapes,
-					objMaterials,
-					errStr, 
-					(resourceDirectory + WALL_OBJ).c_str());
-
-			if (!rc) {
-				cerr << errStr << endl;
-			} 
-			else {
-				for (int i = 0; i < TOshapes.size(); ++i) {
-					auto obj = make_shared<Shape>();
-					obj->createShape(TOshapes[i]);
-					obj->measure();
-					obj->init();
-
-					wallObject.push_back(obj);
-				}
-			}
-
-			// Clean up shapes for the next object setup
-			TOshapes.clear();
-			objMaterials.clear();
-			errStr = "";
 
 			// -- Load Ground --------------------------------------------------------
 			initGround();
@@ -386,12 +342,12 @@ class Application : public EventCallbacks {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
 		}
 
-		// TODO: remove this
-		void drawWall(shared_ptr<Program> curS) {
-			rockTexture->bind(curS->getUniform("Texture0"));
-			initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
-			for (auto& rock : wallObject) { rock->draw(curS); }
-		}
+		// // TODO: remove this
+		// void drawWall(shared_ptr<Program> curS) {
+		// 	rockTexture->bind(curS->getUniform("Texture0"));
+		// 	initModel(vec3(0.0f, -1.0f, -5.0f), 1.57f, 0.0f, 0.01f, curS);
+		// 	for (auto& rock : wallObject) { rock->draw(curS); }
+		// }
 
 		void drawGround(shared_ptr<Program> curS) {
 			curS->bind();
@@ -513,9 +469,8 @@ class Application : public EventCallbacks {
 			glUniform1f(texProg->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-
-			rockTexture->bind(texProg->getUniform("Texture0"));
-			maze.render(texProg, wallObject, Model, MAZE_SCALE);
+			wallObject.getTexture()->bind(texProg->getUniform("Texture0"));
+			maze.render(texProg, wallObject.getGeometry(), Model, MAZE_SCALE);
 
 			drawGround(texProg);
 
@@ -527,14 +482,6 @@ class Application : public EventCallbacks {
 			Projection->popMatrix();
 			View->popMatrix();
 		}
-
-		// Render The Dummy (player lol)
-		void renderDummy(std::shared_ptr<MatrixStack>Model) {
-			initModel(vec3(2, -1, -4.0), 0.0f, -1.57f, 0.01f, prog);
-			setMaterial(prog, 0);
-			for (auto& o : dummyObject) { o->draw(prog); }
-		}
-
 };
 
 int main(int argc, char *argv[]) {
@@ -557,6 +504,7 @@ int main(int argc, char *argv[]) {
 
 	// This is the code that will likely change program to program as you
 	// may need to initialize or set up different data and state
+	application->initObjects(resourceDir);
 	application->init(resourceDir);
 	application->initGeom(resourceDir);
 
