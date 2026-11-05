@@ -1,5 +1,6 @@
 #include "BambooWall.h"
 #include "GLSL.h"
+#include <GLFW/glfw3.h>
 #include <assert.h>
 #include <algorithm>
 #include <glm/fwd.hpp>
@@ -8,6 +9,9 @@
 // One bamboo cluster spans roughly 2 maze units.
 #define WALL_SPAN 2.0f
 #define CLUSTER_ANGLE 20.0f
+
+#define WIND_MAX_ANGLE 6.0f
+#define WIND_SPEED 1.25f
 
 using namespace std;
 using namespace glm;
@@ -33,6 +37,8 @@ void BambooWall::render(
 
 	int clusterSize = std::max(1, density);
 	float spacing = WALL_SPAN / static_cast<float>(clusterSize);
+	float time = static_cast<float>(glfwGetTime());
+	float windAngle = WIND_MAX_ANGLE * sin(time * WIND_SPEED);
 
 	for (int i = 0; i < clusterSize; i++) {
 		float offset = -WALL_SPAN / 2.0f
@@ -48,12 +54,15 @@ void BambooWall::render(
 		}
 
 		model->translate(vec3(offset, 0.0f, 0.0f));
-
-		// Give this cluster a stable, unique Y-axis rotation.
+		
+		vec3 windAxis = flip ? vec3(-1.0f, 0.0f, 0.0f) : vec3(0.0f, 0.0f, 1.0f);
+		model->rotate(radians(windAngle), windAxis);
+		
+		// Each cluster retains its unique fixed orientation.
 		float randomValue = clusterRandom(trans, i);
-		float randomAngle = -CLUSTER_ANGLE + randomValue * (CLUSTER_ANGLE*2);
+		float randomAngle = -CLUSTER_ANGLE + randomValue * (CLUSTER_ANGLE * 2);
 		model->rotate(radians(randomAngle), vec3(0.0f, 1.0f, 0.0f));
-
+		
 		model->scale(vec3(scale));
 
 		bambooObject.render(shader, model);

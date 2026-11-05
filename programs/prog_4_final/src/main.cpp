@@ -34,7 +34,7 @@ using namespace glm;
 // .obj mesh files
 #define DUMMY_OBJ "/dummy.obj"
 #define WALL_OBJ "/rock_wall.obj"
-#define BAMBOO_OBJ "/bamboo.obj"
+#define BAMBOO_OBJ "/bamboo.obj" // TODO: define this in the bamboo wall function
 
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
@@ -79,7 +79,6 @@ class Application : public EventCallbacks {
 		bool keys[1024] = { false };
 
 		// =========================================================================
-
 		// Camera Data
 		enum CameraMode {
 			FPS, 
