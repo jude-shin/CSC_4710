@@ -57,8 +57,6 @@ using namespace glm;
 #define MAZE_H 20
 #define MAZE_W 20
 #define MAZE_SCALE 1.00
-
-// Move these magic numbers to the other packages?
 #define MAZE_SEED 100
 #define BAMBOO_DENSITY 3
 

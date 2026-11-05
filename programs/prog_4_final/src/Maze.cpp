@@ -7,6 +7,9 @@
 #include <random>
 #include <glad/glad.h>
 
+#define WALL_Y_LOCATION -1.2f
+#define SCALE 0.005
+
 using namespace std;
 using namespace glm;
 
@@ -91,9 +94,6 @@ void Maze::render(
 		BambooWall bambooWall,
 		shared_ptr<MatrixStack> model,
 		float mazeScale) {
-
-	const float WALL_Y_LOCATION = -1.2f;
-	const float SCALE = 0.005; // TODO: change this
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {

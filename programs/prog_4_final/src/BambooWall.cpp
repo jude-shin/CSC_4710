@@ -5,6 +5,9 @@
 #include <glm/fwd.hpp>
 #include "Program.h"
 
+// One bamboo cluster spans roughly 2 maze units.
+#define WALL_SPAN 2.0f
+
 using namespace std;
 using namespace glm;
 
@@ -26,9 +29,6 @@ void BambooWall::render(
 		vec3 trans,
 		float scale,
 		bool flip) {
-
-	// One bamboo cluster spans roughly 2 maze units.
-	const float WALL_SPAN = 2.0f;
 
 	// Avoid division by zero if an invalid density was provided.
 	int clusterSize = std::max(1, density);
