@@ -13,18 +13,18 @@
 #define WIND_MAX_ANGLE 6.0f
 #define WIND_SPEED 1.25f
 
+#define BAMBOO_OBJ "/bamboo.obj"
+#define BAMBOO_TEX "/bamboo.jpg"
+
 using namespace std;
 using namespace glm;
 
 BambooWall::BambooWall() {}
 
-BambooWall::BambooWall(
-		const std::string & texFile, 
-		const std::string & objFile, 
-		int density){
+BambooWall::BambooWall(const std::string & resourcesDir, int density) {
 
 	// Init the single bamboo object
-	bambooObject = MyObject(texFile, objFile);
+	bambooObject = MyObject(resourcesDir+BAMBOO_TEX, resourcesDir+BAMBOO_OBJ);
 	this->density = density;
 }
 

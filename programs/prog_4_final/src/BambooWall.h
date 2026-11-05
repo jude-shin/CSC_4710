@@ -17,10 +17,7 @@ using namespace glm;
 class BambooWall {
   public:
     BambooWall();
-    BambooWall(
-        const std::string & texFile, 
-        const std::string & objFile, 
-        int density);
+    BambooWall(const std::string & resourcesDir, int density);
     void render(
         shared_ptr<Program> shader, 
         shared_ptr<MatrixStack> model,

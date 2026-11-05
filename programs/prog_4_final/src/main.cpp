@@ -34,12 +34,10 @@ using namespace glm;
 // .obj mesh files
 #define DUMMY_OBJ "/dummy.obj"
 #define WALL_OBJ "/rock_wall.obj"
-#define BAMBOO_OBJ "/bamboo.obj" // TODO: define this in the bamboo wall function
 
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
 #define WALL_TEX "/mossy_rock_texture.jpg"
-#define BAMBOO_TEX "/bamboo.jpg"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -203,7 +201,7 @@ class Application : public EventCallbacks {
 
 			// wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ); // TODO: remove the wall object
 			groundObject = Ground(resourceDirectory+GROUND_TEX);
-			bambooWall = BambooWall(resourceDirectory+BAMBOO_TEX, resourceDirectory+BAMBOO_OBJ, BAMBOO_DENSITY);
+			bambooWall = BambooWall(resourceDirectory, BAMBOO_DENSITY);
 		}
 
 		// TODO: rename this to initShaders or something
