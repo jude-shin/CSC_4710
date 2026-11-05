@@ -18,6 +18,7 @@
 #include "Ground.h"
 #include "BambooWall.h"
 
+// TODO: remove this macro?
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
