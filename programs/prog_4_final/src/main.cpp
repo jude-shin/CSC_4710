@@ -61,14 +61,13 @@ using namespace glm;
 #define BAMBOO_DENSITY 3
 
 class Application : public EventCallbacks {
-
 	public:
 		WindowManager * windowManager = nullptr;
 
-		shared_ptr<Program> texProg;	// Texture shader program
+		shared_ptr<Program> shader;	// Texture shader program
 
 		// Objects
-		MyObject wallObject;
+		MyObject wallObject; // TODO: remove the wall object
 		Ground groundObject;
 		BambooWall bambooWall;
 		// TODO: make a skybox object?
@@ -202,7 +201,7 @@ class Application : public EventCallbacks {
 		void initObjects(const std::string& resourceDirectory) {
 			GLSL::checkVersion();
 
-			wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ);
+			// wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ); // TODO: remove the wall object
 			groundObject = Ground(resourceDirectory+GROUND_TEX);
 			bambooWall = BambooWall(resourceDirectory+BAMBOO_TEX, resourceDirectory+BAMBOO_OBJ, BAMBOO_DENSITY);
 		}
@@ -217,23 +216,23 @@ class Application : public EventCallbacks {
 			glEnable(GL_DEPTH_TEST);
 
 			// Initialize the GLSL program that we will use for texture mapping
-			texProg = make_shared<Program>();
-			texProg->setVerbose(true);
-			texProg->setShaderNames(resourceDirectory + "/tex_vert.glsl", resourceDirectory + "/tex_frag0.glsl");
-			texProg->init();
-			texProg->addUniform("P");
-			texProg->addUniform("V");
-			texProg->addUniform("M");
-			texProg->addUniform("Texture0");
-			texProg->addAttribute("vertPos");
-			texProg->addAttribute("vertNor");
-			texProg->addAttribute("vertTex");
-			texProg->addUniform("MatAmb");
-			texProg->addUniform("MatDif");
-			texProg->addUniform("MatSpec");
-			texProg->addUniform("MatShine");
-			texProg->addUniform("lightPos0");
-			texProg->addUniform("lightColor0");
+			shader = make_shared<Program>();
+			shader->setVerbose(true);
+			shader->setShaderNames(resourceDirectory + "/tex_vert.glsl", resourceDirectory + "/tex_frag0.glsl");
+			shader->init();
+			shader->addUniform("P");
+			shader->addUniform("V");
+			shader->addUniform("M");
+			shader->addUniform("Texture0");
+			shader->addAttribute("vertPos");
+			shader->addAttribute("vertNor");
+			shader->addAttribute("vertTex");
+			shader->addUniform("MatAmb");
+			shader->addUniform("MatDif");
+			shader->addUniform("MatSpec");
+			shader->addUniform("MatShine");
+			shader->addUniform("lightPos0");
+			shader->addUniform("lightColor0");
 
 			// === Generate the Maze =================================================
 			maze.generateRecursiveBacktracker(MAZE_SEED);
@@ -291,30 +290,27 @@ class Application : public EventCallbacks {
 			}
 
 			// == TEXTURE GLSL PROGRAM =================================================
-			texProg->bind();
+			shader->bind();
 
-			glUniformMatrix4fv(texProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-			glUniformMatrix4fv(texProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-			glUniformMatrix4fv(texProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+			glUniformMatrix4fv(shader->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+			glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+			glUniformMatrix4fv(shader->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 
 			// Material for textured objects
-			glUniform3f(texProg->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
-			glUniform3f(texProg->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+			glUniform3f(shader->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
+			glUniform3f(shader->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
 
-			glUniform3f(texProg->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
-			glUniform3f(texProg->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
-			glUniform3f(texProg->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
-			glUniform1f(texProg->getUniform("MatShine"), 32.0f);
+			glUniform3f(shader->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
+			glUniform3f(shader->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
+			glUniform3f(shader->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
+			glUniform1f(shader->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-			wallObject.getTexture()->bind(texProg->getUniform("Texture0"));
-			maze.render(texProg, bambooWall, Model, MAZE_SCALE);
+			// wallObject.getTexture()->bind(shader->getUniform("Texture0")); // TODO: remove the wall object
+			maze.render(shader, bambooWall, Model, MAZE_SCALE);
+			groundObject.render(shader);
 
-			groundObject.render(texProg);
-
-			// =======================================================================
-
-			texProg->unbind();
+			shader->unbind();
 
 			// Pop matrix stacks.
 			Projection->popMatrix();
