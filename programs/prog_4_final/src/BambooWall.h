@@ -28,12 +28,12 @@ class BambooWall {
         float scale, 
         bool flip);
 
-    // TODO: add in translation, rotation, and flip status
-
   private:
     MyObject bambooObject; // One cluster
     vector<shared_ptr<Shape>> geometry; // List of all clusters
     int density;
+
+    static float clusterRandom(vec3 wallPosition, int clusterIndex);
 };
 
 #endif

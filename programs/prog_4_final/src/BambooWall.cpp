@@ -7,6 +7,7 @@
 
 // One bamboo cluster spans roughly 2 maze units.
 #define WALL_SPAN 2.0f
+#define CLUSTER_ANGLE 20.0f
 
 using namespace std;
 using namespace glm;
@@ -30,10 +31,7 @@ void BambooWall::render(
 		float scale,
 		bool flip) {
 
-	// Avoid division by zero if an invalid density was provided.
 	int clusterSize = std::max(1, density);
-
-	// Each bamboo stalk gets an evenly spaced position in the cluster.
 	float spacing = WALL_SPAN / static_cast<float>(clusterSize);
 
 	for (int i = 0; i < clusterSize; i++) {
@@ -43,23 +41,34 @@ void BambooWall::render(
 
 		model->pushMatrix();
 
-		// Move to this maze wall's center.
 		model->translate(trans);
 
-		// By default, the bamboo cluster extends along X.
-		// Rotate it to extend along Z for the other wall orientation.
 		if (flip) {
 			model->rotate(radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
 		}
 
-		// Place this individual bamboo object within the cluster.
 		model->translate(vec3(offset, 0.0f, 0.0f));
 
-		// Scale only this individual bamboo model uniformly.
+		// Give this cluster a stable, unique Y-axis rotation.
+		float randomValue = clusterRandom(trans, i);
+		float randomAngle = -CLUSTER_ANGLE + randomValue * (CLUSTER_ANGLE*2);
+		model->rotate(radians(randomAngle), vec3(0.0f, 1.0f, 0.0f));
+
 		model->scale(vec3(scale));
 
 		bambooObject.render(shader, model);
 
 		model->popMatrix();
 	}
+}
+
+// Returns the same pseudo-random value in [0, 1) for the same wall/cluster.
+float BambooWall::clusterRandom(vec3 wallPosition, int clusterIndex) {
+	float value = sin(
+		wallPosition.x * 12.9898f +
+		wallPosition.z * 78.233f +
+		static_cast<float>(clusterIndex) * 37.719f
+	) * 43758.5453f;
+
+	return value - floor(value);
 }
