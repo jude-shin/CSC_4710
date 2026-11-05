@@ -46,6 +46,29 @@ MyObject::MyObject(const std::string & texFile, const std::string & objFile) {
 	texture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
+
+void MyObject::render(
+		shared_ptr<Program> shader,
+		shared_ptr<MatrixStack> model) {
+
+	// Send to the shader
+	glUniformMatrix4fv(
+			shader->getUniform("M"),
+			1,
+			GL_FALSE,
+			value_ptr(model->topMatrix()));
+
+	// Use this object's texture.
+	texture->bind(shader->getUniform("Texture0"));
+
+	// Draw every shape in this geometry
+	for (auto & shape : geometry) {
+		shape->draw(shader);
+	}
+
+	texture->unbind();
+}
+
 shared_ptr<Texture> MyObject::getTexture() {
 	return texture;
 }

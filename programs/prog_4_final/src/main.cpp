@@ -16,6 +16,7 @@
 #include "Maze.h"
 #include "MyObject.h"
 #include "Ground.h"
+#include "BambooWall.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader/tiny_obj_loader.h>
@@ -32,12 +33,12 @@ using namespace glm;
 // .obj mesh files
 #define DUMMY_OBJ "/dummy.obj"
 #define WALL_OBJ "/rock_wall.obj"
-// #define WALL_OBJ "/bamboo.obj"
+#define BAMBOO_OBJ "/bamboo.obj"
 
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
 #define WALL_TEX "/mossy_rock_texture.jpg"
-// #define WALL_TEX "/bamboo.jpg"
+#define BAMBOO_TEX "/bamboo.jpg"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -56,7 +57,10 @@ using namespace glm;
 #define MAZE_H 20
 #define MAZE_W 20
 #define MAZE_SCALE 1.00
+
+// Move these magic numbers to the other packages?
 #define MAZE_SEED 100
+#define BAMBOO_DENSITY 3
 
 class Application : public EventCallbacks {
 
@@ -68,6 +72,7 @@ class Application : public EventCallbacks {
 		// Objects
 		MyObject wallObject;
 		Ground groundObject;
+		BambooWall bambooWall;
 		// TODO: make a skybox object?
 
 		// =========================================================================
@@ -201,6 +206,7 @@ class Application : public EventCallbacks {
 
 			wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ);
 			groundObject = Ground(resourceDirectory+GROUND_TEX);
+			bambooWall = BambooWall(resourceDirectory+BAMBOO_TEX, resourceDirectory+BAMBOO_OBJ, BAMBOO_DENSITY);
 		}
 
 		// TODO: rename this to initShaders or something
@@ -304,7 +310,7 @@ class Application : public EventCallbacks {
 
 			// -- Draw objects -------------------------------------------------------
 			wallObject.getTexture()->bind(texProg->getUniform("Texture0"));
-			maze.render(texProg, wallObject.getGeometry(), Model, MAZE_SCALE);
+			maze.render(texProg, bambooWall, Model, MAZE_SCALE);
 
 			groundObject.render(texProg);
 

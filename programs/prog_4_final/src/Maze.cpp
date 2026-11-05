@@ -1,6 +1,6 @@
 // Maze.cpp
 #include "Maze.h"
-
+#include "BambooWall.h"
 #include <algorithm>
 #include <array>
 #include <stdexcept>
@@ -87,37 +87,13 @@ void Maze::generateRecursive(int x, int y, mt19937 &generator) {
 
 // TODO: make drawWall() a private function
 void Maze::render(
-		shared_ptr<Program> prog, 
-		vector<shared_ptr<Shape>> wallObject, 
-		shared_ptr<MatrixStack> Model,
+		shared_ptr<Program> shader, 
+		BambooWall bambooWall,
+		shared_ptr<MatrixStack> model,
 		float mazeScale) {
 
-	const float WALL_LENGTH = 0.007f;
-	const float WALL_HEIGHT = 0.01f;
-	const float WALL_THICKNESS = 0.01f;
-
-	const float WALL_Y_LOCATION = -1.5f;
-
-	// Draws a wall whose unrotated long direction is the X axis.
-	auto drawWall = [&](float x, float z, bool horizontal) {
-		Model->pushMatrix();
-
-		Model->scale(vec3(mazeScale));
-
-		Model->translate(vec3(x, WALL_Y_LOCATION, z));
-	
-		// Rotate the walls depending on their orientation.
-		if (horizontal) {
-			Model->rotate(radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
-		}
-
-		Model->scale(vec3(WALL_THICKNESS, WALL_HEIGHT, WALL_LENGTH));
-
-		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
-		for (auto& rock : wallObject) { rock->draw(prog); }
-
-		Model->popMatrix();
-	};
+	const float WALL_Y_LOCATION = -1.2f;
+	const float SCALE = 0.005; // TODO: change this
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
@@ -125,23 +101,52 @@ void Maze::render(
 			float cellX = 2.0f * x + 1.0f - width;
 			float cellZ = 2.0f * y + 1.0f - height;
 
-			// North/front wall: horizontal, extends along X.
+			// North/front wall: extends along X.
 			if (nodes[y][x] & NORTH) {
-				drawWall(cellX, cellZ - 1.0f, true);
+				bambooWall.render(
+						shader,
+						model,
+						vec3(cellX * mazeScale,
+							WALL_Y_LOCATION * mazeScale,
+							(cellZ - 1.0f) * mazeScale),
+						SCALE,
+						false);
 			}
 
-			// West/left wall: vertical, extends along Z.
+			// West/left wall: extends along Z.
 			if (nodes[y][x] & WEST) {
-				drawWall(cellX - 1.0f, cellZ, false);
+				bambooWall.render(
+						shader,
+						model,
+						vec3((cellX - 1.0f) * mazeScale,
+							WALL_Y_LOCATION * mazeScale,
+							cellZ * mazeScale),
+						SCALE,
+						true);
 			}
 
-			// Draw these only at the outside edge, avoiding duplicates.
+			// South/back wall: extends along X.
 			if (y == height - 1 && (nodes[y][x] & SOUTH)) {
-				drawWall(cellX, cellZ + 1.0f, true);
+				bambooWall.render(
+						shader,
+						model,
+						vec3(cellX * mazeScale,
+							WALL_Y_LOCATION * mazeScale,
+							(cellZ + 1.0f) * mazeScale),
+						SCALE,
+						false);
 			}
 
+			// East/right wall: extends along Z.
 			if (x == width - 1 && (nodes[y][x] & EAST)) {
-				drawWall(cellX + 1.0f, cellZ, false);
+				bambooWall.render(
+						shader,
+						model,
+						vec3((cellX + 1.0f) * mazeScale,
+							WALL_Y_LOCATION * mazeScale,
+							cellZ * mazeScale),
+						SCALE,
+						true);
 			}
 		}
 	}

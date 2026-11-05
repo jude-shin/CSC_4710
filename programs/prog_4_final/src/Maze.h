@@ -9,6 +9,7 @@
 #include "Program.h"
 #include "Shape.h"
 #include "MatrixStack.h"
+#include "BambooWall.h"
 
 using namespace std;
 
@@ -21,9 +22,9 @@ class Maze {
   public:
     Maze(int w, int h);
     void render(
-        shared_ptr<Program> prog, 
-        vector<shared_ptr<Shape>> wallObject, 
-        shared_ptr<MatrixStack> Model,
+        shared_ptr<Program> shader, 
+        BambooWall bambooWall,
+        shared_ptr<MatrixStack> model,
         float mazeScale);
     void generateRecursiveBacktracker(int seed);
 
