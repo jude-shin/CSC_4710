@@ -69,6 +69,7 @@ void MyObject::render(
 	texture->unbind();
 }
 
+// TODO: remove these?
 shared_ptr<Texture> MyObject::getTexture() {
 	return texture;
 }

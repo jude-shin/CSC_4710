@@ -172,17 +172,17 @@ class Application : public EventCallbacks {
 				pos_x = -pos_x;
 				pos_y = -pos_y;
 			}
-			
+
 			if (initMousePos) {
 				prevMouseX = pos_x;
 				prevMouseY = pos_y;
 				initMousePos = false;
 			}
 			// Get the change in mouse position from the previous poll 
-    	float deltax = prevMouseX - pos_x;
-    	float deltay = prevMouseY - pos_y;
-    	prevMouseX = pos_x;
-    	prevMouseY = pos_y;
+			float deltax = prevMouseX - pos_x;
+			float deltay = prevMouseY - pos_y;
+			prevMouseX = pos_x;
+			prevMouseY = pos_y;
 
 			// Use Deltas to calculate the yaw and pitch of the camera
 			camFpsPitch += deltay;
@@ -235,7 +235,7 @@ class Application : public EventCallbacks {
 			// === Generate the Maze =================================================
 			maze.generateRecursiveBacktracker(MAZE_SEED);
 		}
-	
+
 		// Helper function to pass material data to the GPU
 		void setMaterial(shared_ptr<Program> curS, int i) {
 			switch (i) {
@@ -272,21 +272,39 @@ class Application : public EventCallbacks {
 			Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
 
 			// Update the Global Camera
-			// Rotate first, then (in the same stack) translate the camera.
+			// Build the view matrix from the camera position and viewing direction.
 			View->pushMatrix();
 			View->loadIdentity();
 			switch (cameraMode) {
-				case FPS:
-					View->rotate(-camFpsPitch*MOUSE_FPS_SENSE_PITCH, vec3(1, 0, 0));
-    			View->rotate(-camFpsYaw*MOUSE_FPS_SENSE_YAW, vec3(0, 1, 0));
-    			View->translate(-camFpsPos);
-					break;
-				case BIRD:
-					View->rotate(radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
-					View->translate(vec3(0.0f, -BIRD_HEIGHT, 0.0f));
-					break;
-			}
+				case FPS: 
+					{
+						float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
+						float pitch = camFpsPitch * MOUSE_FPS_SENSE_PITCH;
 
+						vec3 forward(
+								-sin(yaw) * cos(pitch),
+								sin(pitch),
+								-cos(yaw) * cos(pitch)
+								);
+
+						View->lookAt(
+								camFpsPos,
+								camFpsPos + forward,
+								vec3(0.0f, 1.0f, 0.0f)
+								);
+						break;
+					}
+
+				case BIRD:
+					{
+						View->lookAt(
+								vec3(0.0f, BIRD_HEIGHT, 0.0f),
+								vec3(0.0f, 0.0f, 0.0f),
+								vec3(0.0f, 0.0f, -1.0f)
+								);
+						break;
+					}
+			}
 			// == TEXTURE GLSL PROGRAM =================================================
 			shader->bind();
 
@@ -314,6 +332,7 @@ class Application : public EventCallbacks {
 			Projection->popMatrix();
 			View->popMatrix();
 		}
+
 };
 
 int main(int argc, char *argv[]) {
@@ -357,4 +376,5 @@ int main(int argc, char *argv[]) {
 	// Quit program.
 	windowManager->shutdown();
 	return 0;
+
 }
