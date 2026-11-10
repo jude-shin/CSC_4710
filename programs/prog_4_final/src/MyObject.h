@@ -16,8 +16,6 @@ class MyObject {
   public:
     MyObject();
     MyObject(const std::string & texFile, const std::string & objFile);
-    shared_ptr<Texture> getTexture();
-    vector<shared_ptr<Shape>> getGeometry();
     void render(shared_ptr<Program> shader, shared_ptr<MatrixStack> model);
 
   private:

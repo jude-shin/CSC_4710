@@ -66,7 +66,6 @@ class Application : public EventCallbacks {
 		shared_ptr<Program> shader;	// Texture shader program
 
 		// Objects
-		MyObject wallObject; // TODO: remove the wall object
 		Ground groundObject;
 		BambooWall bambooWall;
 		// TODO: make a skybox object?
@@ -199,7 +198,6 @@ class Application : public EventCallbacks {
 		void initObjects(const std::string& resourceDirectory) {
 			GLSL::checkVersion();
 
-			// wallObject = MyObject(resourceDirectory+WALL_TEX, resourceDirectory+WALL_OBJ); // TODO: remove the wall object
 			groundObject = Ground(resourceDirectory+GROUND_TEX);
 			bambooWall = BambooWall(resourceDirectory, BAMBOO_DENSITY);
 		}
@@ -322,7 +320,6 @@ class Application : public EventCallbacks {
 			glUniform1f(shader->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-			// wallObject.getTexture()->bind(shader->getUniform("Texture0")); // TODO: remove the wall object
 			maze.render(shader, bambooWall, Model, MAZE_SCALE);
 			groundObject.render(shader);
 
