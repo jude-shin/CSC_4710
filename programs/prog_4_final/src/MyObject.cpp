@@ -10,61 +10,83 @@ using namespace glm;
 
 MyObject::MyObject() {}
 
-MyObject::MyObject(const std::string & texFile, const std::string & objFile) {
-	// Init Geometries
+MyObject::MyObject(
+		const string &objFile,
+		const vector<string> &textureFiles,
+		const vector<size_t> &textureForShape) {
+
 	string errStr;
-	bool rc;
 	vector<tinyobj::shape_t> TOshapes;
 	vector<tinyobj::material_t> objMaterials;
 
-	// -- Load Dummy Mesh ----------------------------------------------------
-	rc = tinyobj::LoadObj(
+	bool rc = tinyobj::LoadObj(
 			TOshapes,
 			objMaterials,
-			errStr, 
-			(objFile).c_str());
+			errStr,
+			objFile.c_str()
+			);
 
 	if (!rc) {
 		cerr << errStr << endl;
-	} 
-	else {
-		for (int i = 0; i < TOshapes.size(); ++i) {
-			auto obj = make_shared<Shape>();
-			obj->createShape(TOshapes[i]);
-			obj->measure();
-			obj->init();
-
-			geometry.push_back(obj);
-		}
+		return;
 	}
 
-	// Init Textures
-	texture = make_shared<Texture>();
-	texture->setFilename(texFile);
-	texture->init();
-	texture->setUnit(0);
-	texture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-}
+	if (textureFiles.empty() ||
+			textureForShape.size() != TOshapes.size()) {
+		cerr << "Need one texture mapping for each OBJ shape." << endl;
+		cerr << "Objects Needed: " << TOshapes.size() << endl;
+		cerr << "Textures Defined: " << textureForShape.size() << endl;
+		return;
+	}
 
+	// Load each unique texture file once.
+	for (const auto &texFile : textureFiles) {
+		auto texture = make_shared<Texture>();
+		texture->setFilename(texFile);
+		texture->init();
+		texture->setUnit(0); // Reuse Texture0 for each separate draw call.
+		texture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		textures.push_back(texture);
+	}
+
+	// Associate every OBJ shape with its assigned texture.
+	for (size_t i = 0; i < TOshapes.size(); ++i) {
+		if (textureForShape[i] >= textures.size()) {
+			cerr << "Invalid texture index for OBJ shape " << i << endl;
+			return;
+		}
+
+		auto shape = make_shared<Shape>();
+		shape->createShape(TOshapes[i]);
+		shape->measure();
+		shape->init();
+
+		Part part;
+		part.shape = shape;
+		part.textureIndex = textureForShape[i];
+		parts.push_back(part);
+	}
+}
 
 void MyObject::render(
 		shared_ptr<Program> shader,
 		shared_ptr<MatrixStack> model) {
 
-	// Send to the shader
 	glUniformMatrix4fv(
 			shader->getUniform("M"),
 			1,
 			GL_FALSE,
-			value_ptr(model->topMatrix()));
+			value_ptr(model->topMatrix())
+			);
 
-	// Use this object's texture.
-	texture->bind(shader->getUniform("Texture0"));
+	GLint textureHandle = shader->getUniform("Texture0");
 
-	// Draw every shape in this geometry
-	for (auto & shape : geometry) {
-		shape->draw(shader);
+	for (const auto &part : parts) {
+		auto texture = textures[part.textureIndex];
+
+		texture->bind(textureHandle);
+		part.shape->draw(shader);
+		texture->unbind();
 	}
-
-	texture->unbind();
 }

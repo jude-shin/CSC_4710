@@ -12,9 +12,7 @@
 #include "Shape.h"
 #include "MatrixStack.h"
 #include "WindowManager.h"
-#include "Texture.h"
 #include "Maze.h"
-#include "MyObject.h"
 #include "Ground.h"
 #include "BambooWall.h"
 
@@ -303,7 +301,7 @@ class Application : public EventCallbacks {
 						break;
 					}
 			}
-			// == TEXTURE GLSL PROGRAM =================================================
+			// == TEXTURE GLSL PROGRAM ===============================================
 			shader->bind();
 
 			glUniformMatrix4fv(shader->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));

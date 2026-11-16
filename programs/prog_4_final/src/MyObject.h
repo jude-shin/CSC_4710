@@ -15,12 +15,28 @@ using namespace std;
 class MyObject {
   public:
     MyObject();
-    MyObject(const std::string & texFile, const std::string & objFile);
-    void render(shared_ptr<Program> shader, shared_ptr<MatrixStack> model);
+
+    MyObject(
+        const std::string &objFile,
+        const std::vector<std::string> &textureFiles,
+        const std::vector<size_t> &textureForShape
+        );
+
+    void render(
+        std::shared_ptr<Program> shader,
+        std::shared_ptr<MatrixStack> model
+        );
 
   private:
-    shared_ptr<Texture> texture;
-    vector<shared_ptr<Shape>> geometry;
+    struct Part {
+      std::shared_ptr<Shape> shape;
+      size_t textureIndex;
+    };
+
+    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<Part> parts;
 };
+
+
 
 #endif
