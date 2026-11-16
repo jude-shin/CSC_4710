@@ -26,6 +26,10 @@ vec3 blinnPhong(vec3 normal, vec3 light, vec3 diffuseColor) {
 
 void main() {
 	vec4 texColor0 = texture(Texture0, vTexCoord);
+	
+	if (texColor0.a < 0.10) {
+		discard;
+	}
 
 	vec3 normal = normalize(fragNor);
 	vec3 light0 = normalize(lightDir0);

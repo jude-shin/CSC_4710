@@ -15,7 +15,7 @@
 
 #define BAMBOO_OBJ "/bamboo.obj"
 #define BAMBOO_STALK_TEX "/bamboo_stalk.jpg"
-#define BAMBOO_LEAF_TEX "/bamboo_leaf.jpg"
+#define BAMBOO_LEAF_TEX "/bamboo_leaf.png"
 
 using namespace std;
 using namespace glm;
