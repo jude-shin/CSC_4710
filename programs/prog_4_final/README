@@ -13,3 +13,5 @@ There is one static orange light in the sky.
 Another white light is following the FPS camera.
 This bright spot can be seen from the bird's eye animation.
 This is to allow the player to see everything when they are navigating the maze.
+
+Collision detection was added for FPS controls.

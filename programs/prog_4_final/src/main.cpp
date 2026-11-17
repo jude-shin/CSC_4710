@@ -44,6 +44,7 @@ using namespace glm;
 
 // FPS sensitivity for wasd controls and mouse (for moving the camera)
 #define WASD_FPS_SENSE 0.2f
+#define FPS_COLLISION_RADIUS 0.03f
 #define MOUSE_FPS_SENSE_PITCH 0.004f	// vertical
 #define MOUSE_FPS_SENSE_YAW 0.002f		// horizontal
 #define INVERTED_MOUSE_CONTROLS true  // TODO: set to true before submitting
@@ -93,7 +94,7 @@ class Application : public EventCallbacks {
 		vec3 birdLookAt = vec3(0.0f, 0.0f, 0.0f);
 
 		// FPS Camera State
-		vec3 camFpsPos = vec3(0.0f, 0.0f, 0.0f);
+		vec3 camFpsPos = vec3(1.0f, 1.0f, 0.0f);
 
 		float camFpsYaw = 0.0f; // horizontal
 		float camFpsPitch = 0.0f; // vertical
@@ -115,10 +116,10 @@ class Application : public EventCallbacks {
 				// vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
 				float pitch = camFpsPitch * MOUSE_FPS_SENSE_PITCH;
 				vec3 forward(
-				    -sin(yaw) * cos(pitch),
-				    sin(pitch),
-				    -cos(yaw) * cos(pitch)
-				);
+						-sin(yaw) * cos(pitch),
+						sin(pitch),
+						-cos(yaw) * cos(pitch)
+						);
 
 				vec3 right(cos(yaw), 0.0f, -sin(yaw));
 				vec3 delta(0.0f, 0.0f, 0.0f);
@@ -141,7 +142,10 @@ class Application : public EventCallbacks {
 					delta -= vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);
 				}
 
-				camFpsPos += delta;
+				vec3 nextPosition = camFpsPos + delta;
+				if (!maze.collides(nextPosition, FPS_COLLISION_RADIUS, MAZE_SCALE)) {
+					camFpsPos = nextPosition;
+				}
 			}
 			else if (cameraMode == BIRD) {
 				// TODO: Just move the person
@@ -237,7 +241,7 @@ class Application : public EventCallbacks {
 					{ 4, 2, 0, 3, 1 });
 		}
 
-	
+
 		// TODO: Remove bezier curve stuff when you are donw with prog 4
 		void initCamera() {
 			splinepath[0] = Spline(
@@ -285,7 +289,7 @@ class Application : public EventCallbacks {
 			skyboxShader->addUniform("Texture0");
 			skyboxShader->addAttribute("vertPos");
 			skyboxShader->addAttribute("vertTex");
-			
+
 			// === Initialize the GLSL program that we will use for MyObjects ========
 			shader = make_shared<Program>();
 			shader->setVerbose(true);
@@ -373,14 +377,14 @@ class Application : public EventCallbacks {
 
 				case BIRD:
 					{
-							if (!splinepath[0].isDone()) {
-								splinepath[0].update(frametime);
-								birdEye = splinepath[0].getPosition();
-							}
-							else if (!splinepath[1].isDone()) {
-								splinepath[1].update(frametime);
-								birdEye = splinepath[1].getPosition();
-							}
+						if (!splinepath[0].isDone()) {
+							splinepath[0].update(frametime);
+							birdEye = splinepath[0].getPosition();
+						}
+						else if (!splinepath[1].isDone()) {
+							splinepath[1].update(frametime);
+							birdEye = splinepath[1].getPosition();
+						}
 						// }
 
 						View->lookAt(
@@ -389,50 +393,50 @@ class Application : public EventCallbacks {
 								vec3(0.0f, 1.0f, 0.0f)
 								);
 						break;
-					}
 			}
-
-			// == TEXTURE GLSL PROGRAM ===============================================
-			shader->bind();
-
-			glUniformMatrix4fv(shader->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-			glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-			glUniformMatrix4fv(shader->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
-
-			// Material for textured objects
-			glUniform3f(shader->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
-			glUniform3f(shader->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
-
-			glUniform3f(shader->getUniform("lightPos1"), 0.0f, BIRD_HEIGHT, 0.0f);
-			glUniform3f(shader->getUniform("lightColor1"), 0.5f, 0.42f, 0.31f);
-
-			glUniform3f(shader->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
-			glUniform3f(shader->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
-			glUniform3f(shader->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
-			glUniform1f(shader->getUniform("MatShine"), 32.0f);
-
-			// -- Draw objects -------------------------------------------------------
-			maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
-			groundObject.render(shader);
-
-			Model->pushMatrix();
-			Model->translate(vec3(0.0, -1.2f, CHEST_OFFSET));
-			Model->scale(vec3(0.003));
-			chestObject.render(shader, Model);
-			Model->popMatrix();
-
-			shader->unbind();
-
-			// == SKYBOX GLSL PROGRAM ================================================
-			// -- Draw Skybox --------------------------------------------------------
-			skyboxShader->bind();
-			skybox->render(skyboxShader, Projection, View);
-			skyboxShader->unbind();
-
-			// Pop matrix stacks.
-			Projection->popMatrix();
-			View->popMatrix();
 		}
+
+		// == TEXTURE GLSL PROGRAM ===============================================
+		shader->bind();
+
+		glUniformMatrix4fv(shader->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+		glUniformMatrix4fv(shader->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+		glUniformMatrix4fv(shader->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+
+		// Material for textured objects
+		glUniform3f(shader->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
+		glUniform3f(shader->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+
+		glUniform3f(shader->getUniform("lightPos1"), 0.0f, BIRD_HEIGHT, 0.0f);
+		glUniform3f(shader->getUniform("lightColor1"), 0.5f, 0.42f, 0.31f);
+
+		glUniform3f(shader->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
+		glUniform3f(shader->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
+		glUniform3f(shader->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
+		glUniform1f(shader->getUniform("MatShine"), 32.0f);
+
+		// -- Draw objects -------------------------------------------------------
+		maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
+		groundObject.render(shader);
+
+		Model->pushMatrix();
+		Model->translate(vec3(0.0, -1.2f, CHEST_OFFSET));
+		Model->scale(vec3(0.003));
+		chestObject.render(shader, Model);
+		Model->popMatrix();
+
+		shader->unbind();
+
+		// == SKYBOX GLSL PROGRAM ================================================
+		// -- Draw Skybox --------------------------------------------------------
+		skyboxShader->bind();
+		skybox->render(skyboxShader, Projection, View);
+		skyboxShader->unbind();
+
+		// Pop matrix stacks.
+		Projection->popMatrix();
+		View->popMatrix();
+}
 
 };
 
@@ -459,7 +463,7 @@ int main(int argc, char *argv[]) {
 	application->init(resourceDir);
 	application->initObjects(resourceDir);
 	application->initCamera();
-	
+
 	// Time since last frame
 	auto lastTime = chrono::high_resolution_clock::now();
 

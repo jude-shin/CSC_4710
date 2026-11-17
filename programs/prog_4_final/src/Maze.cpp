@@ -20,6 +20,21 @@ constexpr int SOUTH = 4;
 constexpr int WEST  = 8;
 constexpr int ALL_WALLS = NORTH | EAST | SOUTH | WEST;
 
+// Collision is intentionally a little wider than a zero-thickness line so the
+// camera cannot pass between or visibly into bamboo clusters.
+constexpr float WALL_HALF_THICKNESS = 0.15f;
+constexpr float WALL_COLLISION_BOTTOM = WALL_Y_LOCATION;
+constexpr float WALL_COLLISION_TOP = 0.8f;
+
+static bool pointHitsWall(
+		const vec3 &position,
+		float radius,
+		float minX, float maxX,
+		float minZ, float maxZ) {
+	return position.x >= minX - radius && position.x <= maxX + radius &&
+		position.z >= minZ - radius && position.z <= maxZ + radius;
+}
+
 Maze::Maze(int w, int h) : width(w), height(h) {
 	if (w <= 0 || h <= 0) {
 		throw invalid_argument("Maze width and height must be positive.");
@@ -86,6 +101,52 @@ void Maze::generateRecursive(int x, int y, mt19937 &generator) {
 
 		generateRecursive(nextX, nextY, generator);
 	}
+}
+
+bool Maze::collides(const vec3 &position, float radius, float mazeScale) const {
+	// The walls only block the camera while it is within the bamboo height.
+	// Moving above the top lets the player fly over the maze.
+	if (position.y < WALL_COLLISION_BOTTOM || position.y > WALL_COLLISION_TOP) {
+		return false;
+	}
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			float cellX = (2.0f * x + 1.0f - width) * mazeScale;
+			float cellZ = (2.0f * y + 1.0f - height) * mazeScale;
+			float halfCell = mazeScale;
+			float halfWall = WALL_HALF_THICKNESS * mazeScale;
+
+			// Use the same wall selection and locations as render(). Each test is
+			// one full maze-wall rectangle, never an individual bamboo cluster.
+			if ((nodes[y][x] & NORTH) &&
+					pointHitsWall(position, radius,
+						cellX - halfCell, cellX + halfCell,
+						cellZ - halfCell - halfWall, cellZ - halfCell + halfWall)) {
+				return true;
+			}
+			if ((nodes[y][x] & WEST) &&
+					pointHitsWall(position, radius,
+						cellX - halfCell - halfWall, cellX - halfCell + halfWall,
+						cellZ - halfCell, cellZ + halfCell)) {
+				return true;
+			}
+			if (y == height - 1 && (nodes[y][x] & SOUTH) &&
+					pointHitsWall(position, radius,
+						cellX - halfCell, cellX + halfCell,
+						cellZ + halfCell - halfWall, cellZ + halfCell + halfWall)) {
+				return true;
+			}
+			if (x == width - 1 && (nodes[y][x] & EAST) &&
+					pointHitsWall(position, radius,
+						cellX + halfCell - halfWall, cellX + halfCell + halfWall,
+						cellZ - halfCell, cellZ + halfCell)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 // TODO: make drawWall() a private function

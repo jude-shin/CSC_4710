@@ -28,6 +28,9 @@ class Maze {
         float mazeScale);
     void generateRecursiveBacktracker(int seed);
 
+    // Returns true when the camera's XZ footprint overlaps a bamboo wall.
+    bool collides(const glm::vec3 &position, float radius, float mazeScale) const;
+
   private:
     int width;
     int height;
