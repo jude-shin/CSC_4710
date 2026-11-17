@@ -15,11 +15,11 @@ using namespace std;
 class MyObject {
   public:
     MyObject();
-
-
+    
+    // For those that have .mtl
     MyObject(const string &objFileName, const string &resourceDirectory);
   
-    // TODO: remove this
+    // For those that don't have .mtl (explicit texture listing)
     MyObject(
         const std::string &objFile,
         const std::vector<std::string> &textureFiles,

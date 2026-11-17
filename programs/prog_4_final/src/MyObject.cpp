@@ -116,11 +116,6 @@ MyObject::MyObject(
 		return;
 	}
 	
-	// TODO: do this later
-	// int materialID = TOshapes[i].mesh.material_ids.at(0);
-	// string textureFile =
-  //	resourceDirectory + objMaterials[materialID].diffuse_texname;
-
 	if (textureFiles.empty() ||
 			textureForShape.size() != TOshapes.size()) {
 		cerr << "Need one texture mapping for each OBJ shape." << endl;
