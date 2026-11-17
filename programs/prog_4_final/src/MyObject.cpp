@@ -159,8 +159,6 @@ void MyObject::render(
 		shared_ptr<Program> shader,
 		shared_ptr<MatrixStack> model) {
 
-	shader->bind();
-
 	CHECKED_GL_CALL(glUniformMatrix4fv(
 				shader->getUniform("M"),
 				1,

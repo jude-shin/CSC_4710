@@ -373,7 +373,7 @@ class Application : public EventCallbacks {
 			glUniform1f(shader->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-			// maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
+			maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
 			groundObject.render(shader);
 
 			Model->pushMatrix();
@@ -386,7 +386,9 @@ class Application : public EventCallbacks {
 
 			// == SKYBOX GLSL PROGRAM ================================================
 			// -- Draw Skybox --------------------------------------------------------
+			skyboxShader->bind();
 			skybox->render(skyboxShader, Projection, View);
+			skyboxShader->unbind();
 
 			// Pop matrix stacks.
 			Projection->popMatrix();

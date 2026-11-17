@@ -41,8 +41,6 @@ void Skybox::render(
 		return;
 	}
 
-	skyboxShader->bind();
-
 	glUniformMatrix4fv(
 			skyboxShader->getUniform("P"),
 			1,
@@ -86,6 +84,4 @@ void Skybox::render(
 	if (cullingWasEnabled) {
 		glCullFace(oldCullFace);
 	}
-
-	skyboxShader->unbind();
 }

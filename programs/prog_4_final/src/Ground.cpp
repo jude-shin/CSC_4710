@@ -70,7 +70,6 @@ Ground::Ground(const std::string & texFile) {
 }
 
 void Ground::render(shared_ptr<Program> shader) {
-	shader->bind();
 	glBindVertexArray(GroundVertexArrayID);
 	texture->bind(shader->getUniform("Texture0"));
 
@@ -98,6 +97,4 @@ void Ground::render(shared_ptr<Program> shader) {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
-
-	shader->unbind();
 }
