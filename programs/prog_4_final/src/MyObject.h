@@ -16,6 +16,10 @@ class MyObject {
   public:
     MyObject();
 
+
+    MyObject(const string &objFileName, const string &resourceDirectory);
+  
+    // TODO: remove this
     MyObject(
         const std::string &objFile,
         const std::vector<std::string> &textureFiles,
