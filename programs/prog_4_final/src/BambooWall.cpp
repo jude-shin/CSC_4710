@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <assert.h>
 #include <algorithm>
+#include <string>
 #include <glm/fwd.hpp>
 #include "Program.h"
 
@@ -13,6 +14,7 @@
 #define WIND_MAX_ANGLE 6.0f
 #define WIND_SPEED 1.25f
 
+#define RESOURCE_SUB_DIR "/bamboo"
 #define BAMBOO_OBJ "/bamboo.obj"
 
 using namespace std;
@@ -23,7 +25,7 @@ BambooWall::BambooWall() {}
 BambooWall::BambooWall(const std::string & resourcesDir, int density) {
 
 	// Init the single bamboo object
-	bambooObject = MyObject(BAMBOO_OBJ, resourcesDir);
+	bambooObject = MyObject(BAMBOO_OBJ, resourcesDir+RESOURCE_SUB_DIR);
 	this->density = density;
 }
 
