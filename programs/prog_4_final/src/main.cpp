@@ -1,12 +1,7 @@
-/*
- * Program 3 base code - includes modifications to shape and initGeom in preparation to load
- * multi shape objects 
- * CSC 471 Cal Poly Z. Wood + S. Sueda + I. Dunn
- */
-
 #include <iostream>
 #include <glad/glad.h>
 #include <chrono>
+#include <memory>
 
 #include "GLSL.h"
 #include "Program.h"
@@ -34,6 +29,14 @@ using namespace glm;
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
 #define SKYBOX_TEX "/skybox/skybox.jpg"
+
+#define CHEST_OBJ "/chest/Box.obj"
+
+#define CHEST_TEX_1 "/chest/Box_low_Box2_Diffuse.png"
+#define CHEST_TEX_2 "/chest/Box_low_Metal1_Diffuse.png"
+#define CHEST_TEX_3 "/chest/Box_low_Box1_Diffuse.png"
+#define CHEST_TEX_4 "/chest/Box_low_Box_Diffuse.png"
+#define CHEST_TEX_5 "/chest/Box_low_Metal2_Diffuse.png"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -66,6 +69,7 @@ class Application : public EventCallbacks {
 		Ground groundObject;
 		BambooWall bambooWallObject;
 		shared_ptr<Skybox> skybox;
+		MyObject chestObject;
 
 		// =========================================================================
 
@@ -78,11 +82,10 @@ class Application : public EventCallbacks {
 			FPS, 
 			BIRD,
 		};
-		CameraMode cameraMode = BIRD;
+		CameraMode cameraMode = FPS;
 
 		// Bezier animation
 		// TODO: Remove bezier curve stuff when you are donw with prog 4
-		bool animateBird = false;
 		Spline splinepath[2];
 		vec3 birdEye = vec3(-6.0f, 0.0f, 5.0f);
 		vec3 birdLookAt = vec3(0.0f, 0.0f, 0.0f);
@@ -154,17 +157,10 @@ class Application : public EventCallbacks {
 			// TODO: I really want a switch case, but I guess not...
 			if (key == GLFW_KEY_F && GLFW_PRESS) {
 				cameraMode = FPS;
-				animateBird = false;
 			}
 
-			if (key == GLFW_KEY_B && GLFW_PRESS) {
+			if (key == GLFW_KEY_G && GLFW_PRESS) {
 				cameraMode = BIRD;
-				animateBird = false;
-			}
-
-			// === Animating the Bezier Curve ========================================
-			if (key == GLFW_KEY_G && action == GLFW_PRESS && cameraMode == BIRD) {
-				animateBird = !animateBird;
 			}
 		}
 
@@ -214,6 +210,16 @@ class Application : public EventCallbacks {
 			bambooWallObject = BambooWall(resourceDirectory, BAMBOO_DENSITY);
 			skybox = make_shared<Skybox>();
 			skybox->init(skyboxShader, resourceDirectory + SKYBOX_TEX);
+			chestObject = MyObject(
+					resourceDirectory+CHEST_OBJ, 
+					{
+					resourceDirectory+CHEST_TEX_1,
+					resourceDirectory+CHEST_TEX_2,
+					resourceDirectory+CHEST_TEX_3,
+					resourceDirectory+CHEST_TEX_4,
+					resourceDirectory+CHEST_TEX_5,
+					}, 
+					{ 4, 2, 0, 3, 1 });
 		}
 
 	
@@ -331,7 +337,6 @@ class Application : public EventCallbacks {
 
 				case BIRD:
 					{
-						if (animateBird) {
 							if (!splinepath[0].isDone()) {
 								splinepath[0].update(frametime);
 								birdEye = splinepath[0].getPosition();
@@ -340,7 +345,7 @@ class Application : public EventCallbacks {
 								splinepath[1].update(frametime);
 								birdEye = splinepath[1].getPosition();
 							}
-						}
+						// }
 
 						View->lookAt(
 								birdEye,
@@ -368,18 +373,20 @@ class Application : public EventCallbacks {
 			glUniform1f(shader->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-			maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
+			// maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
 			groundObject.render(shader);
+
+			Model->pushMatrix();
+			Model->translate(vec3(0.0, -1.2f, 0.0));
+			Model->scale(vec3(0.003));
+			chestObject.render(shader, Model);
+			Model->popMatrix();
 
 			shader->unbind();
 
 			// == SKYBOX GLSL PROGRAM ================================================
-			shader->bind();
-
 			// -- Draw Skybox --------------------------------------------------------
 			skybox->render(skyboxShader, Projection, View);
-
-			shader->unbind();
 
 			// Pop matrix stacks.
 			Projection->popMatrix();

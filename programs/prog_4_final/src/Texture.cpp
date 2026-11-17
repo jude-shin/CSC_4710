@@ -45,7 +45,7 @@ void Texture::init()
 	glGenTextures(1, &tid);
 	glBindTexture(GL_TEXTURE_2D, tid);
 
-	glTexImage2D(
+	CHECKED_GL_CALL(glTexImage2D(
 			GL_TEXTURE_2D,
 			0,
 			GL_RGBA8,
@@ -55,9 +55,9 @@ void Texture::init()
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			data
-			);
+			));
 
-	glGenerateMipmap(GL_TEXTURE_2D);
+	CHECKED_GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -71,9 +71,9 @@ void Texture::init()
 void Texture::setWrapModes(GLint wrapS, GLint wrapT)
 {
 	// Must be called after init()
-	glBindTexture(GL_TEXTURE_2D, tid);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	CHECKED_GL_CALL(glBindTexture(GL_TEXTURE_2D, tid));
+	CHECKED_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS));
+	CHECKED_GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT));
 }
 
 void Texture::bind(GLint handle)

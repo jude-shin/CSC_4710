@@ -159,12 +159,14 @@ void MyObject::render(
 		shared_ptr<Program> shader,
 		shared_ptr<MatrixStack> model) {
 
-	glUniformMatrix4fv(
-			shader->getUniform("M"),
-			1,
-			GL_FALSE,
-			value_ptr(model->topMatrix())
-			);
+	shader->bind();
+
+	CHECKED_GL_CALL(glUniformMatrix4fv(
+				shader->getUniform("M"),
+				1,
+				GL_FALSE,
+				value_ptr(model->topMatrix())
+				));
 
 	GLint textureHandle = shader->getUniform("Texture0");
 
