@@ -15,6 +15,7 @@
 #include "Maze.h"
 #include "Ground.h"
 #include "BambooWall.h"
+#include "Skybox.h"
 
 // TODO: remove this macro?
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -28,14 +29,9 @@ using namespace std;
 using namespace glm;
 
 // === MAGIC FILES =============================================================
-
-// .obj mesh files
-#define DUMMY_OBJ "/dummy.obj"
-#define WALL_OBJ "/rock_wall.obj"
-
 // .jpg texture files
 #define GROUND_TEX "/dirt.jpg"
-#define WALL_TEX "/mossy_rock_texture.jpg"
+#define SKYBOX_TEX "/skybox/skybox.jpg"
 
 // === MAGIC CONTROLS ==========================================================
 
@@ -62,11 +58,13 @@ class Application : public EventCallbacks {
 		WindowManager * windowManager = nullptr;
 
 		shared_ptr<Program> shader;	// Texture shader program
+		shared_ptr<Program> skyboxShader;
 
 		// Objects
 		Ground groundObject;
-		BambooWall bambooWall;
-		// TODO: make a skybox object?
+		BambooWall bambooWallObject;
+		// TODO: later just toss all of this into one Skybox object
+		shared_ptr<Skybox> skybox;
 
 		// =========================================================================
 
@@ -160,6 +158,7 @@ class Application : public EventCallbacks {
 
 			if (action == GLFW_PRESS) {
 				// TODO: set a lamp to the closest lamp node position if you have any lamps left?
+
 				cout << "Pos X " << posX <<  " Pos Y " << posY << endl;
 			}
 		}
@@ -197,7 +196,9 @@ class Application : public EventCallbacks {
 			GLSL::checkVersion();
 
 			groundObject = Ground(resourceDirectory+GROUND_TEX);
-			bambooWall = BambooWall(resourceDirectory, BAMBOO_DENSITY);
+			bambooWallObject = BambooWall(resourceDirectory, BAMBOO_DENSITY);
+			skybox = make_shared<Skybox>();
+			skybox->init(skyboxShader, resourceDirectory + SKYBOX_TEX);
 		}
 
 		// TODO: rename this to initShaders or something
@@ -209,7 +210,20 @@ class Application : public EventCallbacks {
 			// Enable z-buffer test.
 			glEnable(GL_DEPTH_TEST);
 
-			// Initialize the GLSL program that we will use for texture mapping
+
+			// === Init the GLSL program for the skybox ==============================
+			// init()
+			skyboxShader = make_shared<Program>();
+			skyboxShader->setShaderNames(resourceDirectory + "/skybox/skybox_vert.glsl", resourceDirectory + "/skybox/skybox_frag.glsl");
+			skyboxShader->init();
+			skyboxShader->addUniform("P");
+			skyboxShader->addUniform("V");
+			skyboxShader->addUniform("M");
+			skyboxShader->addUniform("Texture0");
+			skyboxShader->addAttribute("vertPos");
+			skyboxShader->addAttribute("vertTex");
+			
+			// === Initialize the GLSL program that we will use for MyObjects ========
 			shader = make_shared<Program>();
 			shader->setVerbose(true);
 			shader->setShaderNames(resourceDirectory + "/tex_vert.glsl", resourceDirectory + "/tex_frag0.glsl");
@@ -301,6 +315,7 @@ class Application : public EventCallbacks {
 						break;
 					}
 			}
+
 			// == TEXTURE GLSL PROGRAM ===============================================
 			shader->bind();
 
@@ -318,8 +333,16 @@ class Application : public EventCallbacks {
 			glUniform1f(shader->getUniform("MatShine"), 32.0f);
 
 			// -- Draw objects -------------------------------------------------------
-			maze.render(shader, bambooWall, Model, MAZE_SCALE);
+			maze.render(shader, bambooWallObject, Model, MAZE_SCALE);
 			groundObject.render(shader);
+
+			shader->unbind();
+
+			// == SKYBOX GLSL PROGRAM ================================================
+			shader->bind();
+
+			// -- Draw Skybox --------------------------------------------------------
+			skybox->render(skyboxShader, Projection, View);
 
 			shader->unbind();
 
