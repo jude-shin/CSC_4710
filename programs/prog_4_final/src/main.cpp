@@ -43,10 +43,10 @@ using namespace glm;
 // === MAGIC CONTROLS ==========================================================
 
 // FPS sensitivity for wasd controls and mouse (for moving the camera)
-#define WASD_FPS_SENSE 0.2
-#define MOUSE_FPS_SENSE_PITCH 0.004	// vertical
-#define MOUSE_FPS_SENSE_YAW 0.002		// horizontal
-#define INVERTED_MOUSE_CONTROLS false  // TODO: set to true before submitting
+#define WASD_FPS_SENSE 0.2f
+#define MOUSE_FPS_SENSE_PITCH 0.004f	// vertical
+#define MOUSE_FPS_SENSE_YAW 0.002f		// horizontal
+#define INVERTED_MOUSE_CONTROLS true  // TODO: set to true before submitting
 #define PITCH_CLAMP_DEG 80.0f
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
@@ -110,16 +110,29 @@ class Application : public EventCallbacks {
 		void processKeyboardState() {
 			if (cameraMode == FPS) {
 				float yaw = camFpsYaw * MOUSE_FPS_SENSE_YAW;
-				vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
+
+				// TODO: Use this for FPS later
+				// vec3 forward(-sin(yaw), 0.0f, -cos(yaw));
+				float pitch = camFpsPitch * MOUSE_FPS_SENSE_PITCH;
+				vec3 forward(
+				    -sin(yaw) * cos(pitch),
+				    sin(pitch),
+				    -cos(yaw) * cos(pitch)
+				);
+
 				vec3 right(cos(yaw), 0.0f, -sin(yaw));
 				vec3 delta(0.0f, 0.0f, 0.0f);
 
 				// === WASD FPS Controls ===============================================
 				if (keys[GLFW_KEY_W]) {
-					delta += vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
+					// TODO: Use this for FPS later
+					// delta += vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
+					delta += forward * WASD_FPS_SENSE;
 				}
 				if (keys[GLFW_KEY_S]) {
-					delta -= vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
+					// TODO: Use this for FPS later
+					// delta -= vec3(forward.x * WASD_FPS_SENSE, 0.0f, forward.z * WASD_FPS_SENSE);
+					delta -= forward * WASD_FPS_SENSE;
 				}
 				if (keys[GLFW_KEY_D]) {
 					delta += vec3(right.x * WASD_FPS_SENSE, 0.0f, right.z * WASD_FPS_SENSE);

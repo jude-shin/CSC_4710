@@ -4,13 +4,12 @@ All parts of this program were completed.
 
 I built off the code given for program 3, but I started making more changes 
 that will be implemented in my final project. The main milestone that I wanted 
-to complete was the maze generation. The wall object and texture was added in 
-program 3, and I am just going to use that as a unit of measurement for one 
-"wall".
+to complete was the maze generation. 
 
-To change views from FPS mode to Birds-Eye-View, press "m". This will change 
-the camera angle.
+To change the view to FPS mode, press "f".
+To animate the scene around the treasure chest, press "g".
 
-
-
-AABB (Axis alligned bounding box for collision detection)
+There is one static orange light in the sky.
+Another white light is following the FPS camera.
+This bright spot can be seen from the bird's eye animation.
+This is to allow the player to see everything when they are navigating the maze.
