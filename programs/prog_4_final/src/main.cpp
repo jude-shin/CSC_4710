@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <glad/glad.h>
+#include <chrono>
 
 #include "GLSL.h"
 #include "Program.h"
@@ -16,6 +17,7 @@
 #include "Ground.h"
 #include "BambooWall.h"
 #include "Skybox.h"
+#include "Spline.h"
 
 // TODO: remove this macro?
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -63,7 +65,6 @@ class Application : public EventCallbacks {
 		// Objects
 		Ground groundObject;
 		BambooWall bambooWallObject;
-		// TODO: later just toss all of this into one Skybox object
 		shared_ptr<Skybox> skybox;
 
 		// =========================================================================
@@ -78,6 +79,13 @@ class Application : public EventCallbacks {
 			BIRD,
 		};
 		CameraMode cameraMode = BIRD;
+
+		// Bezier animation
+		// TODO: Remove bezier curve stuff when you are donw with prog 4
+		bool animateBird = false;
+		Spline splinepath[2];
+		vec3 birdEye = vec3(-6.0f, 0.0f, 5.0f);
+		vec3 birdLookAt = vec3(0.0f, 0.0f, 0.0f);
 
 		// FPS Camera State
 		vec3 camFpsPos = vec3(0.0f, 0.0f, 0.0f);
@@ -146,10 +154,17 @@ class Application : public EventCallbacks {
 			// TODO: I really want a switch case, but I guess not...
 			if (key == GLFW_KEY_F && GLFW_PRESS) {
 				cameraMode = FPS;
+				animateBird = false;
 			}
 
 			if (key == GLFW_KEY_B && GLFW_PRESS) {
 				cameraMode = BIRD;
+				animateBird = false;
+			}
+
+			// === Animating the Bezier Curve ========================================
+			if (key == GLFW_KEY_G && action == GLFW_PRESS && cameraMode == BIRD) {
+				animateBird = !animateBird;
 			}
 		}
 
@@ -199,6 +214,15 @@ class Application : public EventCallbacks {
 			bambooWallObject = BambooWall(resourceDirectory, BAMBOO_DENSITY);
 			skybox = make_shared<Skybox>();
 			skybox->init(skyboxShader, resourceDirectory + SKYBOX_TEX);
+		}
+
+	
+		// TODO: Remove bezier curve stuff when you are donw with prog 4
+		void initCamera() {
+			// init splines up and down
+			splinepath[0] = Spline(glm::vec3(-6,0,5), glm::vec3(-1,-5,5), glm::vec3(1, 5, 5), glm::vec3(2,0,5), 5);
+			splinepath[1] = Spline(glm::vec3(2,0,5), glm::vec3(3,-2,5), glm::vec3(-0.25, 0.25, 5), glm::vec3(0,0,5), 5);
+			birdEye = splinepath[0].getPosition();
 		}
 
 		// TODO: rename this to initShaders or something
@@ -262,7 +286,7 @@ class Application : public EventCallbacks {
 			glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
 		}
 
-		void render() {
+		void render(float frametime) {
 			// Get current frame buffer size.
 			int width, height;
 			glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -307,10 +331,21 @@ class Application : public EventCallbacks {
 
 				case BIRD:
 					{
+						if (animateBird) {
+							if (!splinepath[0].isDone()) {
+								splinepath[0].update(frametime);
+								birdEye = splinepath[0].getPosition();
+							}
+							else if (!splinepath[1].isDone()) {
+								splinepath[1].update(frametime);
+								birdEye = splinepath[1].getPosition();
+							}
+						}
+
 						View->lookAt(
-								vec3(0.0f, BIRD_HEIGHT, 0.0f),
-								vec3(0.0f, 0.0f, 0.0f),
-								vec3(0.0f, 0.0f, -1.0f)
+								birdEye,
+								birdLookAt,
+								vec3(0.0f, 1.0f, 0.0f)
 								);
 						break;
 					}
@@ -375,14 +410,31 @@ int main(int argc, char *argv[]) {
 	// may need to initialize or set up different data and state
 	application->init(resourceDir);
 	application->initObjects(resourceDir);
+	application->initCamera();
+	
+	// Time since last frame
+	auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
 	while (!glfwWindowShouldClose(windowManager->getHandle())) {
 		// Process Keyboard State
 		application->processKeyboardState();
 
+		// Save current time for next frame
+		auto nextLastTime = chrono::high_resolution_clock::now();
+
+		// Get time since last frame
+		float deltaTime = chrono::duration_cast<std::chrono::microseconds>(
+				chrono::high_resolution_clock::now() - lastTime).count();
+
+		// Convert microseconds to seconds
+		deltaTime *= 0.000001;
+
+		// Reset lastTime so that we can calculate the deltaTime on the next frame
+		lastTime = nextLastTime;
+
 		// Render scene.
-		application->render();
+		application->render(deltaTime);
 
 		// Swap front and back buffers.
 		glfwSwapBuffers(windowManager->getHandle());
