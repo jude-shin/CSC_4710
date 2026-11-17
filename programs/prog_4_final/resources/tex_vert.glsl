@@ -8,10 +8,12 @@ uniform mat4 P;
 uniform mat4 M;
 uniform mat4 V;
 uniform vec3 lightPos0;
+uniform vec3 lightPos1;
 
 out vec2 vTexCoord;
 out vec3 fragNor;
 out vec3 lightDir0;
+out vec3 lightDir1;
 out vec3 EPos;
 
 void main() {
@@ -23,9 +25,15 @@ void main() {
 	mat3 normalMatrix = transpose(inverse(mat3(V * M)));
 	fragNor = normalize(normalMatrix * vertNor);
 
-	vec3 viewLightPos = (V * vec4(lightPos0, 1.0)).xyz;
+	// Both light positions must be converted into view space.
+	vec3 viewLightPos0 = (V * vec4(lightPos0, 1.0)).xyz;
+	vec3 viewLightPos1 = (V * vec4(lightPos1, 1.0)).xyz;
+
 	EPos = viewPos.xyz;
-	lightDir0 = viewLightPos - EPos;
+
+	// Direction from this vertex toward each light.
+	lightDir0 = viewLightPos0 - EPos;
+	lightDir1 = viewLightPos1 - EPos;
 
 	vTexCoord = vertTex;
 }

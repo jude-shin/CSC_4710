@@ -38,6 +38,8 @@ using namespace glm;
 #define CHEST_TEX_4 "/chest/Box_low_Box_Diffuse.png"
 #define CHEST_TEX_5 "/chest/Box_low_Metal2_Diffuse.png"
 
+#define CHEST_OFFSET 5.0f
+
 // === MAGIC CONTROLS ==========================================================
 
 // FPS sensitivity for wasd controls and mouse (for moving the camera)
@@ -49,7 +51,7 @@ using namespace glm;
 
 // BIRD sensitivity for wasd controls (for moving the dummy)
 // #define WASD_BIRD_SENSE 1.0 // TODO
-#define BIRD_HEIGHT 60.0f
+#define BIRD_HEIGHT 28.0f
 
 // Game Dimensions
 #define MAZE_H 20
@@ -60,7 +62,7 @@ using namespace glm;
 
 class Application : public EventCallbacks {
 	public:
-		WindowManager * windowManager = nullptr;
+		WindowManager* windowManager = nullptr;
 
 		shared_ptr<Program> shader;	// Texture shader program
 		shared_ptr<Program> skyboxShader;
@@ -225,10 +227,28 @@ class Application : public EventCallbacks {
 	
 		// TODO: Remove bezier curve stuff when you are donw with prog 4
 		void initCamera() {
-			// init splines up and down
-			splinepath[0] = Spline(glm::vec3(-6,0,5), glm::vec3(-1,-5,5), glm::vec3(1, 5, 5), glm::vec3(2,0,5), 5);
-			splinepath[1] = Spline(glm::vec3(2,0,5), glm::vec3(3,-2,5), glm::vec3(-0.25, 0.25, 5), glm::vec3(0,0,5), 5);
+			splinepath[0] = Spline(
+					vec3(-8.0f, BIRD_HEIGHT, -8.0f),
+					vec3(-4.0f, BIRD_HEIGHT,  8.0f),
+					vec3( 2.0f, BIRD_HEIGHT, -8.0f),
+					vec3( 8.0f, BIRD_HEIGHT,  8.0f),
+					7.0f
+					);
+
+			// Starts in the same direction that splinepath[0] ends:
+			// path 0 ends moving toward +x, +z.
+			splinepath[1] = Spline(
+					vec3( 8.0f, BIRD_HEIGHT,  8.0f),
+					vec3(11.0f, BIRD_HEIGHT, 16.0f),
+					vec3(-5.0f, BIRD_HEIGHT, 12.0f),
+					vec3(-8.0f, BIRD_HEIGHT, -8.0f),
+					7.0f
+					);
+
 			birdEye = splinepath[0].getPosition();
+
+			// Aim ahead of and below the camera rather than straight down.
+			birdLookAt = vec3(0.0f, 0.0f, CHEST_OFFSET);
 		}
 
 		// TODO: rename this to initShaders or something
@@ -271,6 +291,8 @@ class Application : public EventCallbacks {
 			shader->addUniform("MatShine");
 			shader->addUniform("lightPos0");
 			shader->addUniform("lightColor0");
+			shader->addUniform("lightPos1");
+			shader->addUniform("lightColor1");
 
 			// === Generate the Maze =================================================
 			maze.generateRecursiveBacktracker(MAZE_SEED);
@@ -309,7 +331,8 @@ class Application : public EventCallbacks {
 			// Apply perspective projection.
 			float aspect = width/(float)height;
 			Projection->pushMatrix();
-			Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
+			// Projection->perspective(45.0f, aspect, 0.01f, 100.0f);
+			Projection->perspective(32.0f, aspect, 0.01f, 100.0f);
 
 			// Update the Global Camera
 			// Build the view matrix from the camera position and viewing direction.
@@ -367,6 +390,9 @@ class Application : public EventCallbacks {
 			glUniform3f(shader->getUniform("lightPos0"), camFpsPos.x, camFpsPos.y, camFpsPos.z);
 			glUniform3f(shader->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
 
+			glUniform3f(shader->getUniform("lightPos1"), 0.0f, BIRD_HEIGHT, 0.0f);
+			glUniform3f(shader->getUniform("lightColor1"), 0.5f, 0.42f, 0.31f);
+
 			glUniform3f(shader->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
 			glUniform3f(shader->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
 			glUniform3f(shader->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
@@ -377,7 +403,7 @@ class Application : public EventCallbacks {
 			groundObject.render(shader);
 
 			Model->pushMatrix();
-			Model->translate(vec3(0.0, -1.2f, 0.0));
+			Model->translate(vec3(0.0, -1.2f, CHEST_OFFSET));
 			Model->scale(vec3(0.003));
 			chestObject.render(shader, Model);
 			Model->popMatrix();
