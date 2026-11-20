@@ -6,6 +6,8 @@
 #include "particleSys.h"
 #include "GLSL.h"
 
+#define ALPHA_DECREMENT 0.8
+
 using namespace std;
 
 particleSys::particleSys(vec3 source):
@@ -114,6 +116,7 @@ void particleSys::update() {
 	for (int i = 0; i < numP; i++) {
 		pos = particles[i]->getPosition();
 		col = particles[i]->getColor();
+		col.a -= ALPHA_DECREMENT;
 		points[i*3+0] =pos.x; 
 		points[i*3+1] =pos.y; 
 		points[i*3+2] =pos.z; 
