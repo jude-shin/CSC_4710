@@ -21,6 +21,8 @@
 using namespace std;
 using namespace glm;
 
+#define TREE_FILE "/big_tree.obj"
+#define LEAF_COUNT 5
 
 class Application : public EventCallbacks
 {
@@ -39,7 +41,13 @@ public:
 	particleSys *thePartSystem;
 
 	// Shape to be used (from  file) - modify to support multiple
-	shared_ptr<Shape> sphere;
+	// shared_ptr<Shape> myMesh;
+
+	// TREE
+  shared_ptr<Shape> trunkMesh;
+  vector<shared_ptr<Shape>> leafMeshes;
+  float leafDelta = 0;
+  float trunkDelta = 0;
 
 	// OpenGL handle to texture data used in particle
 	shared_ptr<Texture> texture;
@@ -159,26 +167,31 @@ public:
 	}
 
 	void initGeom(const std::string& resourceDirectory){
+		vector<tinyobj::material_t> objMaterials;
+		string errStr;
+		vector<tinyobj::shape_t> TOshapes;
+		bool rc = false;
 
-		//EXAMPLE new set up to read one shape from one obj file - convert to read several
-		// Initialize mesh
-		// Load geometry
- 		// Some obj files contain material information.We'll ignore them for this assignment.
- 		vector<tinyobj::shape_t> TOshapes;
- 		vector<tinyobj::material_t> objMaterials;
- 		string errStr;
-		//load in the mesh and make the shape(s)
- 		bool rc = tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + "/SmoothSphere.obj").c_str());
-		if (!rc) {
+		// =========================================================================
+
+		// Load Tree 1
+		if (!tinyobj::LoadObj(TOshapes, objMaterials, errStr, (resourceDirectory + TREE_FILE).c_str())) {
 			cerr << errStr << endl;
-		} else {
-			sphere = make_shared<Shape>();
-			sphere->createShape(TOshapes[0]);
-			sphere->measure();
-			sphere->init();
-		}
-		//read out information stored in the shape about its size - something like this...
+		} 
+		else {
+			trunkMesh = make_shared<Shape>(false);
+			trunkMesh->createShape(TOshapes[0]);
+			trunkMesh->measure();
+			trunkMesh->init();
 
+			for (int i = 1; i < LEAF_COUNT; ++i) {
+				auto leaf = make_shared<Shape>(false);
+				leaf->createShape(TOshapes[i]);
+				leaf->measure();
+				leaf->init();
+				leafMeshes.push_back(leaf);
+			}
+		}
 	}
 
 	// Code to load in the texture
@@ -189,6 +202,22 @@ public:
 		texture->init();
 		texture->setUnit(0);
 		texture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	}
+
+
+	/* helper for sending top of the matrix strack to GPU */
+	void setModel(shared_ptr<Program>& prog, shared_ptr<MatrixStack>M) {
+		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
+	}
+	
+	/* helper function to set model trasnforms */
+	void setModel(shared_ptr<Program>& curS, vec3 trans, float rotY, float rotX, float sc) {
+		mat4 Trans = glm::translate( glm::mat4(1.0f), trans);
+		mat4 RotX = glm::rotate( glm::mat4(1.0f), rotX, vec3(1, 0, 0));
+		mat4 RotY = glm::rotate( glm::mat4(1.0f), rotY, vec3(0, 1, 0));
+		mat4 ScaleS = glm::scale(glm::mat4(1.0f), vec3(sc));
+		mat4 ctm = Trans*RotX*RotY*ScaleS;
+		glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
 	}
 
 	void render()
@@ -234,9 +263,40 @@ public:
 			M->loadIdentity();
 			//"global" translate
 			M->pushMatrix();
-				M->scale(vec3(0.5, 0.5, 0.5));
-				glUniformMatrix4fv(meshProg->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
-				sphere->draw(meshProg);
+				// M->scale(0.08);
+				// glUniformMatrix4fv(meshProg->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
+
+
+				// M->pushMatrix();
+
+				// Global scale rotate and translates
+				M->translate(vec3(0.0f, 0.0f, 0.0f));
+				M->scale(vec3(0.05, 0.05, 0.05));
+
+				// Draw the Trunk (sways in the wind)
+				M->rotate(trunkDelta, vec3(0, 0, 1));
+				setModel(meshProg, M);
+				trunkMesh->draw(meshProg);
+				
+				// Draw the Leaves (also swaying in the wind)
+				for (const auto& leaf : leafMeshes) {
+					M->pushMatrix();
+
+					M->translate(vec3(leafDelta*0.07, leafDelta*0.1, leafDelta*0.3));
+					setModel(meshProg, M);
+					leaf->draw(meshProg);
+
+					M->popMatrix();
+				}
+
+				// M->popMatrix();
+
+				// Animate the leaves
+				leafDelta = sin(glfwGetTime());
+				trunkDelta = sin(glfwGetTime())*0.03;
+
+
+				// myMesh->draw(meshProg);
 			M->popMatrix();
 		M->popMatrix();
 
