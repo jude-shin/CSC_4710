@@ -34,11 +34,12 @@ private:
 	int numP;
 	vec3 start;
 	ParticleSorter sorter;
-	//this is not great that this is hard coded - you can make it better
-	GLfloat points[900];
+	vector<float> points;
+	vector<float> pointColors;
 	mat4 theCamera;
 	unsigned vertArrObj;
 	unsigned vertBuffObj;
+	unsigned colorBuffer;
 	
 public:
 	particleSys(vec3 source);

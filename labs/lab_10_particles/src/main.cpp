@@ -144,6 +144,7 @@ public:
 		partProg->addUniform("pColor");
 		partProg->addUniform("alphaTexture");
 		partProg->addAttribute("vertPos");
+		partProg->addAttribute("vertCol");
 
 				// Initialize the GLSL program.
 		meshProg = make_shared<Program>();
