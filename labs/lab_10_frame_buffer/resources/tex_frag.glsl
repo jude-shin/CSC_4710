@@ -6,8 +6,20 @@ uniform sampler2D texBuf;
 
 void main(){
 
-	vec3 texColor = texture( texBuf, texCoord ).rgb;
-	//TODO modify to show this is a 2D image
-	color = vec4(texColor, 1.0);
+	float squareSize = 10.0;
+	float period = 20.0;
 
+	vec2 cellPos = mod(gl_FragCoord.xy, period);
+
+	vec3 sceneColor = texture(texBuf, texCoord).rgb;
+
+	if (cellPos.x < squareSize && cellPos.y < squareSize) {
+		vec3 blueColor = vec3(0.0, 0.0, 0.75);
+		float opacity = 0.5;
+
+		vec3 blendedColor = mix(sceneColor, blueColor, opacity);
+		color = vec4(blendedColor, 1.0);
+	} else {
+		color = vec4(sceneColor, 1.0);
+	}
 }
