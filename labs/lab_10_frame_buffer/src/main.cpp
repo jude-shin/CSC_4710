@@ -44,7 +44,7 @@ class Application : public EventCallbacks
 	public:
 		WindowManager * windowManager = nullptr;
 
-		shared_ptr<Program> prog, tex_prog;
+		shared_ptr<Program> prog, vertical_tex_prog, horizontal_tex_prog;
 		shared_ptr<Shape> bunny;
 
 		shared_ptr<Texture> texture0;
@@ -78,6 +78,22 @@ class Application : public EventCallbacks
 		//geometry for texture render
 		GLuint quad_VertexArrayID;
 		GLuint quad_vertexbuffer;
+
+		shared_ptr<Program> makeTextureProgram(
+				const std::string &resourceDirectory,
+				const std::string &fragmentShader) {
+			auto shader = make_shared<Program>();
+			shader->setVerbose(true);
+			shader->setShaderNames(
+					resourceDirectory + "/pass_vert.glsl",
+					resourceDirectory + fragmentShader
+					);
+			shader->init();
+			shader->addUniform("texBuf");
+			shader->addAttribute("vertPos");
+
+			return shader;
+		}
 
 		static void error_callback(int error, const char *description) {
 			cerr << description << endl;
@@ -113,21 +129,39 @@ class Application : public EventCallbacks
 		/* Process Texture on the specificed texture  - could vary what it does based on
 			 shader  - works on inTex - runs shaders and output to textured quad */
 		/* TODO: fill in with call to appropriate shader(s) to complete the texture processding */
-		void ProcessDrawTex(GLuint inTex) {
+		void ProcessDrawTex(
+				GLuint inputTexture,
+				GLuint outputFramebuffer,
+				shared_ptr<Program> shader) {
 
-			//set up inTex as my input texture
+			int width, height;
+			glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+
+			// frameBuf[1]: render an intermediate result into its texture.
+			// 0: render the final result to the screen.
+			glBindFramebuffer(GL_FRAMEBUFFER, outputFramebuffer);
+			glViewport(0, 0, width, height);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// The fullscreen quad does not need scene depth testing.
+			glDisable(GL_DEPTH_TEST);
+
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, inTex);
-			//example applying of 'drawing' the FBO texture
-			//this shader just draws right now
-			tex_prog->bind();
-			glUniform1i(tex_prog->getUniform("texBuf"), 0);
+			glBindTexture(GL_TEXTURE_2D, inputTexture);
+
+			shader->bind();
+			glUniform1i(shader->getUniform("texBuf"), 0);
+
 			glEnableVertexAttribArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+
 			glDisableVertexAttribArray(0);
-			tex_prog->unbind();  
+			shader->unbind();
+
+			glEnable(GL_DEPTH_TEST);
 		}
 
 		void init(const std::string& resourceDirectory) {
@@ -159,12 +193,16 @@ class Application : public EventCallbacks
 
 			//set up the shaders to blur the FBO decomposed just a placeholder pass thru now
 			//TODO - modify and possibly add other shaders to complete blur
-			tex_prog = make_shared<Program>();
-			tex_prog->setVerbose(true);
-			tex_prog->setShaderNames(resourceDirectory + "/pass_vert.glsl", resourceDirectory + HORIZONTAL_SHADER);
-			tex_prog->init();
-			tex_prog->addUniform("texBuf");
-			tex_prog->addAttribute("vertPos");
+			vertical_tex_prog = makeTextureProgram(
+					resourceDirectory,
+					VERTICAL_SHADER
+					);
+
+			horizontal_tex_prog = makeTextureProgram(
+					resourceDirectory,
+					HORIZONTAL_SHADER
+					);
+
 
 			//create two frame buffer objects to toggle between
 			//make two FBOs and two textures
@@ -217,13 +255,19 @@ class Application : public EventCallbacks
 				FirstTime = 0;
 			}
 
-			//regardless NOW set up to render to the screen = 0
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			/* now draw the actual output  to the default framebuffer - ie display */ 
-			/* note the current base code is just using one FBO and texture - will need
-				 to change that  - we pass in texBuf[0] right now */
-			ProcessDrawTex(texBuf[0]);
+			// Pass 1: scene texture -> vertical-stripe shader -> FBO 1 texture
+			ProcessDrawTex(
+					texBuf[0],
+					frameBuf[1],
+					vertical_tex_prog
+					);
+
+			// Pass 2: FBO 1 texture -> horizontal-stripe shader -> screen
+			ProcessDrawTex(
+					texBuf[1],
+					0,
+					horizontal_tex_prog
+					);
 		}
 
 		/* heler to draw the geometry */
