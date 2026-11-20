@@ -256,7 +256,7 @@ public:
 
 		// View is identity - for now
 		V->pushMatrix();
-		V->translate(vec3(0, 0, -5));
+		V->translate(vec3(0, -1, -5));
 		V->rotate(camRot, vec3(0, 1, 0));
 
 		M->pushMatrix();
