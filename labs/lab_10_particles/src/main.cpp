@@ -162,6 +162,27 @@ public:
 		meshProg->addAttribute("vertPos");
 		meshProg->addAttribute("vertNor");
 
+
+		meshProg->addAttribute("vertTex");
+		meshProg->addUniform("MatAmb");
+		meshProg->addUniform("MatDif");
+		meshProg->addUniform("MatSpec");
+		meshProg->addUniform("MatShine");
+		meshProg->addUniform("lightPos0");
+		meshProg->addUniform("lightColor0");
+
+
+
+
+
+
+
+
+
+
+
+
+
 		thePartSystem = new particleSys(vec3(0, 0, 0));
 		thePartSystem->gpuSetup();
 	}
@@ -263,15 +284,19 @@ public:
 			M->loadIdentity();
 			//"global" translate
 			M->pushMatrix();
-				// M->scale(0.08);
-				// glUniformMatrix4fv(meshProg->getUniform("M"), 1, GL_FALSE, value_ptr(M->topMatrix()));
 
+				glUniform3f(meshProg->getUniform("lightPos0"), 2.0f, 2.0f, 2.0f);
+				glUniform3f(meshProg->getUniform("lightColor0"), 1.0f, 1.0f, 1.0f);
+				glUniform3f(meshProg->getUniform("MatAmb"),  0.12f, 0.12f, 0.12f);
+				glUniform3f(meshProg->getUniform("MatDif"),  1.0f,  1.0f,  1.0f);
+				glUniform3f(meshProg->getUniform("MatSpec"), 0.25f, 0.25f, 0.25f);
+				glUniform1f(meshProg->getUniform("MatShine"), 32.0f);
 
 				// M->pushMatrix();
 
 				// Global scale rotate and translates
 				M->translate(vec3(0.0f, 0.0f, 0.0f));
-				M->scale(vec3(0.05, 0.05, 0.05));
+				M->scale(vec3(0.1f, 0.1f, 0.1f));
 
 				// Draw the Trunk (sways in the wind)
 				M->rotate(trunkDelta, vec3(0, 0, 1));
