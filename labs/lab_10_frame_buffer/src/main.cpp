@@ -28,6 +28,9 @@
 // #define FRAGMENT_SHADER "/checkerboard_frag.glsl"
 #define VERTICAL_SHADER "/vertical_stripes_frag.glsl"
 #define HORIZONTAL_SHADER "/horizontal_stripes_frag.glsl"
+#define GAUSSIAN_SHADER "/gaussian_frag.glsl"
+
+#define GAUSSIAN_PASS_CT 30
 
 using namespace std;
 using namespace glm;
@@ -44,7 +47,7 @@ class Application : public EventCallbacks
 	public:
 		WindowManager * windowManager = nullptr;
 
-		shared_ptr<Program> prog, vertical_tex_prog, horizontal_tex_prog;
+		shared_ptr<Program> prog, vertical_tex_prog, horizontal_tex_prog, gaussian_tex_prog;
 		shared_ptr<Shape> bunny;
 
 		shared_ptr<Texture> texture0;
@@ -202,6 +205,10 @@ class Application : public EventCallbacks
 					resourceDirectory,
 					HORIZONTAL_SHADER
 					);
+			gaussian_tex_prog = makeTextureProgram(
+					resourceDirectory,
+					GAUSSIAN_SHADER
+					);
 
 
 			//create two frame buffer objects to toggle between
@@ -255,19 +262,52 @@ class Application : public EventCallbacks
 				FirstTime = 0;
 			}
 
-			// Pass 1: scene texture -> vertical-stripe shader -> FBO 1 texture
-			ProcessDrawTex(
-					texBuf[0],
-					frameBuf[1],
-					vertical_tex_prog
-					);
+			// TODO: look Look LOOK here Here HERE
 
-			// Pass 2: FBO 1 texture -> horizontal-stripe shader -> screen
-			ProcessDrawTex(
-					texBuf[1],
-					0,
-					horizontal_tex_prog
-					);
+			// // Pass 1: scene texture -> vertical-stripe shader -> FBO 1 texture
+			// ProcessDrawTex(
+			// 		texBuf[0],
+			// 		frameBuf[1],
+			// 		vertical_tex_prog
+			// 		);
+
+			// // Pass 2: FBO 1 texture -> horizontal-stripe shader -> screen
+			// ProcessDrawTex(
+			// 		texBuf[1],
+			// 		0,
+			// 		horizontal_tex_prog
+			// 		);
+
+			gaussian(GAUSSIAN_PASS_CT);
+		}
+
+		void gaussian(int numPasses) {
+			int sourceIndex = 0;
+
+			for (int pass = 0; pass < numPasses; pass++) {
+				bool isFinalPass = (pass == numPasses - 1);
+
+				if (isFinalPass) {
+					// Last blur pass: texture -> screen
+					ProcessDrawTex(
+							texBuf[sourceIndex],
+							0,
+							gaussian_tex_prog
+							);
+				} else {
+					// Intermediate blur pass: texture -> the other FBO
+					int destinationIndex = 1 - sourceIndex;
+
+					ProcessDrawTex(
+							texBuf[sourceIndex],
+							frameBuf[destinationIndex],
+							gaussian_tex_prog
+							);
+
+					// The texture just rendered becomes the input next pass.
+					sourceIndex = destinationIndex;
+				}
+			}
 		}
 
 		/* heler to draw the geometry */
