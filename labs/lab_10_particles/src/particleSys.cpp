@@ -6,7 +6,7 @@
 #include "particleSys.h"
 #include "GLSL.h"
 
-#define ALPHA_DECREMENT 0.5f
+#define ALPHA_DECREMENT 0.1f
 
 using namespace std;
 

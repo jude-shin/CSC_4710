@@ -23,7 +23,7 @@ Particle::Particle(vec3 start) :
 	d(0.2f),
 	x(start),
 	v(0.0f, 0.0f, 0.0f),
-	lifespan(1.0f),
+	lifespan(0.1f),
 	tEnd(0.0f),
 	scale(1.0f),
 	color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -50,8 +50,8 @@ void Particle::rebirth(float t, vec3 start)
 	v.x = randFloat(-0.27f, 0.3f);
 	v.y = randFloat(-0.1f, 0.9f);
 	v.z = randFloat(-0.3f, 0.27f);
-	a = vec3(0.0f, -0.1f, 0.0f); // constant downward acceleration
-	lifespan = randFloat(100.0f, 200.0f); 
+	a = vec3(0.0f, -0.4f, 0.0f); // constant downward acceleration
+	lifespan = randFloat(1.0f, 7.0f); 
 	tEnd = t + lifespan;
 	scale = randFloat(0.2, 1.0f);
 
@@ -63,17 +63,17 @@ void Particle::rebirth(float t, vec3 start)
 	color.a = 1.0f;
 }
 
-void Particle::update(float t, float h, const vec3 &g, const vec3 start)
-{
+void Particle::update(float t, float h, const vec3 &g, const vec3 start) {
+
 	if(t > tEnd) {
 		rebirth(t, start);
 	}
 	
-	// Particles slow down over time with drag
-	v *= exp(-d * h);
-
 	// Accelerate the particle towards somewhere
 	v += a * h;
+
+	// Particles slow down over time with drag
+	v *= exp(-d * h);
 
 	// very simple update
 	x += h*v;
