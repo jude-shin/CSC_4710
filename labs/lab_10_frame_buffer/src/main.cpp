@@ -24,6 +24,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
+// #define FRAGMENT_SHADER "/checkerboard_frag.glsl"
+#define VERTICAL_SHADER "/vertical_stripes_frag.glsl"
+#define HORIZONTAL_SHADER "/horizontal_stripes_frag.glsl"
+
 using namespace std;
 using namespace glm;
 
@@ -156,7 +161,7 @@ class Application : public EventCallbacks
 			//TODO - modify and possibly add other shaders to complete blur
 			tex_prog = make_shared<Program>();
 			tex_prog->setVerbose(true);
-			tex_prog->setShaderNames(resourceDirectory + "/pass_vert.glsl", resourceDirectory + "/tex_frag.glsl");
+			tex_prog->setShaderNames(resourceDirectory + "/pass_vert.glsl", resourceDirectory + HORIZONTAL_SHADER);
 			tex_prog->init();
 			tex_prog->addUniform("texBuf");
 			tex_prog->addAttribute("vertPos");
