@@ -40,6 +40,7 @@ private:
 	float d; // viscous damping
 	vec3 x; // position
 	vec3 v; // velocity
+	vec3 a; // velocity
 	float lifespan; // how long this particle lives
 	float tEnd;     // time this particle dies
 	float scale;

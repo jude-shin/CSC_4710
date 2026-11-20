@@ -173,18 +173,7 @@ public:
 		meshProg->addUniform("lightColor0");
 
 
-
-
-
-
-
-
-
-
-
-
-
-		thePartSystem = new particleSys(vec3(0, 0, 0));
+		thePartSystem = new particleSys(vec3(0, 1, 0));
 		thePartSystem->gpuSetup();
 	}
 

@@ -6,7 +6,7 @@
 #include "particleSys.h"
 #include "GLSL.h"
 
-#define ALPHA_DECREMENT 0.8
+#define ALPHA_DECREMENT 0.5f
 
 using namespace std;
 
@@ -116,7 +116,7 @@ void particleSys::update() {
 	for (int i = 0; i < numP; i++) {
 		pos = particles[i]->getPosition();
 		col = particles[i]->getColor();
-		col.a -= ALPHA_DECREMENT;
+		col.a = std::max(0.0f, col.a - (h * ALPHA_DECREMENT));
 		points[i*3+0] =pos.x; 
 		points[i*3+1] =pos.y; 
 		points[i*3+2] =pos.z; 
